@@ -7,3 +7,4 @@ requests
 youtube-transcript-api
 google-generativeai
 isodate
+docx
