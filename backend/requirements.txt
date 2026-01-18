@@ -6,3 +6,4 @@ motor
 requests
 youtube-transcript-api
 google-generativeai
+isodate
