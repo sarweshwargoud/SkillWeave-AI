@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import search, analyze, course
+from backend.routers import search, analyze, course
 
 app = FastAPI(title="EduPath API", version="0.1.0")
 
