@@ -5,9 +5,10 @@ python-dotenv
 motor
 requests
 youtube-transcript-api
-google-generativeai
+google-genai
 isodate
 python-docx
+
 
 
 
