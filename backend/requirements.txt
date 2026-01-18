@@ -8,5 +8,6 @@ youtube-transcript-api
 google-generativeai
 isodate
 docx
-exceptions
+
+
 
