@@ -25,7 +25,7 @@ app.include_router(course.router, prefix="/api/v1", tags=["Course"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to EduPath API"}
+    return {"message": "Welcome to SkillWeave API"}
 
 @app.get("/health")
 def health_check():
