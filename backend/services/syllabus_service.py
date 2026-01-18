@@ -1,22 +1,26 @@
-import google.generativeai as genai
 import json
 import os
 from dotenv import load_dotenv
 from utils.cache import cache_with_ttl
+from google import genai
 
 load_dotenv()
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# New Gemini client
+client = genai.Client(api_key=GEMINI_API_KEY)
+
 
 @cache_with_ttl(ttl_seconds=3600)
 def generate_syllabus(topic: str, level: str = "Beginner"):
     """
     Generates a structured syllabus for the course using Gemini.
     """
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-flash-latest')
-        
-        prompt = f"""
+    if not GEMINI_API_KEY:
+        return None
+
+    prompt = f"""
         Create a structured learning syllabus for "{topic}" at a "{level}" level.
         Return a JSON object with a list of "modules".
         Each module should have:
@@ -35,18 +39,21 @@ def generate_syllabus(topic: str, level: str = "Beginner"):
             ]
         }}
         """
-        
-        try:
-            response = model.generate_content(prompt)
-            text = response.text
-            if "```json" in text:
-                text = text.split("```json")[1].split("```")[0]
-            elif "```" in text:
-                text = text.split("```")[1].split("```")[0]
-            return json.loads(text.strip())
-        except Exception as e:
-            print(f"Error generating syllabus: {e}")
-            return None
-    else:
-        # Fallback wrapper for manual testing if needed
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
+
+        text = response.text
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0]
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0]
+
+        return json.loads(text.strip())
+
+    except Exception as e:
+        print(f"Error generating syllabus: {e}")
         return None
