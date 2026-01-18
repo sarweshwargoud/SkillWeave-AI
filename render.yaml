@@ -1,6 +1,5 @@
 services:
 
-# 🔹 FastAPI Backend
   - type: web
     name: skillweave-api
     runtime: python
@@ -17,7 +16,6 @@ services:
       - key: DB_NAME
         value: skillweave_ai
 
-# 🔹 React Frontend
   - type: static
     name: skillweave-ai
     rootDir: frontend
