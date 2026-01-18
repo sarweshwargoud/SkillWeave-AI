@@ -1,8 +1,8 @@
 import os
-import google.generativeai as genai
 import json
 import typing
 from pydantic import BaseModel
+from google import genai
 from dotenv import load_dotenv
 from utils.cache import cache_with_ttl
 
@@ -10,8 +10,8 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# NEW CLIENT (replaces configure + GenerativeModel)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Define structured output models for Gemini
 class VideoTopic(BaseModel):
@@ -20,22 +20,18 @@ class VideoTopic(BaseModel):
     difficulty_level: str  # Beginner, Intermediate, Advanced
     completeness_score: int # 1-10
 
+
 @cache_with_ttl(ttl_seconds=86400)
 def analyze_transcript(transcript_text: str):
-    """
-    Uses Gemini to extract structured topics from transcript text.
-    """
     if not GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY is not set.")
 
-    model = genai.GenerativeModel('gemini-flash-latest')
-    
     prompt = f"""
     You are an expert educational content analyzer. 
     Analyze the following YouTube video transcript and extract the learning structure.
     
     Transcript:
-    {transcript_text[:10000]}  # Truncate if too long to avoid token limits mostly for cost/speed
+    {transcript_text[:10000]}
     
     Return the response in strictly valid JSON format with the following keys:
     - main_topic: The core subject being taught.
@@ -45,19 +41,21 @@ def analyze_transcript(transcript_text: str):
     
     JSON Output:
     """
-    
+
     try:
-        response = model.generate_content(prompt)
-        # Attempt to parse JSON from response text
-        # Gemini often returns ```json ... ``` blocks
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
+
         text = response.text
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
             text = text.split("```")[1].split("```")[0]
-            
+
         return json.loads(text.strip())
-        
+
     except Exception as e:
         print(f"Error calling Gemini: {e}")
         return {
@@ -67,16 +65,12 @@ def analyze_transcript(transcript_text: str):
             "completeness_score": 0
         }
 
+
 @cache_with_ttl(ttl_seconds=86400)
 def evaluate_continuity(text_prev_end: str, text_next_start: str):
-    """
-    Checks if the second video naturally follows the first.
-    """
     if not GEMINI_API_KEY:
         return 0, "No API Key"
 
-    model = genai.GenerativeModel('gemini-flash-latest')
-    
     prompt = f"""
     Compare the ending of Video A and the beginning of Video B to check for learning continuity.
     
@@ -95,17 +89,21 @@ def evaluate_continuity(text_prev_end: str, text_next_start: str):
     - continuity_score: 0-100 (High is good flow)
     - reason: Short explanation.
     """
-    
+
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
+
         text = response.text
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
             text = text.split("```")[1].split("```")[0]
-            
+
         return json.loads(text.strip())
-        
+
     except Exception as e:
         print(f"Error evaluating continuity: {e}")
         return {"continuity_score": 0, "reason": "Error"}
