@@ -6,7 +6,7 @@ app = FastAPI(title="EduPath API", version="0.1.0")
 
 # CORS Setup
 origins = [
-    "http://localhost:3000",
+   ,
     "http://localhost:5173",
     "https://skillweave-ai-1.onrender.com"# Vite default
 ]
