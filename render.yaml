@@ -19,7 +19,7 @@ services:
 
 # 🔹 React Frontend
   - type: static
-    name: skillweave-ui
+    name: skillweave-ai
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
