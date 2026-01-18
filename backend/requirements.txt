@@ -8,6 +8,9 @@ youtube-transcript-api
 google-genai
 isodate
 python-docx
+google-api-python-client
+
+
 
 
 
