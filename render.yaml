@@ -1,0 +1,25 @@
+services:
+
+# 🔹 FastAPI Backend
+  - type: web
+    name: skillweave-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: MONGO_URI
+        value: mongodb://localhost:27017
+      - key: DB_NAME
+        value: skillweave_ai
+
+# 🔹 React Frontend
+  - type: static
+    name: skillweave-ui
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
