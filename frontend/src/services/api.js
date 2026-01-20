@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://skillweave-api.onrender.com/api/v1';
+const API_URL =import.meta.env.VITE_API_URL;
 
 export const generateCourse = async (topic, level, accentPreference) => {
     try {
