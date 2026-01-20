@@ -11,7 +11,7 @@ origins = [
     "https://skill-weave-ai.vercel.app/",
     "https://skillweave-ai-1.onrender.com"
 ]
-]
+
 
 app.add_middleware(
     CORSMiddleware,
