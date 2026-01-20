@@ -6,10 +6,11 @@ app = FastAPI(title="EduPath API", version="0.1.0")
 
 # CORS Setup
 origins = [
-    "http://localhost:3000",
     "http://localhost:5173",
-    "https://skill-weave-ai.vercel.app/",
-    "https://skillweave-ai-1.onrender.com"
+    "http://localhost:3000",
+    "https://skillweave-ai-1.onrender.com",   # frontend on Render (if any)
+    "https://skillweave.vercel.app",          # Vercel prod
+    "https://skillweave-ai.vercel.app",
 ]
 
 
