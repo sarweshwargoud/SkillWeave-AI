@@ -8,8 +8,8 @@ app = FastAPI(title="EduPath API", version="0.1.0")
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://skill-weave-ai.vercel.app,
-    "https://your-vercel-domain.vercel.app"
+    "https://skill-weave-ai.vercel.app/",
+    "https://skillweave-ai-1.onrender.com"
 ]
 ]
 
