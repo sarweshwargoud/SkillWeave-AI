@@ -54,7 +54,7 @@ def infer_accent_and_style(transcript_sample: str, channel_title: str = ""):
 
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=prompt
         )
 
