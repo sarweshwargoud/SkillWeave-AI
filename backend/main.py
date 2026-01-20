@@ -8,7 +8,9 @@ app = FastAPI(title="EduPath API", version="0.1.0")
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://skillweave-ai-1.onrender.com"
+    "https://skillweave-ai-1.onrender.com",
+    "https://your-vercel-domain.vercel.app"
+]
 ]
 
 app.add_middleware(
