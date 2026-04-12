@@ -9,7 +9,7 @@ Built as part of the **Edunet Foundation AI & ML Internship**, this project uses
 
 ## 📌 Problem We Solve.
 Students rely on YouTube to learn skills, but face:
-- ❌ Unstructured and scattered videos  .
+- ❌ Unstructured and scattered videos  
 - ❌ Incomplete playlists  
 - ❌ Repeated or skipped topics  
 - ❌ Sudden jumps in learning flow  
