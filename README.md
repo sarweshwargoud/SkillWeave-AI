@@ -37,7 +37,7 @@ SkillWeave AI automatically:
 
 ---
 
-## ⚙️ Technologies Used
+## ⚙️ Technologies Used...
 
 ### Frontend
 - React  
