@@ -9,7 +9,7 @@ origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://skillweave-ai-1.onrender.com",   # frontend on Render (if any)
-    "https://skillweave.vercel.app",          # Vercel prod
+    "https://skillweave.vercel.app",          
     "https://skillweave-ai.vercel.app",
 ]
 
