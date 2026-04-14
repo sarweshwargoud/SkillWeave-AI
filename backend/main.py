@@ -4,7 +4,7 @@ from routers import search, analyze, course
 
 app = FastAPI(title="EduPath API", version="0.1.0")
 
-# CORS Setup
+# CORS  Setup
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
