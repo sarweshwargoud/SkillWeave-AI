@@ -1,5 +1,5 @@
 # 🚀 SkillWeave AI  
-### AI-Powered Learning Path & YouTube Playlist Generator
+### AI-Powered Learning Path & YouTube Playlist Generator..
 
 SkillWeave AI is an intelligent AI/ML system that transforms scattered YouTube educational videos into a **structured, continuous, and personalized learning roadmap**.
 
