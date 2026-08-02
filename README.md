@@ -95,8 +95,8 @@ SkillWeave AI helps learners:
 ---
 
 ## 👨‍💻 Developed By
-**Sarweshwar Goud**  
-AI & ML Intern — Edunet Foundation  
+**Sarweshwar Buddolla**  
+ 
 
 ---
 
