@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 @patch('services.transcript_service.YouTubeTranscriptApi')
 def test_transcript_fetch(mock_api):
-    # Mock the get_transcript static method on the mocked class
-    mock_api.get_transcript.return_value = [{'text': 'Hello world', 'start': 0, 'duration': 1}]
+    # Mock the fetch() and to_raw_data() methods on the instantiated API
+    mock_api.return_value.fetch.return_value.to_raw_data.return_value = [{'text': 'Hello world', 'start': 0, 'duration': 1}]
     transcript = fetch_transcript("vid123")
     assert transcript == "Hello world"
 

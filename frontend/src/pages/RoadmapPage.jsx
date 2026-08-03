@@ -1,12 +1,27 @@
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, Clock, CheckCircle, Download, Share2 } from 'lucide-react';
+import { ArrowLeft, Play, Clock, CheckCircle, Download, FolderHeart, Sparkles } from 'lucide-react';
+import { getClient } from '../services/supabaseClient';
 import './RoadmapPage.css';
 
 const RoadmapPage = () => {
     const { state } = useLocation();
     const navigate = useNavigate();
     const course = state?.courseData;
+    const [user, setUser] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    const client = getClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user: currentUser } } = await client.auth.getUser();
+            setUser(currentUser);
+        };
+        checkUser();
+    }, []);
 
     const handleDownload = async () => {
         if (!course) return;
@@ -39,6 +54,52 @@ const RoadmapPage = () => {
         }
     };
 
+    const handleSaveToProfile = async () => {
+        if (!user) {
+            alert('Please login to save this roadmap to your profile workspace.');
+            navigate('/auth');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            // Map modules to include completion status
+            const structuredModules = course.modules.map(mod => ({
+                ...mod,
+                completed: false
+            }));
+
+            const newProject = {
+                user_id: user.id,
+                title: course.title,
+                description: `AI-Curated Roadmap for learning ${course.title}. Contains ${course.modules.length} lessons.`,
+                level: state?.level || 'Beginner',
+                accent: state?.accent || 'Any',
+                status: 'In Progress',
+                progress: 0,
+                roadmap_data: {
+                    title: course.title,
+                    modules: structuredModules
+                },
+                custom_tasks: []
+            };
+
+            const { data, error } = await client
+                .from('projects')
+                .insert(newProject);
+
+            if (error) throw error;
+
+            setSaved(true);
+            alert('Roadmap saved successfully to your profile workspace!');
+        } catch (error) {
+            console.error('Error saving project:', error);
+            alert('Failed to save project: ' + error.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (!course) {
         return (
             <div className="roadmap-container center-error">
@@ -49,26 +110,50 @@ const RoadmapPage = () => {
 
     return (
         <div className="roadmap-container">
-            <header className="roadmap-header">
-                <button className="back-btn" onClick={() => navigate('/create')}>
-                    <ArrowLeft size={20} />
+            {/* Top Navigation banner */}
+            <nav className="roadmap-nav-top">
+                <button className="nav-back-button" onClick={() => navigate('/create')}>
+                    <ArrowLeft size={18} /> Back
                 </button>
-                <div className="header-content">
-                    <h1>{course.title}</h1>
-                    <p className="subtitle">{course.modules.length} Modules • AI Curated</p>
+                <div className="nav-logo" onClick={() => navigate('/')}>SkillWeave AI</div>
+                <div>
+                    {user ? (
+                        <button className="nav-profile-button" onClick={() => navigate('/profile')}>My Workspace</button>
+                    ) : (
+                        <button className="nav-profile-button" onClick={() => navigate('/auth')}>Login</button>
+                    )}
                 </div>
-                <button className="download-btn" onClick={handleDownload} title="Download Roadmap (DOCX)">
-                    <Download size={20} />
-                    <span className="btn-text">Download</span>
-                </button>
+            </nav>
+
+            <header className="roadmap-header">
+                <div className="header-content">
+                    <span className="ai-curated-badge"><Sparkles size={14} /> Gemini Verified Sequence</span>
+                    <h1>{course.title}</h1>
+                    <p className="subtitle">{course.modules.length} Modules • Topics Continuity Analyzed</p>
+                </div>
+                <div className="roadmap-header-actions">
+                    {saved ? (
+                        <button className="save-btn btn-success-saved" disabled>
+                            <CheckCircle size={18} /> Saved to Profile
+                        </button>
+                    ) : (
+                        <button className="save-btn" onClick={handleSaveToProfile} disabled={saving}>
+                            <FolderHeart size={18} /> {saving ? 'Saving...' : 'Save to Profile'}
+                        </button>
+                    )}
+                    <button className="download-btn" onClick={handleDownload} title="Download Roadmap (DOCX)">
+                        <Download size={18} />
+                        <span className="btn-text">Download</span>
+                    </button>
+                </div>
             </header>
 
             <div className="timeline">
                 {course.modules.map((mod, index) => (
                     <motion.div
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className="timeline-item"
                     >
@@ -112,7 +197,7 @@ const RoadmapPage = () => {
                                             rel="noopener noreferrer"
                                             className="play-link"
                                         >
-                                            <Play size={16} /> Watch
+                                            <Play size={16} /> Watch Lesson
                                         </a>
                                     </div>
                                 </div>
@@ -122,9 +207,8 @@ const RoadmapPage = () => {
                 ))}
             </div>
 
-
             <footer className="roadmap-footer">
-                <p>Created by Sarweshwar</p>
+                <p>Created by Sarweshwar • Powered by Gemini AI</p>
             </footer>
         </div >
     );

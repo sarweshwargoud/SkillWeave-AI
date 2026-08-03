@@ -324,3 +324,28 @@ select.input-field {
         font-size: 2rem;
     }
 }
+
+.create-back-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 15;
+}
+
+.create-back-btn:hover {
+    background: #818cf8;
+    color: white;
+    border-color: #818cf8;
+    box-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
+}

@@ -6,7 +6,7 @@ def get_raw_transcript(video_id: str):
     Returns the raw list of transcript entries (dictionaries with text, start, duration).
     """
     try:
-        return YouTubeTranscriptApi.get_transcript(video_id)
+        return YouTubeTranscriptApi().fetch(video_id).to_raw_data()
     except Exception as e:
         print(f"Error fetching raw transcript for {video_id}: {e}")
         return None
@@ -20,7 +20,7 @@ def fetch_transcript(video_id: str):
     """
     try:
         # Get transcript (prefer manually created, fall back to auto-generated)
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript_list = YouTubeTranscriptApi().fetch(video_id).to_raw_data()
         
         # Combine into a single text block for LLM processing
         full_text = " ".join([entry['text'] for entry in transcript_list])
@@ -39,7 +39,7 @@ def get_transcript_segment(video_id: str, section: str = "full"):
     section: 'start' (first 20%), 'end' (last 20%), or 'full'.
     """
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript_list = YouTubeTranscriptApi().fetch(video_id).to_raw_data()
         if not transcript_list:
             return None
             

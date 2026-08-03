@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Loader2, Search, SlidersHorizontal, Sparkles, ArrowLeft } from 'lucide-react';
 import { generateCourse } from '../services/api';
 import './CourseInputPage.css';
 
@@ -33,7 +33,7 @@ const CourseInputPage = () => {
 
             const courseData = await generateCourse(topic, level, accent);
             clearInterval(interval);
-            navigate('/roadmap', { state: { courseData } });
+            navigate('/roadmap', { state: { courseData, level, accent } });
         } catch (error) {
             alert("Failed to generate course. Please try again.");
         } finally {
@@ -50,6 +50,9 @@ const CourseInputPage = () => {
                 <div className="blob blob-3"></div>
             </div>
             <div className="card input-card">
+                <button className="create-back-btn" onClick={() => navigate('/')} title="Go back to home">
+                    <ArrowLeft size={18} />
+                </button>
                 <motion.h2
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

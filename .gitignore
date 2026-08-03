@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.npm
+jspm_packages/
+web_modules/
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+*.venv
+
+# Python Cache & Build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Environment Variables & Secrets (CRITICAL)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+*.env
+
+# Production Builds
+dist/
+build/
+out/
+.next/
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Media / Large Files
+*.mp4
+*.mov
+*.avi
+SkillWeave.mp4
+
