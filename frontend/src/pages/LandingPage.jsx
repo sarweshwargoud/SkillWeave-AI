@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  PlayCircle, 
-  BookOpen, 
-  Layers, 
-  Sparkles, 
-  Clock, 
-  ShieldCheck, 
-  Network, 
+import {
+  ArrowRight,
+  PlayCircle,
+  BookOpen,
+  Layers,
+  Sparkles,
+  Clock,
+  ShieldCheck,
+  Network,
   TrendingUp,
   UserCheck,
   Play,
@@ -150,7 +150,7 @@ const DEMO_ROADMAPS = {
 
 const LandingPage = () => {
   const [user, setUser] = useState(null);
-  
+
   // Sandbox demo state
   const [activeDemoKey, setActiveDemoKey] = useState(null);
   const [demoRoadmap, setDemoRoadmap] = useState(null);
@@ -218,13 +218,13 @@ const LandingPage = () => {
             <div className="hero-badge">
               <Sparkles size={14} className="sparkle-icon" /> AI-Sequenced Continuous Syllabus
             </div>
-            
+
             <h1 className="hero-title">
               SkillWeave <span className="gradient-text">AI</span>
             </h1>
-            <h2 className="hero-subtitle">Master Any Skill with 3D-Curated Learning Paths</h2>
+            <h2 className="hero-subtitle">Master Any Skill with AI-Curated Learning Paths</h2>
             <p className="hero-description">
-              Stop drowning in YouTube clickbait. We fetch, transcribe, and analyze videos using 
+              Stop drowning in YouTube clickbait. We fetch, transcribe, and analyze videos using
               Gemini to guarantee absolute learning continuity between lessons.
             </p>
 
@@ -242,19 +242,19 @@ const LandingPage = () => {
             <div className="quick-sandbox-tags">
               <span>Try a demo sandbox:</span>
               <div className="sandbox-tags-row">
-                <button 
+                <button
                   className={`tag-btn ${activeDemoKey === 'python' ? 'tag-active' : ''}`}
                   onClick={() => handleDemoTagClick('python')}
                 >
                   Python Basics
                 </button>
-                <button 
+                <button
                   className={`tag-btn ${activeDemoKey === 'react' ? 'tag-active' : ''}`}
                   onClick={() => handleDemoTagClick('react')}
                 >
                   Next.js SaaS
                 </button>
-                <button 
+                <button
                   className={`tag-btn ${activeDemoKey === 'llm' ? 'tag-active' : ''}`}
                   onClick={() => handleDemoTagClick('llm')}
                 >
@@ -274,7 +274,7 @@ const LandingPage = () => {
       {/* Instant Demo Roadmap Renderer (Sandbox Area) */}
       <AnimatePresence>
         {demoRoadmap && (
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
@@ -296,16 +296,16 @@ const LandingPage = () => {
                         <h5>{mod.module_title}</h5>
                         <p>{mod.description}</p>
                       </div>
-                      
+
                       <div className="sandbox-video-card">
                         <img src={mod.video.thumbnail} alt={mod.video.title} />
                         <div className="sandbox-video-details">
                           <h6>{mod.video.title}</h6>
                           <span>{mod.video.channelTitle} • Match: {mod.video.final_score}%</span>
-                          <a 
-                            href="https://www.youtube.com" 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <a
+                            href="https://www.youtube.com"
+                            target="_blank"
+                            rel="noreferrer"
                             className="sandbox-play-link"
                           >
                             <Play size={12} /> Play
@@ -325,7 +325,7 @@ const LandingPage = () => {
       <section className="dashboard-stats">
         <h3 className="section-title-center">Platform Highlights</h3>
         <p className="section-desc-center">Why thousands of self-directed learners structure their education with SkillWeave</p>
-        
+
         <div className="stats-grid">
           <TiltCard className="stat-card" maxTilt={8}>
             <TrendingUp className="stat-icon text-indigo" />
@@ -360,7 +360,7 @@ const LandingPage = () => {
             <div className="transcript-pane pane-a">
               <div className="pane-title">Video A Ending (Transcribed)</div>
               <div className="pane-content">
-                "...so that covers the fundamentals of defining objects and initializers in JavaScript. 
+                "...so that covers the fundamentals of defining objects and initializers in JavaScript.
                 Next, we need to look at how subclasses inherit methods using prototype chains..."
               </div>
             </div>
@@ -377,7 +377,7 @@ const LandingPage = () => {
             <div className="transcript-pane pane-b">
               <div className="pane-title">Video B Start (Transcribed)</div>
               <div className="pane-content">
-                "Hi there! In this tutorial, we will explore prototypal inheritance in JS, 
+                "Hi there! In this tutorial, we will explore prototypal inheritance in JS,
                 building on top of class definitions and initializer constructors we wrote last time..."
               </div>
             </div>
@@ -395,7 +395,7 @@ const LandingPage = () => {
       {/* Feature grid */}
       <section className="features-grid-section">
         <h3 className="section-title-center">Core Pillars of SkillWeave</h3>
-        
+
         <div className="features">
           <div className="feature-card">
             <BookOpen className="icon" />
