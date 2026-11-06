@@ -22,11 +22,31 @@ const Navbar = () => {
   const client = getClient();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkUser = async () => {
-      const { data: { user: currentUser } } = await client.auth.getUser();
-      setUser(currentUser);
+      try {
+        const { data } = await client.auth.getUser();
+        if (mounted) {
+          setUser(data?.user || null);
+        }
+      } catch (err) {
+        if (mounted) setUser(null);
+      }
     };
     checkUser();
+
+    // Subscribe to auth state updates
+    const { data: authListener } = client.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setUser(session?.user || null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      authListener?.subscription?.unsubscribe?.();
+    };
   }, [location.pathname]);
 
   const navLinks = [
@@ -79,7 +99,7 @@ const Navbar = () => {
           {user ? (
             <button className="btn-secondary nav-user-btn" onClick={() => navigate('/profile')}>
               <User size={15} />
-              <span>{user?.user_metadata?.name || 'Workspace'}</span>
+              <span>{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Workspace'}</span>
             </button>
           ) : (
             <>

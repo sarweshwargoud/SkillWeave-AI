@@ -23,7 +23,12 @@ import {
   Clock,
   Layers,
   Award,
-  Video
+  Video,
+  Camera,
+  Edit3,
+  ShieldCheck,
+  AlertCircle,
+  LogIn
 } from 'lucide-react';
 import { getClient, defaultGoogleLearner } from '../services/supabaseClient';
 import Navbar from '../components/Navbar';
@@ -31,9 +36,13 @@ import './ProfilePage.css';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
 
   // Quick In-App Cinema Preview Modal state
@@ -56,21 +65,63 @@ const ProfilePage = () => {
   const fetchUserDataAndProjects = async () => {
     try {
       const { data } = await client.auth.getUser();
-      const currentUser = data?.user || defaultGoogleLearner;
-      setUser(currentUser);
+      const currentUser = data?.user;
 
-      // Fetch user projects
-      const { data: userProjects, error } = await client
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+      if (currentUser) {
+        setUser(currentUser);
 
-      if (error) throw error;
-      setProjects(userProjects || []);
-      
-      // Auto-expand first project if available
-      if (userProjects && userProjects.length > 0) {
-        setSelectedProject(userProjects[0]);
+        // Fetch user profile from public.profiles
+        try {
+          const { data: profileRow } = await client
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+
+          if (profileRow) {
+            setProfile(profileRow);
+            setEditFullName(profileRow.full_name || '');
+          } else {
+            // Profile row missing - insert defaults
+            const defaultName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+            const { data: newProfile } = await client
+              .from('profiles')
+              .insert({
+                id: currentUser.id,
+                email: currentUser.email,
+                full_name: defaultName,
+                avatar_url: currentUser.user_metadata?.avatar_url || ''
+              })
+              .select()
+              .maybeSingle();
+            if (newProfile) {
+              setProfile(newProfile);
+              setEditFullName(newProfile.full_name || '');
+            }
+          }
+        } catch (profileErr) {
+          console.warn('Profile sync note:', profileErr);
+        }
+
+        // Fetch user projects from public.projects
+        const { data: userProjects, error } = await client
+          .from('projects')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setProjects(userProjects || []);
+        
+        // Auto-expand first project if available
+        if (userProjects && userProjects.length > 0) {
+          setSelectedProject(userProjects[0]);
+        }
+      } else {
+        // Guest user
+        setUser(null);
+        setProfile(null);
+        setProjects([]);
       }
     } catch (err) {
       console.error('Error fetching profile data:', err);
@@ -84,9 +135,75 @@ const ProfilePage = () => {
     navigate('/');
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image smaller than 5MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadErr } = await client.storage
+        .from('user-assets')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlData } = client.storage
+        .from('user-assets')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = publicUrlData.publicUrl;
+
+      // Update public.profiles
+      await client.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+
+      // Update user metadata in Supabase Auth
+      await client.auth.updateUser({ data: { avatar_url: avatarUrl } });
+
+      setProfile(prev => ({ ...prev, avatar_url: avatarUrl }));
+      alert('Avatar updated successfully!');
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      alert('Failed to upload avatar: ' + (err.message || 'Please try again.'));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleSaveFullName = async (e) => {
+    e.preventDefault();
+    if (!user || !editFullName.trim()) return;
+    setFormLoading(true);
+
+    try {
+      const trimmed = editFullName.trim();
+      await client.from('profiles').update({ full_name: trimmed }).eq('id', user.id);
+      await client.auth.updateUser({ data: { full_name: trimmed, name: trimmed } });
+      setProfile(prev => ({ ...prev, full_name: trimmed }));
+      setShowEditNameModal(false);
+      alert('Display name updated successfully!');
+    } catch (err) {
+      alert('Failed to update name: ' + err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const handleAddProject = async (e) => {
     e.preventDefault();
-    if (!projectTitle || !user) return;
+    if (!projectTitle) return;
+    if (!user) {
+      alert('Please sign in to save custom projects to your Supabase cloud account.');
+      navigate('/auth');
+      return;
+    }
     setFormLoading(true);
 
     try {
@@ -112,6 +229,7 @@ const ProfilePage = () => {
       const { data: updatedProjects } = await client
         .from('projects')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       setProjects(updatedProjects || []);
@@ -228,8 +346,16 @@ const ProfilePage = () => {
     );
   }
 
-  const userName = user?.user_metadata?.name || 'Google Learner';
-  const userAvatar = user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=GoogleLearner`;
+  const getInitials = (name) => {
+    if (!name) return 'GL';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const userName = profile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || (user ? 'Developer' : 'Google Learner');
+  const userAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || '';
+  const userEmail = profile?.email || user?.email || 'learner.google@example.com';
 
   return (
     <div className="profile-studio-page">
@@ -282,11 +408,56 @@ const ProfilePage = () => {
       <main className="profile-studio-grid">
         {/* Left Sidebar: User Details */}
         <section className="user-studio-card">
-          <div className="user-avatar-frame">
-            <img src={userAvatar} alt={userName} className="user-avatar-element" />
+          <div className="user-avatar-frame-wrapper">
+            <div className="user-avatar-frame">
+              {userAvatar ? (
+                <img src={userAvatar} alt={userName} className="user-avatar-element" />
+              ) : (
+                <div className="user-avatar-initials">{getInitials(userName)}</div>
+              )}
+              {user && (
+                <label className="avatar-upload-trigger" title="Upload avatar photo">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    disabled={uploadingAvatar}
+                    style={{ display: 'none' }}
+                  />
+                  <Camera size={13} />
+                </label>
+              )}
+            </div>
+            {uploadingAvatar && <span className="avatar-uploading-tag">Uploading...</span>}
           </div>
-          <h3 className="user-name-title">{userName}</h3>
-          <p className="user-email-subtitle">{user?.email || 'learner.google@gmail.com'}</p>
+
+          <div className="user-name-title-container">
+            <h3 className="user-name-title">{userName}</h3>
+            {user && (
+              <button 
+                className="name-edit-pencil-btn"
+                onClick={() => { setEditFullName(userName); setShowEditNameModal(true); }}
+                title="Edit display name"
+              >
+                <Edit3 size={13} />
+              </button>
+            )}
+          </div>
+          <p className="user-email-subtitle">{userEmail}</p>
+
+          <div className={`user-sync-pill ${user ? 'synced' : 'guest'}`}>
+            {user ? (
+              <>
+                <ShieldCheck size={13} className="sync-icon" />
+                <span>Supabase Cloud Synced</span>
+              </>
+            ) : (
+              <>
+                <AlertCircle size={13} className="sync-icon" />
+                <span>Guest Mode</span>
+              </>
+            )}
+          </div>
           
           <div className="user-stats-bar">
             <div className="stat-unit">
@@ -322,9 +493,15 @@ const ProfilePage = () => {
             </button>
           </div>
 
-          <button className="logout-action-btn" onClick={handleLogout} title="Log Out">
-            <LogOut size={16} /> <span>Sign Out</span>
-          </button>
+          {user ? (
+            <button className="logout-action-btn" onClick={handleLogout} title="Log Out">
+              <LogOut size={16} /> <span>Sign Out</span>
+            </button>
+          ) : (
+            <button className="login-action-btn" onClick={() => navigate('/auth')} title="Sign in with Supabase">
+              <LogIn size={16} /> <span>Sign In / Register</span>
+            </button>
+          )}
         </section>
 
         {/* Right Content Area: Projects list */}
@@ -729,6 +906,54 @@ const ProfilePage = () => {
                     disabled={formLoading || !projectTitle}
                   >
                     {formLoading ? 'Creating...' : 'Create Project'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Full Name Modal */}
+      <AnimatePresence>
+        {showEditNameModal && (
+          <div className="modal-backdrop" onClick={() => setShowEditNameModal(false)}>
+            <motion.div 
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              className="modal-content card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Edit Display Name</h3>
+              <p className="modal-sub">Update your full name saved in your Supabase profile.</p>
+              <form onSubmit={handleSaveFullName} className="modal-form">
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="input-field"
+                    placeholder="e.g. Sarweshwar Goud"
+                    value={editFullName}
+                    onChange={(e) => setEditFullName(e.target.value)}
+                  />
+                </div>
+                <div className="modal-buttons-row">
+                  <button 
+                    type="button" 
+                    className="modal-btn-cancel" 
+                    onClick={() => setShowEditNameModal(false)}
+                    disabled={formLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary" 
+                    disabled={formLoading || !editFullName.trim()}
+                  >
+                    {formLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </form>

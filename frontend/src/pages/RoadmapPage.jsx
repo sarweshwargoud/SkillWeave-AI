@@ -113,8 +113,33 @@ const RoadmapPage = () => {
 
       if (error) throw error;
 
+      // Also persist to courses for the in-app workspace player
+      try {
+        await client.from('courses').insert({
+          id: `course_${Date.now()}`,
+          user_id: user.id,
+          title: course.title,
+          description: `AI-Curated Roadmap for learning ${course.title}`,
+          thumbnail: course.modules?.[0]?.video?.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+          progress: 0,
+          status: 'In Progress',
+          total_videos: course.modules.length,
+          total_duration: "45m",
+          totalVideos: course.modules.length,
+          totalDuration: "45m",
+          modules: structuredModules,
+          roadmap: {
+            title: course.title,
+            modules: structuredModules
+          },
+          created_at: new Date().toISOString()
+        });
+      } catch (courseErr) {
+        console.warn('Course auto-save note:', courseErr);
+      }
+
       setSaved(true);
-      alert('Roadmap saved successfully to your profile workspace!');
+      alert('Roadmap saved successfully to your Supabase profile & workspace!');
     } catch (error) {
       console.error('Error saving project:', error);
       alert('Failed to save project: ' + error.message);

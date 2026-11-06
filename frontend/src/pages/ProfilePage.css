@@ -162,14 +162,117 @@
   top: 140px;
 }
 
+.user-avatar-frame-wrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto 1.25rem;
+}
+
 .user-avatar-frame {
   width: 86px;
   height: 86px;
-  margin: 0 auto 1.25rem;
   border-radius: 50%;
   padding: 3px;
   background: #111827;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #111827;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  user-select: none;
+}
+
+.avatar-upload-trigger {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  background: #2563eb;
+  color: #ffffff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  border: 2px solid #ffffff;
+}
+
+.avatar-upload-trigger:hover {
+  background: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.avatar-uploading-tag {
+  display: block;
+  font-size: 0.72rem;
+  color: #2563eb;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.user-name-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.name-edit-pencil-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.name-edit-pencil-btn:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+
+.user-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.user-sync-pill.synced {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.user-sync-pill.guest {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
 }
 
 .user-avatar-element {
@@ -183,14 +286,37 @@
   font-size: 1.2rem;
   font-weight: 800;
   color: #111827;
-  margin: 0 0 0.25rem;
+  margin: 0;
 }
 
 .user-email-subtitle {
   font-size: 0.8rem;
   color: #6b7280;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   word-break: break-all;
+}
+
+.login-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.login-action-btn:hover {
+  background: #000000;
+  transform: translateY(-1px);
 }
 
 .user-stats-bar {

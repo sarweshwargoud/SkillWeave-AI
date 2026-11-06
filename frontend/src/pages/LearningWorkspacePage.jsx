@@ -227,11 +227,17 @@ const LearningWorkspacePage = () => {
       });
 
       const progressPercent = totalVids > 0 ? Math.round((finishedVids / totalVids) * 100) : 0;
-      await client.from('courses').update({
-        progress: progressPercent,
-        lastWatchedVideoId: vidId,
-        lastActivity: new Date().toISOString()
-      }).eq('id', course.id || course.title);
+      try {
+        await client.from('courses').update({
+          progress: progressPercent,
+          last_watched_video_id: vidId,
+          lastWatchedVideoId: vidId,
+          last_activity: new Date().toISOString(),
+          lastActivity: new Date().toISOString()
+        }).eq('id', course.id || course.title);
+      } catch (err) {
+        console.warn('Update course progress note:', err);
+      }
     }
   };
 

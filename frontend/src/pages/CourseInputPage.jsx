@@ -80,20 +80,49 @@ const CourseInputPage = () => {
         const roadmapData = await generateRoadmapFromURL(inputValue.trim(), level);
         clearInterval(interval);
 
-        // Save course to Supabase client so it shows up in /workspace and /my-learning
+        const { data: authData } = await client.auth.getUser();
+        const userId = authData?.user?.id || null;
+
+        // Save course to Supabase so it shows up in /workspace and /my-learning
         const newCourse = {
           id: `course_${Date.now()}`,
+          user_id: userId,
           title: roadmapData.title || "Custom YouTube Course",
           channel: roadmapData.channelTitle || "YouTube Academy",
+          description: roadmapData.description || `AI-Curated course for ${roadmapData.title || "YouTube Learning"}`,
           thumbnail: roadmapData.modules?.[0]?.video?.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
           progress: 0,
+          status: 'In Progress',
+          total_videos: roadmapData.total_videos || (roadmapData.modules ? roadmapData.modules.length : 1),
+          total_duration: roadmapData.estimated_time || "45m",
           totalVideos: roadmapData.total_videos || (roadmapData.modules ? roadmapData.modules.length : 1),
           totalDuration: roadmapData.estimated_time || "45m",
+          modules: roadmapData.modules || [],
           roadmap: roadmapData,
           created_at: new Date().toISOString()
         };
 
         await client.from('courses').insert([newCourse]);
+
+        // If user is authenticated, also save to projects in Supabase
+        if (userId) {
+          try {
+            await client.from('projects').insert({
+              user_id: userId,
+              title: newCourse.title,
+              description: newCourse.description,
+              level: level,
+              accent: accent,
+              status: 'In Progress',
+              progress: 0,
+              roadmap_data: roadmapData,
+              custom_tasks: []
+            });
+          } catch (pErr) {
+            console.warn('Project auto-save note:', pErr);
+          }
+        }
+
         setGeneratedResult({ course: newCourse, roadmapData });
       } else {
         const courseData = await generateCourse(inputValue.trim(), level, accent);

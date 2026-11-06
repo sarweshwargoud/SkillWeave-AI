@@ -74,16 +74,22 @@ const HandwrittenNotesPage = () => {
   const handleSaveNote = async (noteObj) => {
     try {
       const { data: { user } } = await client.auth.getUser();
+      if (!user) {
+        alert("Please sign in to save handwritten notes to your Supabase cloud library.");
+        navigate('/auth');
+        return;
+      }
       await client.from('notes').insert({
-        user_id: user?.id || 'guest',
+        user_id: user.id,
         video_id: noteObj.video_id,
         title: noteObj.title,
         notes_data: noteObj,
         created_at: new Date().toISOString()
       });
-      alert("Note successfully saved to your personal library!");
+      alert("Note successfully saved to your personal Supabase library!");
     } catch (e) {
       console.error("Save note error:", e);
+      alert("Failed to save note: " + (e.message || "Please try again."));
     }
   };
 

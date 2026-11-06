@@ -16,7 +16,7 @@
   height: 800px;
   overflow: hidden;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
 .floating-glass-tile {

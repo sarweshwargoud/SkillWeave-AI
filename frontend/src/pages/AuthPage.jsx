@@ -19,10 +19,12 @@ const AuthPage = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await client.auth.getUser();
-      if (user) {
-        navigate('/profile');
-      }
+      try {
+        const { data } = await client.auth.getUser();
+        if (data?.user) {
+          navigate('/profile');
+        }
+      } catch (e) {}
     };
     checkUser();
   }, [navigate]);
@@ -35,7 +37,7 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         const { data, error } = await client.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password
         });
         if (error) throw error;
@@ -44,15 +46,24 @@ const AuthPage = () => {
         }
       } else {
         const { data, error } = await client.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
-            data: { name }
+            data: { 
+              full_name: name.trim(),
+              name: name.trim()
+            }
           }
         });
         if (error) throw error;
         if (data.user) {
-          alert('Sign up successful! Welcome to SkillWeave AI.');
+          if (!data.session) {
+            // Auto sign-in if session wasn't returned directly
+            await client.auth.signInWithPassword({
+              email: email.trim(),
+              password
+            });
+          }
           navigate('/profile');
         }
       }
