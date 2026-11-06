@@ -11,7 +11,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # NEW CLIENT (replaces configure + GenerativeModel)
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 # Define structured output models for Gemini
 class VideoTopic(BaseModel):
