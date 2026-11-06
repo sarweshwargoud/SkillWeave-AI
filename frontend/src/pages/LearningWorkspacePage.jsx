@@ -114,11 +114,12 @@ const LearningWorkspacePage = () => {
     }
   };
 
-  // When active video changes, fetch its transcript and auto-load notes
+  // When active video changes, fetch transcript and reset notes (do not auto-generate notes/quiz until user clicks)
   useEffect(() => {
     if (activeVideo?.id) {
       loadTranscript(activeVideo.id);
-      loadNotesForVideo(activeVideo.id);
+      setVideoNotes(null);
+      setNotesLoading(false);
     }
   }, [activeVideo?.id]);
 
@@ -448,9 +449,9 @@ const LearningWorkspacePage = () => {
         {/* COLUMN 1 (LEFT SIDE): Video Player & Under-Video Features */}
         <main className="workspace-video-and-features-main">
           
-          {/* STICKY FIXED VIDEO PLAYER STAGE */}
-          {/* Fixed / Sticky at top: does not move when user scrolls down through notes / quiz / tutor below */}
-          <section className="sticky-player-bezel-wrapper">
+          {/* PERMANENTLY FIXED VIDEO PLAYER STAGE */}
+          {/* Fixed in place: does NOT move or scroll when user scrolls through notes / quiz / tutor below */}
+          <section className="fixed-video-player-stage">
             <div className="player-stage-bezel">
               {activeVideo ? (
                 <>
@@ -530,14 +531,11 @@ const LearningWorkspacePage = () => {
           {/* Notes generation, AI tutor chat, quizzes, and transcripts displayed in separate interactive divs */}
           <section className="under-video-features-hub">
             
-            {/* Feature Tab Selector Strip */}
+            {/* Feature Tab Selector Strip (Permanently fixed under video) */}
             <div className="under-video-tab-strip">
               <button
                 className={`feature-tab-item ${activeTab === 'notes' ? 'active-tab' : ''}`}
-                onClick={() => {
-                  setActiveTab('notes');
-                  if (!videoNotes && activeVideo?.id) loadNotesForVideo(activeVideo.id);
-                }}
+                onClick={() => setActiveTab('notes')}
               >
                 <FileText size={16} />
                 <span>✍️ AI Handwritten Notes</span>

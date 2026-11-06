@@ -23,7 +23,12 @@ const LessonQuiz = ({ videoId, videoTitle, onQuizComplete }) => {
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    loadQuiz();
+    // Reset quiz state when video changes - do not auto-generate until user clicks
+    setQuizData(null);
+    setLoading(false);
+    setSubmitted(false);
+    setSelectedAnswers({});
+    setCurrentQIndex(0);
   }, [videoId]);
 
   const loadQuiz = async () => {
