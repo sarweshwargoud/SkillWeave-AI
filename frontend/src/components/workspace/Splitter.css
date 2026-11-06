@@ -1,0 +1,41 @@
+/* Resizable Splitter Styles */
+.vscode-splitter {
+  position: relative;
+  z-index: 15;
+  user-select: none;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.vscode-splitter.horizontal {
+  width: 5px;
+  cursor: col-resize;
+  height: 100%;
+}
+
+.vscode-splitter.vertical {
+  height: 5px;
+  cursor: row-resize;
+  width: 100%;
+}
+
+.vscode-splitter:hover,
+.vscode-splitter.dragging {
+  background-color: var(--vsc-accent, #007acc) !important;
+}
+
+.splitter-handle-bar {
+  width: 100%;
+  height: 100%;
+}
+
+/* Global body cursor overrides during active drag */
+body.is-resizing-h {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.is-resizing-v {
+  cursor: row-resize !important;
+  user-select: none !important;
+}

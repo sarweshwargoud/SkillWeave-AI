@@ -1,0 +1,432 @@
+/* VS Code Primary Sidebar */
+.vscode-primary-sidebar {
+  height: 100%;
+  background-color: var(--vsc-sidebar-bg, #252526);
+  border-right: 1px solid var(--vsc-border, #2d2d2d);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--vsc-fg, #cccccc);
+}
+
+.sidebar-header-strip {
+  height: 35px;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--vsc-border, #2d2d2d);
+}
+
+.sidebar-title-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--vsc-muted, #999999);
+  text-transform: uppercase;
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sidebar-icon-action {
+  background: transparent;
+  border: none;
+  color: var(--vsc-muted, #999999);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-icon-action:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-content-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 0;
+}
+
+/* Custom Scrollbar for VS Code feel */
+.sidebar-content-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-content-scrollable::-webkit-scrollbar-thumb {
+  background-color: var(--vsc-scrollbar, rgba(255, 255, 255, 0.15));
+  border-radius: 3px;
+}
+
+/* Explorer Tree Styles */
+.explorer-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0.75rem 0.5rem;
+  padding: 0.3rem 0.5rem;
+  background-color: var(--vsc-input-bg, #3c3c3c);
+  border: 1px solid var(--vsc-border, #454545);
+  border-radius: 4px;
+}
+
+.explorer-search-box .search-icon {
+  color: #858585;
+}
+
+.explorer-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.75rem;
+  width: 100%;
+}
+
+.explorer-course-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--vsc-header-bg, #2d2d2d);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ffffff;
+  border-bottom: 1px solid var(--vsc-border, #3c3c3c);
+}
+
+.course-title-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.course-progress-badge {
+  background-color: rgba(0, 122, 204, 0.25);
+  color: #4fc1ff;
+  border: 1px solid rgba(0, 122, 204, 0.4);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+/* Tree Nodes */
+.module-tree-node {
+  margin-bottom: 1px;
+}
+
+.module-folder-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--vsc-fg, #cccccc);
+  transition: background-color 0.1s ease;
+}
+
+.module-folder-row:hover {
+  background-color: var(--vsc-list-hover, rgba(255, 255, 255, 0.06));
+}
+
+.folder-icon-wrap {
+  display: flex;
+  align-items: center;
+  color: #dcb67a;
+}
+
+.folder-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-count-pill {
+  font-size: 0.65rem;
+  color: var(--vsc-muted, #777777);
+  background: var(--vsc-badge-bg, rgba(255, 255, 255, 0.08));
+  padding: 1px 5px;
+  border-radius: 10px;
+}
+
+.module-lessons-nest {
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem 0.3rem 1.6rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--vsc-fg-secondary, #aaaaaa);
+  transition: background-color 0.1s ease;
+}
+
+.lesson-file-row:hover {
+  background-color: var(--vsc-list-hover, rgba(255, 255, 255, 0.06));
+  color: #ffffff;
+}
+
+.lesson-file-row.active-lesson {
+  background-color: var(--vsc-list-active, #094771) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.file-status-icon {
+  display: flex;
+  align-items: center;
+}
+
+.check-icon-done {
+  color: #10b981;
+}
+
+.play-icon-active {
+  color: #38bdf8;
+  fill: #38bdf8;
+}
+
+.circle-icon-idle {
+  color: #666666;
+}
+
+.lesson-name-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson-time-pill {
+  font-size: 0.65rem;
+  color: var(--vsc-muted, #777777);
+}
+
+/* Sidebar Other Views */
+.sidebar-section-title {
+  padding: 0.6rem 0.75rem 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--vsc-muted, #888888);
+}
+
+.sidebar-empty-box {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--vsc-muted, #888888);
+  font-size: 0.75rem;
+}
+
+.sidebar-course-card,
+.sidebar-project-item {
+  margin: 0.35rem 0.75rem;
+  padding: 0.6rem;
+  background-color: var(--vsc-card-bg, #2a2a2b);
+  border: 1px solid var(--vsc-border, #3a3a3b);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-course-card:hover,
+.sidebar-project-item:hover {
+  border-color: var(--vsc-accent, #007acc);
+  background-color: var(--vsc-card-hover, #323233);
+}
+
+.course-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.3rem;
+}
+
+.card-course-percent {
+  color: #38bdf8;
+  font-size: 0.7rem;
+}
+
+.course-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--vsc-muted, #888888);
+  margin-bottom: 0.4rem;
+}
+
+.course-card-progress-track {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.course-card-progress-bar {
+  height: 100%;
+  background-color: #38bdf8;
+  border-radius: 2px;
+}
+
+/* Settings View Elements */
+.setting-control-group {
+  padding: 0.4rem 0.75rem 0.8rem;
+}
+
+.setting-control-group label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--vsc-fg, #cccccc);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.theme-toggle-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.theme-pick-btn {
+  flex: 1;
+  padding: 0.35rem;
+  background-color: var(--vsc-input-bg, #3c3c3c);
+  border: 1px solid var(--vsc-border, #454545);
+  color: #cccccc;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.theme-pick-btn.active {
+  background-color: var(--vsc-accent, #007acc);
+  color: #ffffff;
+  border-color: var(--vsc-accent, #007acc);
+}
+
+.reset-layout-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem;
+  background-color: var(--vsc-button-bg, #3c3c3c);
+  border: 1px solid var(--vsc-border, #505050);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reset-layout-action-btn:hover {
+  background-color: var(--vsc-button-hover, #4a4a4a);
+}
+
+.e2ee-settings-box {
+  margin: 0.25rem 0.75rem;
+  padding: 0.75rem;
+  background-color: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 6px;
+}
+
+.e2ee-description {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--vsc-fg-secondary, #aaaaaa);
+  margin-bottom: 0.5rem;
+}
+
+.e2ee-toggle-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.e2ee-key-input-wrap {
+  margin-top: 0.5rem;
+}
+
+.e2ee-key-input-wrap label {
+  display: block;
+  font-size: 0.68rem;
+  color: #999999;
+  margin-bottom: 0.2rem;
+}
+
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--vsc-input-bg, #1e1e1e);
+  border: 1px solid var(--vsc-border, #454545);
+  border-radius: 4px;
+  padding: 0.25rem 0.45rem;
+}
+
+.input-with-icon input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.72rem;
+  width: 100%;
+}
+
+.e2ee-key-input-wrap small {
+  display: block;
+  font-size: 0.62rem;
+  color: #777777;
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+.security-status-card {
+  margin: 0.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  color: #a1a1aa;
+}
