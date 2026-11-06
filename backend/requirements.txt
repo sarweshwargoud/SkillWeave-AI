@@ -10,3 +10,4 @@ isodate
 python-docx
 google-api-python-client
 pyjwt
+aiofiles
