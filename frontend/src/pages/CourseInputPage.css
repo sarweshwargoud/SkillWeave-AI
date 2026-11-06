@@ -1,56 +1,67 @@
 /* Course Input Page Studio Aesthetic */
-.input-studio-page {
+.course-input-page-wrapper {
   min-height: 100vh;
-  background-color: #f7f8fa;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+.course-input-main-stage {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.5rem;
+  padding: 3.5rem 1.5rem 5rem;
   position: relative;
-  overflow: hidden;
+  width: 100%;
 }
 
-.input-page-header {
-  position: absolute;
-  top: 1.5rem;
-  left: 2rem;
-  right: 2rem;
+/* Feature Access Notice Banner */
+.feature-signin-notice-banner {
+  width: 100%;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  z-index: 10;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.back-nav-btn {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 9999px;
-  padding: 0.6rem 1.25rem;
-  display: inline-flex;
+.notice-left {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #9f1239;
+}
+
+.notice-lock-icon {
+  color: #e11d48;
+}
+
+.notice-signin-btn {
+  background: #e11d48;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 750;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
 }
 
-.back-nav-btn:hover {
-  background: #f9fafb;
-  color: #111827;
-  transform: translateX(-2px);
-}
-
-.brand-minimal-badge {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 900;
-  font-size: 0.95rem;
-  color: #111827;
-  letter-spacing: -0.01em;
-  cursor: pointer;
+.notice-signin-btn:hover {
+  background: #be123c;
+  transform: translateY(-1px);
 }
 
 /* Studio Input Card */
@@ -450,3 +461,118 @@
     padding: 4rem 3.5rem;
   }
 }
+
+/* AI Continuity Scanning Beam inside Loading Overlay */
+.continuity-scanning-visual {
+  position: relative;
+  width: 100%;
+  background: #0f172a;
+  border-radius: 18px;
+  padding: 1.5rem 1.25rem;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.scanning-laser-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, #ec4899, transparent);
+  box-shadow: 0 0 16px 3px rgba(56, 189, 248, 0.9), 0 0 32px 6px rgba(236, 72, 153, 0.6);
+  animation: laserScan 2.4s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.2;
+  }
+}
+
+.scanning-radar-nodes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  gap: 1rem;
+}
+
+.node-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+.node-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #38bdf8;
+  letter-spacing: 0.05em;
+}
+
+.node-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.scanning-core-pulse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pulse-star {
+  color: #38bdf8;
+  animation: pulseRotate 3s linear infinite;
+}
+
+@keyframes pulseRotate {
+  0% { transform: scale(0.9) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(180deg); }
+  100% { transform: scale(0.9) rotate(360deg); }
+}
+
+.pulse-score {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #34d399;
+}
+
+.continuity-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #10b981;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  margin-top: 1rem;
+}
+

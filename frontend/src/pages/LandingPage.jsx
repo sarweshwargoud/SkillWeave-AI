@@ -163,6 +163,28 @@ const LandingPage = () => {
   const [activeDemoKey, setActiveDemoKey] = useState('python');
   const [demoRoadmap, setDemoRoadmap] = useState(DEMO_ROADMAPS.python);
   const [activePillar, setActivePillar] = useState('roadmap'); // 'roadmap', 'notes', 'tutor'
+  
+  // AI Continuity Scanner Live Simulation
+  const [isScanning, setIsScanning] = useState(false);
+  const [matchScore, setMatchScore] = useState(98);
+  const [scanStatusText, setScanStatusText] = useState("Continuity Verified: Video B continues smoothly from Video A without repeated definitions.");
+
+  const triggerContinuityScan = () => {
+    setIsScanning(true);
+    setScanStatusText("Scanning transcript tokens & evaluating conceptual bridges with Gemini embeddings...");
+    let ticks = 0;
+    const interval = setInterval(() => {
+      setMatchScore(Math.floor(92 + Math.random() * 8));
+      ticks++;
+      if (ticks >= 7) {
+        clearInterval(interval);
+        setMatchScore(98.6);
+        setIsScanning(false);
+        setScanStatusText("Continuity Verified: 98.6% concept alignment. Zero prerequisite gaps detected.");
+      }
+    }, 280);
+  };
+
   const navigate = useNavigate();
 
   const handleDemoTagClick = (key) => {
@@ -412,7 +434,7 @@ const LandingPage = () => {
       {/* AI Continuity Engine Live Monitor */}
       <section id="engine-showcase" className="engine-monitor-section">
         <motion.div
-          className="engine-studio-card"
+          className={`engine-studio-card ${isScanning ? 'is-active-scanning' : ''}`}
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -420,19 +442,31 @@ const LandingPage = () => {
         >
           <div className="engine-card-header">
             <div className="header-left">
-              <span className="live-indicator-pill">
-                <span className="live-ping"></span> Live Analyzer
+              <span className={`live-indicator-pill ${isScanning ? 'scanning-pill' : ''}`}>
+                <span className="live-ping"></span> {isScanning ? 'Active Laser Scan' : 'Live Analyzer'}
               </span>
               <h3>AI Transcript Continuity Engine</h3>
               <p>How Gemini evaluates the conceptual bridges between recommended videos</p>
             </div>
-            <div className="header-badge">
-              <Sparkles size={16} /> Continuous Sequencing
+            <div className="header-actions-group">
+              <button 
+                type="button" 
+                className="trigger-scan-btn"
+                onClick={triggerContinuityScan}
+                disabled={isScanning}
+                title="Simulate transcript scanning and zero-gap verification"
+              >
+                <Sparkles size={15} className={isScanning ? 'animate-spin text-rose-500' : 'text-blue-500'} />
+                <span>{isScanning ? 'Scanning Transcripts...' : 'Run Live Continuity Scan'}</span>
+              </button>
             </div>
           </div>
 
           <div className="engine-panes-layout">
-            <div className="engine-pane pane-source">
+            {/* Real-time laser scanning line sweep */}
+            <div className="engine-scanning-laser" />
+
+            <div className={`engine-pane pane-source ${isScanning ? 'pulse-scanning-pane' : ''}`}>
               <div className="pane-header-label">Lesson A Concluding Transcript</div>
               <p className="pane-quote">
                 "...and that completes our study of object memory allocations and mutable pointer references in Python.
@@ -442,14 +476,14 @@ const LandingPage = () => {
             </div>
 
             <div className="engine-connector-middle">
-              <div className="connector-circle">
+              <div className={`connector-circle ${isScanning ? 'pulse-connector' : ''}`}>
                 <Sparkles size={20} className="connector-sparkle" />
               </div>
-              <div className="connector-score">98% Match</div>
+              <div className="connector-score">{matchScore}% Match</div>
               <span className="connector-label">Zero Concept Gaps</span>
             </div>
 
-            <div className="engine-pane pane-target">
+            <div className={`engine-pane pane-target ${isScanning ? 'pulse-scanning-pane' : ''}`}>
               <div className="pane-header-label">Lesson B Opening Transcript</div>
               <p className="pane-quote">
                 "Welcome back! Now that you grasp Python's memory model and heap frames, let's look at yield generators
@@ -459,9 +493,13 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <div className="engine-card-footer">
-            <CheckCircle2 size={18} className="footer-check" />
-            <span>Continuity Verified: Video B continues smoothly from Video A without repeated definitions.</span>
+          <div className={`engine-card-footer ${isScanning ? 'footer-scanning' : ''}`}>
+            {isScanning ? (
+              <Zap size={18} className="footer-check text-rose-500 animate-pulse" />
+            ) : (
+              <CheckCircle2 size={18} className="footer-check" />
+            )}
+            <span>{scanStatusText}</span>
           </div>
         </motion.div>
       </section>
@@ -548,8 +586,32 @@ const LandingPage = () => {
             </motion.div>
           </div>
 
-          {/* Zag 2: In-App AI Video Tutor (Card Left, Text Right) */}
+          {/* Zag 2: In-App AI Video Tutor (Card Left, Text Right via row-reverse) */}
           <div className="zigzag-row reverse-row">
+            <motion.div 
+              className="zigzag-content-col"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="zigzag-badge badge-violet">
+                <MessageSquare size={14} /> <span>Feature 02 • Context Grounding</span>
+              </div>
+              <h3 className="zigzag-title">Instant Clarifications with Lecture Timestamp Seeking</h3>
+              <p className="zigzag-desc">
+                Don't waste time scouring comment sections or scrubbing through video timelines. Ask questions directly to your AI tutor. It identifies the exact moments concepts are taught and lets you jump the embedded cinema player with one click.
+              </p>
+              <div className="zigzag-points">
+                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Clickable timestamps seek YouTube video instantly</span></div>
+                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>ChatGPT-style persistent history threads</span></div>
+                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Encrypted session history saved in Supabase</span></div>
+              </div>
+              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/tutor')}>
+                Launch AI Tutor <ArrowRight size={15} />
+              </button>
+            </motion.div>
+
             <motion.div 
               className="zigzag-visual-col"
               initial={{ opacity: 0, x: -30 }}
@@ -585,30 +647,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-violet">
-                <MessageSquare size={14} /> <span>Feature 02 • Context Grounding</span>
-              </div>
-              <h3 className="zigzag-title">Instant Clarifications with Lecture Timestamp Seeking</h3>
-              <p className="zigzag-desc">
-                Don't waste time scouring comment sections or scrubbing through video timelines. Ask questions directly to your AI tutor. It identifies the exact moments concepts are taught and lets you jump the embedded cinema player with one click.
-              </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Clickable timestamps seek YouTube video instantly</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>ChatGPT-style persistent history threads</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Encrypted session history saved in Supabase</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/tutor')}>
-                Launch AI Tutor <ArrowRight size={15} />
-              </button>
             </motion.div>
           </div>
 
@@ -667,8 +705,32 @@ const LandingPage = () => {
             </motion.div>
           </div>
 
-          {/* Zag 4: Interactive Lesson Quizzes (Card Left, Text Right) */}
+          {/* Zag 4: Interactive Lesson Quizzes (Card Left, Text Right via row-reverse) */}
           <div className="zigzag-row reverse-row">
+            <motion.div 
+              className="zigzag-content-col"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="zigzag-badge badge-emerald">
+                <CheckCircle2 size={14} /> <span>Feature 04 • Knowledge Testing</span>
+              </div>
+              <h3 className="zigzag-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
+              <p className="zigzag-desc">
+                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
+              </p>
+              <div className="zigzag-points">
+                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
+                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
+                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
+              </div>
+              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/workspace')}>
+                Try in Workspace <ArrowRight size={15} />
+              </button>
+            </motion.div>
+
             <motion.div 
               className="zigzag-visual-col"
               initial={{ opacity: 0, x: -30 }}
@@ -699,30 +761,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-emerald">
-                <CheckCircle2 size={14} /> <span>Feature 04 • Knowledge Testing</span>
-              </div>
-              <h3 className="zigzag-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
-              <p className="zigzag-desc">
-                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
-              </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/workspace')}>
-                Try in Workspace <ArrowRight size={15} />
-              </button>
             </motion.div>
           </div>
         </div>

@@ -241,7 +241,7 @@ const Navbar = () => {
                   Sign In
                 </button>
                 <button className="btn-primary nav-join-btn" onClick={() => navigate('/auth')}>
-                  Get Started
+                  Sign In to Start
                 </button>
               </>
             )}
@@ -312,7 +312,7 @@ const Navbar = () => {
                       navigate('/auth');
                     }}
                   >
-                    Get Started Free
+                    Sign In to Start
                   </button>
                 </div>
               )}

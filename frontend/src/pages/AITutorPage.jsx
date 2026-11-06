@@ -22,6 +22,7 @@ import {
   Video
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import AuthGateModal from '../components/AuthGateModal';
 import { parseYouTube, askAITutor } from '../services/api';
 import { getClient } from '../services/supabaseClient';
 import './AITutorPage.css';
@@ -48,6 +49,7 @@ const AITutorPage = () => {
   const [loading, setLoading] = useState(false);
   const [editingChatId, setEditingChatId] = useState(null);
   const [editTitleText, setEditTitleText] = useState('');
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   const iframeRef = useRef(null);
   const chatMessagesBoxRef = useRef(null);
@@ -66,7 +68,10 @@ const AITutorPage = () => {
       try {
         const { data: { session } } = await client.auth.getSession();
         const currentUser = session?.user || null;
-        if (mounted) setUser(currentUser);
+        if (mounted) {
+          setUser(currentUser);
+          if (!currentUser) setShowAuthGate(true);
+        }
 
         if (currentUser) {
           // Load from Supabase DB tutor_chats table
@@ -132,6 +137,10 @@ const AITutorPage = () => {
 
   // 3. Start a Brand New Chat
   const handleNewChat = async () => {
+    if (!user) {
+      setShowAuthGate(true);
+      return;
+    }
     const newChatObj = {
       id: `chat_${Date.now()}`,
       title: 'New Discussion',
@@ -264,6 +273,10 @@ const AITutorPage = () => {
 
   // 8. Send Message
   const handleSend = async (customPrompt = null) => {
+    if (!user) {
+      setShowAuthGate(true);
+      return;
+    }
     const textToSend = customPrompt || input;
     if (!textToSend.trim() || loading) return;
 
@@ -625,6 +638,15 @@ const AITutorPage = () => {
           </div>
         </aside>
       </div>
+
+      {/* Feature Access Sign-In Gate */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        featureName="AI Video Tutor"
+        featureIcon={MessageSquare}
+        featureDescription="Sign in with your account to chat with the context-grounded AI Video Tutor, jump lecture timestamps, and save your conversation threads."
+      />
     </div>
   );
 };
