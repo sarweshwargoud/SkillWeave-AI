@@ -205,3 +205,40 @@ def test_user_isolation_anti_idor(monkeypatch):
     # Clean up dependency override
     app.dependency_overrides.clear()
 
+
+
+def test_google_oauth_claims_and_unified_auth(monkeypatch):
+    """
+    Verify that Google OAuth tokens produced by Supabase Auth (with Google provider claims)
+    are treated identically to email/password users by the backend authentication dependency.
+    """
+    from core.auth import verify_supabase_token
+
+    google_sub = "33333333-3333-3333-3333-333333333333"
+    google_claims = {
+        "sub": google_sub,
+        "email": "sarweshwar.google@gmail.com",
+        "aud": "authenticated",
+        "iss": "https://hzxkqugdfyaizzibiexx.supabase.co/auth/v1",
+        "exp": int(time.time()) + 3600,
+        "app_metadata": {"provider": "google", "providers": ["google"]},
+        "user_metadata": {
+            "full_name": "Sarweshwar Buddolla",
+            "name": "Sarweshwar Buddolla",
+            "picture": "https://lh3.googleusercontent.com/a/ACg8ocL...",
+            "email_verified": True
+        }
+    }
+
+    # Generate test signed token
+    token = jwt.encode(google_claims, "test_secret_for_mock_verification_key_32chars", algorithm="HS256")
+
+    # Mock settings secret and network check
+    monkeypatch.setattr(settings, "SUPABASE_JWT_SECRET", "test_secret_for_mock_verification_key_32chars")
+    
+    # Verify token
+    user = verify_supabase_token(token)
+    assert user["id"] == google_sub
+    assert user["email"] == "sarweshwar.google@gmail.com"
+    assert user["claims"]["app_metadata"]["provider"] == "google"
+    assert user["claims"]["user_metadata"]["full_name"] == "Sarweshwar Buddolla"

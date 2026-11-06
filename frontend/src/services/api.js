@@ -30,6 +30,30 @@ api.interceptors.request.use(async (config) => {
   return Promise.reject(error);
 });
 
+// Automatic 401 Session Refresh Interceptor
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const client = getClient();
+        if (client?.auth) {
+          const { data, error: refreshError } = await client.auth.refreshSession();
+          if (!refreshError && data?.session?.access_token) {
+            originalRequest.headers.Authorization = `Bearer ${data.session.access_token}`;
+            return api(originalRequest);
+          }
+        }
+      } catch (refreshErr) {
+        console.warn("Auto-token refresh notice:", refreshErr);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // --- Public / AI Video Endpoints ---
 
 export const parseYouTube = async (urlOrId) => {
@@ -162,4 +186,3 @@ export const updateWorkspaceSettings = saveWorkspaceSettings;
 export const getUserCourses = fetchUserCourses;
 export const getUserProjects = fetchUserProjects;
 export const getUserNotes = fetchUserNotes;
-
