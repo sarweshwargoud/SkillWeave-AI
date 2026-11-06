@@ -16,6 +16,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import AuthGateModal from '../components/AuthGateModal';
 import HandwrittenNotesViewer from '../components/HandwrittenNotesViewer';
 import { generateHandwrittenNotes, parseYouTube } from '../services/api';
 import { getClient } from '../services/supabaseClient';
@@ -56,6 +57,7 @@ const HandwrittenNotesPage = () => {
   const [notesData, setNotesData] = useState(DEFAULT_NOTE_DATA);
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [editNoteTitle, setEditNoteTitle] = useState('');
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   const client = getClient();
 
@@ -72,7 +74,10 @@ const HandwrittenNotesPage = () => {
       try {
         const { data: { session } } = await client.auth.getSession();
         const currentUser = session?.user || null;
-        if (mounted) setUser(currentUser);
+        if (mounted) {
+          setUser(currentUser);
+          if (!currentUser) setShowAuthGate(true);
+        }
 
         if (currentUser) {
           const { data, error } = await client
@@ -126,6 +131,10 @@ const HandwrittenNotesPage = () => {
 
   // 2. Start a New Note
   const handleNewNote = () => {
+    if (!user) {
+      setShowAuthGate(true);
+      return;
+    }
     setVideoUrl('');
     setNotesData(null);
     setActiveNoteId(null);
@@ -133,6 +142,10 @@ const HandwrittenNotesPage = () => {
 
   // 3. Generate Notes
   const handleGenerate = async (customUrl = null) => {
+    if (!user) {
+      setShowAuthGate(true);
+      return;
+    }
     const urlToUse = customUrl || videoUrl;
     if (!urlToUse.trim()) return;
     setLoading(true);
@@ -423,6 +436,15 @@ const HandwrittenNotesPage = () => {
           </div>
         </aside>
       </div>
+
+      {/* Feature Access Sign-In Gate */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        featureName="AI Handwritten Notes"
+        featureIcon={FileText}
+        featureDescription="Sign in with your account to generate authentic handwritten study sheets, download printable PDFs, and save your notes in the cloud."
+      />
     </div>
   );
 };

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
+import AuthGateModal from '../components/AuthGateModal';
 import AITutorChat from '../components/AITutorChat';
 import HandwrittenNotesViewer from '../components/HandwrittenNotesViewer';
 import LessonQuiz from '../components/LessonQuiz';
@@ -65,6 +66,7 @@ const LearningWorkspacePage = () => {
 
   // Authentication & User State
   const [user, setUser] = useState(null);
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   // Active course data
   const [course, setCourse] = useState(null);
@@ -123,6 +125,8 @@ const LearningWorkspacePage = () => {
         const { data: { session } } = await client.auth.getSession();
         if (session?.user) {
           setUser(session.user);
+        } else {
+          setShowAuthGate(true);
         }
       } catch (err) {
         console.warn('Session check note:', err);
@@ -1133,6 +1137,14 @@ const LearningWorkspacePage = () => {
           </div>
         </div>
       )}
+      {/* Feature Access Sign-In Gate */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        featureName="Learning Workspace"
+        featureIcon={PlaySquare}
+        featureDescription="Sign in with your account to save your learning progress, curriculum milestones, notes, and AI questions in the cloud."
+      />
     </div>
   );
 };
