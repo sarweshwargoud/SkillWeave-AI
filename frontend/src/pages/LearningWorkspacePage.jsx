@@ -189,13 +189,19 @@ const LearningWorkspacePage = () => {
       // Extract all flattened videos
       const allVideos = [];
       courseToLoad.modules?.forEach((mod, mIdx) => {
-        if (mod.videos && mod.videos.length > 0) {
-          mod.videos.forEach((vid, vIdx) => {
-            allVideos.push({ ...vid, moduleIdx: mIdx, videoIdx: vIdx, moduleTitle: mod.module_title });
+        const vList = (mod.videos && mod.videos.length > 0)
+          ? mod.videos
+          : (mod.video ? [mod.video] : (mod.lessons && mod.lessons.length > 0 ? mod.lessons : []));
+        const modTitle = mod.module_title || mod.title || mod.name || mod.topic || `Module ${mIdx + 1}`;
+
+        vList.forEach((vid, vIdx) => {
+          allVideos.push({
+            ...vid,
+            moduleIdx: mIdx,
+            videoIdx: vIdx,
+            moduleTitle: modTitle
           });
-        } else if (mod.video) {
-          allVideos.push({ ...mod.video, moduleIdx: mIdx, videoIdx: 0, moduleTitle: mod.module_title });
-        }
+        });
       });
 
       if (allVideos.length > 0) {
@@ -252,7 +258,7 @@ const LearningWorkspacePage = () => {
   const toggleFolder = (mIdx) => {
     setOpenFolders(prev => ({
       ...prev,
-      [mIdx]: prev[mIdx] === false ? true : false
+      [mIdx]: !(prev[mIdx] ?? true)
     }));
   };
 
@@ -283,7 +289,7 @@ const LearningWorkspacePage = () => {
       let finishedVids = 0;
 
       course.modules?.forEach(m => {
-        const vList = m.videos || (m.video ? [m.video] : []);
+        const vList = (m.videos && m.videos.length > 0) ? m.videos : (m.video ? [m.video] : (m.lessons || []));
         vList.forEach(v => {
           totalVids++;
           if (updated[v.id]) finishedVids++;
@@ -306,14 +312,18 @@ const LearningWorkspacePage = () => {
   const handleNextVideo = () => {
     if (!course?.modules) return;
     const currentMod = course.modules[activeModuleIdx];
-    const vList = currentMod?.videos || (currentMod?.video ? [currentMod.video] : []);
+    const vList = (currentMod?.videos && currentMod.videos.length > 0)
+      ? currentMod.videos
+      : (currentMod?.video ? [currentMod.video] : (currentMod?.lessons || []));
 
     if (activeVideoIdx < vList.length - 1) {
       const nextVid = vList[activeVideoIdx + 1];
       handleSelectVideo(activeModuleIdx, activeVideoIdx + 1, nextVid);
     } else if (activeModuleIdx < course.modules.length - 1) {
       const nextMod = course.modules[activeModuleIdx + 1];
-      const nextVList = nextMod.videos || (nextMod.video ? [nextMod.video] : []);
+      const nextVList = (nextMod?.videos && nextMod.videos.length > 0)
+        ? nextMod.videos
+        : (nextMod?.video ? [nextMod.video] : (nextMod?.lessons || []));
       if (nextVList.length > 0) {
         handleSelectVideo(activeModuleIdx + 1, 0, nextVList[0]);
       }
@@ -324,11 +334,15 @@ const LearningWorkspacePage = () => {
     if (!course?.modules) return;
     if (activeVideoIdx > 0) {
       const currentMod = course.modules[activeModuleIdx];
-      const vList = currentMod?.videos || (currentMod?.video ? [currentMod.video] : []);
+      const vList = (currentMod?.videos && currentMod.videos.length > 0)
+        ? currentMod.videos
+        : (currentMod?.video ? [currentMod.video] : (currentMod?.lessons || []));
       handleSelectVideo(activeModuleIdx, activeVideoIdx - 1, vList[activeVideoIdx - 1]);
     } else if (activeModuleIdx > 0) {
       const prevMod = course.modules[activeModuleIdx - 1];
-      const prevVList = prevMod.videos || (prevMod.video ? [prevMod.video] : []);
+      const prevVList = (prevMod?.videos && prevMod.videos.length > 0)
+        ? prevMod.videos
+        : (prevMod?.video ? [prevMod.video] : (prevMod?.lessons || []));
       if (prevVList.length > 0) {
         handleSelectVideo(activeModuleIdx - 1, prevVList.length - 1, prevVList[prevVList.length - 1]);
       }
@@ -474,7 +488,7 @@ const LearningWorkspacePage = () => {
   let totalCount = 0;
   let doneCount = 0;
   course.modules?.forEach(m => {
-    const list = m.videos || (m.video ? [m.video] : []);
+    const list = (m.videos && m.videos.length > 0) ? m.videos : (m.video ? [m.video] : (m.lessons || []));
     list.forEach(v => {
       totalCount++;
       if (completedVideos[v.id] || v.completed) doneCount++;
@@ -625,35 +639,44 @@ const LearningWorkspacePage = () => {
             </div>
 
             <div className="objectives-cards-grid">
-              {course.modules?.map((mod, mIdx) => (
-                <div key={mIdx} className="objective-module-box">
-                  <div className="objective-mod-head">
-                    <span className="obj-step-tag">Step {String(mIdx + 1).padStart(2, '0')}</span>
-                    <h4 className="obj-title">{mod.module_title}</h4>
+              {course.modules?.map((mod, mIdx) => {
+                const modTitle = mod.module_title || mod.title || mod.name || mod.topic || `Module ${mIdx + 1}`;
+                const modVideos = (mod.videos && mod.videos.length > 0)
+                  ? mod.videos
+                  : (mod.video ? [mod.video] : (mod.lessons && mod.lessons.length > 0 ? mod.lessons : []));
+
+                return (
+                  <div key={mIdx} className="objective-module-box">
+                    <div className="objective-mod-head">
+                      <span className="obj-step-tag">Step {String(mIdx + 1).padStart(2, '0')}</span>
+                      <h4 className="obj-title">{modTitle}</h4>
+                    </div>
+                    <div className="objective-lessons-list">
+                      {modVideos.map((v, vIdx) => {
+                        const isDone = completedVideos[v.id] || v.completed;
+                        const isCurrent = activeVideo?.id === v.id;
+                        const vTitle = v.title || v.video_title || v.name || `Lesson ${vIdx + 1}`;
+                        const vDur = v.durationFormatted || (v.duration ? `${Math.floor(v.duration / 60)}:${String(Math.floor(v.duration % 60)).padStart(2, '0')}` : '');
+                        return (
+                          <div
+                            key={vIdx}
+                            className={`objective-leaf-row ${isCurrent ? 'is-active-leaf' : ''} ${isDone ? 'is-done-leaf' : ''}`}
+                            onClick={() => handleSelectVideo(mIdx, vIdx, v)}
+                          >
+                            {isDone ? (
+                              <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                            ) : (
+                              <Circle size={15} className="text-gray-400 flex-shrink-0" />
+                            )}
+                            <span className="obj-leaf-name">{vTitle}</span>
+                            <span className="obj-leaf-dur">{vDur}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="objective-lessons-list">
-                    {(mod.videos || (mod.video ? [mod.video] : [])).map((v, vIdx) => {
-                      const isDone = completedVideos[v.id] || v.completed;
-                      const isCurrent = activeVideo?.id === v.id;
-                      return (
-                        <div
-                          key={vIdx}
-                          className={`objective-leaf-row ${isCurrent ? 'is-active-leaf' : ''} ${isDone ? 'is-done-leaf' : ''}`}
-                          onClick={() => handleSelectVideo(mIdx, vIdx, v)}
-                        >
-                          {isDone ? (
-                            <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-                          ) : (
-                            <Circle size={15} className="text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className="obj-leaf-name">{v.title}</span>
-                          <span className="obj-leaf-dur">{v.durationFormatted || ''}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -686,12 +709,16 @@ const LearningWorkspacePage = () => {
 
       <div className="sidebar-modules-scroll">
         {course.modules?.map((module, mIdx) => {
-          const videoList = module.videos || (module.video ? [module.video] : []);
+          const videoList = (module.videos && module.videos.length > 0)
+            ? module.videos
+            : (module.video ? [module.video] : (module.lessons && module.lessons.length > 0 ? module.lessons : []));
           const isCurrentModule = mIdx === activeModuleIdx;
-          const isFolderOpen = openFolders[mIdx] !== false; // open by default
+          const isFolderOpen = openFolders[mIdx] ?? true; // open by default
+          const moduleTitle = module.module_title || module.title || module.name || module.topic || `Module ${mIdx + 1}`;
 
           return (
             <div key={mIdx} className={`folder-module-block ${isCurrentModule ? 'current-active-folder' : ''}`}>
+              {/* Folder Step Header */}
               <div 
                 className="folder-module-header"
                 onClick={() => toggleFolder(mIdx)}
@@ -699,25 +726,28 @@ const LearningWorkspacePage = () => {
               >
                 <div className="folder-icon-wrapper">
                   {isFolderOpen ? (
-                    <FolderOpen size={17} className="icon-folder-open" />
+                    <FolderOpen size={16} className="icon-folder-open" />
                   ) : (
-                    <Folder size={17} className="icon-folder-closed" />
+                    <Folder size={16} className="icon-folder-closed" />
                   )}
                 </div>
                 
                 <div className="folder-label-group">
                   <span className="folder-step-badge">Step {String(mIdx + 1).padStart(2, '0')}</span>
-                  <h5 className="folder-name-title">{module.module_title}</h5>
+                  <h5 className="folder-name-title" title={moduleTitle}>{moduleTitle}</h5>
                 </div>
 
                 <span className="folder-lesson-count">{videoList.length}</span>
               </div>
 
-              {isFolderOpen && (
+              {/* Offset Nested Video Items with Branch Connectors */}
+              {isFolderOpen && videoList.length > 0 && (
                 <div className="folder-contents-tree">
                   {videoList.map((vid, vIdx) => {
                     const isPlaying = activeVideo?.id === vid.id;
                     const isDone = completedVideos[vid.id] || vid.completed;
+                    const videoTitle = vid.title || vid.video_title || vid.name || `Lesson ${vIdx + 1}`;
+                    const videoDuration = vid.durationFormatted || (vid.duration ? `${Math.floor(vid.duration / 60)}:${String(Math.floor(vid.duration % 60)).padStart(2, '0')}` : 'Lesson');
 
                     return (
                       <div
@@ -725,6 +755,7 @@ const LearningWorkspacePage = () => {
                         className={`tree-leaf-item ${isPlaying ? 'active-tree-leaf' : ''} ${isDone ? 'done-tree-leaf' : ''}`}
                         onClick={() => handleSelectVideo(mIdx, vIdx, vid)}
                       >
+                        {/* Branch Connector Line */}
                         <div className="tree-branch-line" />
 
                         <button
@@ -734,18 +765,19 @@ const LearningWorkspacePage = () => {
                             handleToggleComplete(vid.id);
                           }}
                           title={isDone ? "Mark incomplete" : "Mark completed"}
+                          aria-label="Toggle completed"
                         >
                           {isDone ? (
-                            <CheckCircle2 size={16} className="icon-leaf-done" />
+                            <CheckCircle2 size={15} className="icon-leaf-done" />
                           ) : (
-                            <Circle size={16} className="icon-leaf-pending" />
+                            <Circle size={15} className="icon-leaf-pending" />
                           )}
                         </button>
 
                         <div className="tree-leaf-details">
-                          <span className="tree-leaf-title">{vid.title}</span>
+                          <span className="tree-leaf-title" title={videoTitle}>{videoTitle}</span>
                           <span className="tree-leaf-meta">
-                            <Clock size={11} /> {vid.durationFormatted || 'Lesson'}
+                            <Clock size={11} /> {videoDuration}
                           </span>
                         </div>
 
