@@ -8,6 +8,8 @@ import HandwrittenNotesPage from './pages/HandwrittenNotesPage';
 import AITutorPage from './pages/AITutorPage';
 import LearningWorkspacePage from './pages/LearningWorkspacePage';
 import MyLearningPage from './pages/MyLearningPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import './App.css';
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
         <Route path="/my-learning" element={<MyLearningPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         {/* Wildcard catch-all fallback */}
         <Route path="*" element={<LandingPage />} />
       </Routes>
