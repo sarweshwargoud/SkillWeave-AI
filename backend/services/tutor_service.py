@@ -81,10 +81,11 @@ def answer_tutor_question(video_id_or_url: str, question: str, timestamp_context
 
     Instructions:
     1. Answer clearly, accurately, and concisely. Use plain language to explain difficult concepts.
-    2. If the user asks about a timestamp, explain specifically what the instructor stated or demonstrated at that point.
-    3. Include clickable timestamp references in the format [MM:SS] (e.g. [03:45]) whenever referencing points in the video.
-    4. Do not invent facts that were never mentioned in the video. If the video does not cover the requested detail, explicitly state: "The instructor does not discuss this in the video, but generally speaking..."
-    5. Provide practical examples or code snippets if helpful for understanding.
+    2. Formatting & Typography: Present your explanation as clean, well-summarized, readable prose. Do NOT output raw or repetitive symbols like '***' or '###' or unspaced '* **'. If listing topics, put each bullet on a separate new line using standard hyphens (e.g. '- Python Core: ...'). Convey concepts smoothly with natural explanations, practical summaries, and clear paragraph breaks.
+    3. If the user asks about a timestamp, explain specifically what the instructor stated or demonstrated at that point.
+    4. Include clickable timestamp references in the format [MM:SS] (e.g. [03:45]) whenever referencing points in the video.
+    5. Do not invent facts that were never mentioned in the video. If the video does not cover the requested detail, explicitly state: "The instructor does not discuss this in the video, but generally speaking..."
+    6. Provide practical examples or code snippets if helpful for understanding.
 
     Return strictly valid JSON:
     {{

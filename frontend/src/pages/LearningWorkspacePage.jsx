@@ -25,7 +25,9 @@ import {
   Layers,
   X,
   Tv,
-  Award
+  Award,
+  Folder,
+  FolderOpen
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import AITutorChat from '../components/AITutorChat';
@@ -46,6 +48,9 @@ const LearningWorkspacePage = () => {
   const [activeVideo, setActiveVideo] = useState(null);
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeVideoIdx, setActiveVideoIdx] = useState(0);
+
+  // Folder collapse state for curriculum tree
+  const [openFolders, setOpenFolders] = useState({});
 
   // Layout & Under-Video Tabs
   const [activeTab, setActiveTab] = useState('notes'); // Default to 'notes' under video
@@ -140,6 +145,13 @@ const LearningWorkspacePage = () => {
     } finally {
       setNotesLoading(false);
     }
+  };
+
+  const toggleFolder = (mIdx) => {
+    setOpenFolders(prev => ({
+      ...prev,
+      [mIdx]: prev[mIdx] === false ? true : false
+    }));
   };
 
   const handleSelectVideo = (modIdx, vidIdx, videoObj) => {
@@ -259,19 +271,19 @@ const LearningWorkspacePage = () => {
   });
   const overallPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
-  // Curriculum Step-by-Step Navigation List
+  // Curriculum Step-by-Step Navigation List (Rendered as Folder Tree Structure)
   const renderCurriculumNavigation = () => (
     <div className="curriculum-playlist-inner">
       <div className="sidebar-course-header">
         <div className="header-meta-row">
-          <span className="course-type-tag">Step-by-Step Curriculum</span>
+          <span className="course-type-tag">Curriculum Explorer</span>
           <span className="course-done-badge">{doneCount}/{totalCount} Completed</span>
         </div>
         <h3 className="sidebar-course-title">{course.title}</h3>
         
         <div className="course-progress-indicator">
           <div className="progress-text-row">
-            <span>Overall Progress</span>
+            <span>Progress</span>
             <strong>{overallPercent}%</strong>
           </div>
           <div className="progress-track-small">
@@ -284,59 +296,83 @@ const LearningWorkspacePage = () => {
         {course.modules?.map((module, mIdx) => {
           const videoList = module.videos || (module.video ? [module.video] : []);
           const isCurrentModule = mIdx === activeModuleIdx;
+          const isFolderOpen = openFolders[mIdx] !== false; // open by default
 
           return (
-            <div key={mIdx} className={`module-nav-section ${isCurrentModule ? 'current-module' : ''}`}>
-              <div className="module-nav-header">
-                <span className="module-idx-pill">Step {String(mIdx + 1).padStart(2, '0')}</span>
-                <h5 className="module-nav-heading">{module.module_title}</h5>
+            <div key={mIdx} className={`folder-module-block ${isCurrentModule ? 'current-active-folder' : ''}`}>
+              {/* Folder Step Header */}
+              <div 
+                className="folder-module-header"
+                onClick={() => toggleFolder(mIdx)}
+                title="Click to toggle folder"
+              >
+                <div className="folder-icon-wrapper">
+                  {isFolderOpen ? (
+                    <FolderOpen size={16} className="icon-folder-open" />
+                  ) : (
+                    <Folder size={16} className="icon-folder-closed" />
+                  )}
+                </div>
+                
+                <div className="folder-label-group">
+                  <span className="folder-step-badge">Step {String(mIdx + 1).padStart(2, '0')}</span>
+                  <h5 className="folder-name-title">{module.module_title}</h5>
+                </div>
+
+                <span className="folder-lesson-count">{videoList.length}</span>
               </div>
 
-              <div className="module-lessons-list">
-                {videoList.map((vid, vIdx) => {
-                  const isPlaying = activeVideo?.id === vid.id;
-                  const isDone = completedVideos[vid.id] || vid.completed;
+              {/* Offset Nested Video Items with Branch Connectors */}
+              {isFolderOpen && (
+                <div className="folder-contents-tree">
+                  {videoList.map((vid, vIdx) => {
+                    const isPlaying = activeVideo?.id === vid.id;
+                    const isDone = completedVideos[vid.id] || vid.completed;
 
-                  return (
-                    <div
-                      key={vIdx}
-                      className={`lesson-nav-row ${isPlaying ? 'active-lesson' : ''} ${isDone ? 'completed-lesson' : ''}`}
-                      onClick={() => handleSelectVideo(mIdx, vIdx, vid)}
-                    >
-                      <button
-                        className="lesson-check-toggle"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleComplete(vid.id);
-                        }}
-                        title={isDone ? "Mark incomplete" : "Mark completed"}
-                        aria-label="Toggle completed"
+                    return (
+                      <div
+                        key={vIdx}
+                        className={`tree-leaf-item ${isPlaying ? 'active-tree-leaf' : ''} ${isDone ? 'done-tree-leaf' : ''}`}
+                        onClick={() => handleSelectVideo(mIdx, vIdx, vid)}
                       >
-                        {isDone ? (
-                          <CheckCircle2 size={16} className="icon-check-done" />
-                        ) : (
-                          <Circle size={16} className="icon-check-pending" />
-                        )}
-                      </button>
+                        {/* Branch Connector Line */}
+                        <div className="tree-branch-line" />
 
-                      <div className="lesson-nav-text">
-                        <span className="lesson-nav-title">{vid.title}</span>
-                        <span className="lesson-nav-duration">
-                          <Clock size={11} /> {vid.durationFormatted || 'Lesson'}
-                        </span>
-                      </div>
+                        <button
+                          className="leaf-status-toggle"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleComplete(vid.id);
+                          }}
+                          title={isDone ? "Mark incomplete" : "Mark completed"}
+                          aria-label="Toggle completed"
+                        >
+                          {isDone ? (
+                            <CheckCircle2 size={15} className="icon-leaf-done" />
+                          ) : (
+                            <Circle size={15} className="icon-leaf-pending" />
+                          )}
+                        </button>
 
-                      {isPlaying && (
-                        <div className="now-playing-indicator" title="Now Playing">
-                          <span className="soundwave-bar"></span>
-                          <span className="soundwave-bar"></span>
-                          <span className="soundwave-bar"></span>
+                        <div className="tree-leaf-details">
+                          <span className="tree-leaf-title">{vid.title}</span>
+                          <span className="tree-leaf-meta">
+                            <Clock size={10} /> {vid.durationFormatted || 'Lesson'}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+
+                        {isPlaying && (
+                          <div className="tree-playing-pulse" title="Now Playing">
+                            <span className="pulse-bar" />
+                            <span className="pulse-bar" />
+                            <span className="pulse-bar" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -406,19 +442,14 @@ const LearningWorkspacePage = () => {
         </div>
       </nav>
 
-      {/* Main Studio Viewport (2-Column: Step-by-Step Playlist + Video Theater & Under-Video Features) */}
+      {/* 2-Column Responsive Viewport: LEFT = Main Video & Under-Video Features, RIGHT = Step-by-Step Curriculum Playlist */}
       <div className={`workspace-theater-stage ${playlistCollapsed ? 'playlist-hidden' : ''} ${theaterMode ? 'theater-expanded' : ''}`}>
         
-        {/* COLUMN 1: Step-by-Step Curriculum Playlist (Sidebar) */}
-        <aside className="workspace-curriculum-sidebar">
-          {renderCurriculumNavigation()}
-        </aside>
-
-        {/* COLUMN 2: Main Stage (Sticky Undisturbed Video Player + Features Below) */}
+        {/* COLUMN 1 (LEFT SIDE): Video Player & Under-Video Features */}
         <main className="workspace-video-and-features-main">
           
-          {/* STICKY THEATER VIDEO PLAYER CONTAINER */}
-          {/* Remains pinned at top while user scrolls down through notes/tutor below */}
+          {/* STICKY FIXED VIDEO PLAYER STAGE */}
+          {/* Fixed / Sticky at top: does not move when user scrolls down through notes / quiz / tutor below */}
           <section className="sticky-player-bezel-wrapper">
             <div className="player-stage-bezel">
               {activeVideo ? (
@@ -479,7 +510,7 @@ const LearningWorkspacePage = () => {
                       <button
                         className="theater-expand-btn"
                         onClick={() => setTheaterMode(!theaterMode)}
-                        title={theaterMode ? "Exit Theater Mode" : "Expand Theater Mode"}
+                        title={theaterMode ? "Exit Full Screen Theater" : "Switch to Full Screen Theater"}
                       >
                         {theaterMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                       </button>
@@ -496,7 +527,7 @@ const LearningWorkspacePage = () => {
           </section>
 
           {/* UNDER-VIDEO FEATURE SUITE */}
-          {/* Notes generation, AI tutor chat, quizzes, and transcripts displayed directly under video */}
+          {/* Notes generation, AI tutor chat, quizzes, and transcripts displayed in separate interactive divs */}
           <section className="under-video-features-hub">
             
             {/* Feature Tab Selector Strip */}
@@ -548,9 +579,9 @@ const LearningWorkspacePage = () => {
             {/* TAB CONTENTS (Scrollable below without disturbing the sticky video player) */}
             <div className="under-video-tab-content-panel">
               
-              {/* FEATURE 1: AI HANDWRITTEN NOTES (Display under video) */}
+              {/* SEPARATE DIV 1: AI HANDWRITTEN NOTES */}
               {activeTab === 'notes' && (
-                <div className="tab-pane-notes-container">
+                <div className="feature-section-div div-notes">
                   {notesLoading ? (
                     <div className="notes-generating-card">
                       <Sparkles size={28} className="notes-spin-sparkle" />
@@ -580,9 +611,9 @@ const LearningWorkspacePage = () => {
                 </div>
               )}
 
-              {/* FEATURE 2: AI VIDEO TUTOR (Display under video) */}
+              {/* SEPARATE DIV 2: AI VIDEO TUTOR */}
               {activeTab === 'tutor' && activeVideo && (
-                <div className="tab-pane-tutor-container">
+                <div className="feature-section-div div-tutor">
                   <div className="tutor-header-intro">
                     <span className="intro-badge">Interactive Video Tutor</span>
                     <h3>Ask Questions About This Lesson</h3>
@@ -597,9 +628,9 @@ const LearningWorkspacePage = () => {
                 </div>
               )}
 
-              {/* FEATURE 3: LESSON QUIZ (Display under video) */}
+              {/* SEPARATE DIV 3: LESSON QUIZ */}
               {activeTab === 'quiz' && activeVideo && (
-                <div className="tab-pane-quiz-container">
+                <div className="feature-section-div div-quiz">
                   <LessonQuiz
                     videoId={activeVideo.id}
                     videoTitle={activeVideo.title}
@@ -612,9 +643,9 @@ const LearningWorkspacePage = () => {
                 </div>
               )}
 
-              {/* FEATURE 4: SEARCHABLE INTERACTIVE TRANSCRIPT (Display under video) */}
+              {/* SEPARATE DIV 4: SEARCHABLE INTERACTIVE TRANSCRIPT */}
               {activeTab === 'transcript' && (
-                <div className="tab-pane-transcript-container">
+                <div className="feature-section-div div-transcript">
                   <div className="transcript-search-strip">
                     <Search size={16} className="search-icon" />
                     <input
@@ -656,9 +687,9 @@ const LearningWorkspacePage = () => {
                 </div>
               )}
 
-              {/* FEATURE 5: MODULE OBJECTIVES & ROADMAP (Display under video) */}
+              {/* SEPARATE DIV 5: MODULE OBJECTIVES & ROADMAP */}
               {activeTab === 'roadmap' && (
-                <div className="tab-pane-roadmap-container">
+                <div className="feature-section-div div-roadmap">
                   <div className="current-milestone-card">
                     <div className="milestone-badge-pill">Step {activeModuleIdx + 1} Milestone</div>
                     <h3>{course.modules[activeModuleIdx]?.module_title}</h3>
@@ -700,6 +731,11 @@ const LearningWorkspacePage = () => {
             </div>
           </section>
         </main>
+
+        {/* COLUMN 2 (RIGHT SIDE): Step-by-Step Curriculum Playlist */}
+        <aside className="workspace-curriculum-sidebar">
+          {renderCurriculumNavigation()}
+        </aside>
       </div>
 
       {/* Mobile Slide-Out Curriculum Drawer Modal */}
@@ -707,7 +743,7 @@ const LearningWorkspacePage = () => {
         <div className="workspace-mobile-drawer-backdrop" onClick={() => setMobileDrawerOpen(false)}>
           <div className="workspace-mobile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer-header">
-              <h4>Step-by-Step Curriculum</h4>
+              <h4>Curriculum Explorer</h4>
               <button
                 className="close-drawer-btn"
                 onClick={() => setMobileDrawerOpen(false)}
