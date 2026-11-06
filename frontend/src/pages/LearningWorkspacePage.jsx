@@ -603,7 +603,7 @@ const LearningWorkspacePage = () => {
                       <h4>Handwritten Notes for: {activeVideo?.title}</h4>
                       <p>Generate clean, readable handwritten-style notes with ruled paper and diagram boxes.</p>
                       <button 
-                        className="btn-primary"
+                        className="btn-primary btn-generate-notes"
                         onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
                       >
                         <Sparkles size={16} /> Generate Handwritten Notes
