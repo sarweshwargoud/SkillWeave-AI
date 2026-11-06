@@ -1,0 +1,275 @@
+.vscode-bottom-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--vscode-terminal-background, #141414);
+  border-top: 1px solid var(--vscode-panel-border, #2b2b2b);
+  color: var(--vscode-terminal-foreground, #d4d4d4);
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  overflow: hidden;
+  user-select: none;
+  min-height: 120px;
+  max-height: 500px;
+  flex-shrink: 0;
+}
+
+.bottom-panel-header {
+  height: 35px;
+  background: var(--vscode-panelTitle-activeBorder, #1a1a1a);
+  border-bottom: 1px solid var(--vscode-panel-border, #262626);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  flex-shrink: 0;
+}
+
+.console-tabs-list {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.console-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #8c8c8c;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.console-tab-btn:hover {
+  color: #e0e0e0;
+}
+
+.console-tab-btn.active-console-tab {
+  color: #ffffff;
+  border-bottom-color: #007acc;
+}
+
+.problems-count-badge {
+  background: #262626;
+  color: #10b981;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.bottom-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.panel-icon-btn {
+  background: transparent;
+  border: none;
+  color: #8c8c8c;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.panel-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.close-panel-btn:hover {
+  color: #f87171;
+}
+
+/* Panel Content Area */
+.bottom-panel-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Terminal View */
+.terminal-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  overflow: hidden;
+}
+
+.terminal-logs-stream {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  scrollbar-width: thin;
+}
+
+.terminal-logs-stream::-webkit-scrollbar {
+  width: 5px;
+}
+
+.terminal-logs-stream::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.terminal-log-line {
+  display: flex;
+  gap: 8px;
+  user-select: text;
+}
+
+.terminal-time {
+  color: #666666;
+  flex-shrink: 0;
+}
+
+.terminal-text {
+  word-break: break-all;
+}
+
+.log-system .terminal-text { color: #38bdf8; }
+.log-auth .terminal-text { color: #10b981; }
+.log-security .terminal-text { color: #a855f7; }
+.log-crypto .terminal-text { color: #f59e0b; }
+.log-ai .terminal-text { color: #ec4899; }
+.log-media .terminal-text { color: #e2e8f0; }
+.log-transcript .terminal-text { color: #94a3b8; }
+.log-input .terminal-text { color: #facc15; font-weight: 600; }
+.log-output .terminal-text { color: #6ee7b7; }
+
+/* Form command input */
+.terminal-cmd-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #222222;
+  flex-shrink: 0;
+}
+
+.terminal-prompt-symbol {
+  color: #10b981;
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.terminal-cmd-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f3f4f6;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.terminal-cmd-input::placeholder {
+  color: #555555;
+}
+
+/* Output view */
+.output-view {
+  flex: 1;
+  padding: 10px 14px;
+  overflow-y: auto;
+  font-size: 12px;
+  user-select: text;
+}
+
+.output-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.output-line.success {
+  color: #10b981;
+}
+
+.output-line.info {
+  color: #38bdf8;
+}
+
+/* Problems view */
+.problems-view {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.no-problems-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+/* AI Activity view */
+.ai-activity-view {
+  flex: 1;
+  padding: 12px 14px;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ai-activity-card {
+  background: #181818;
+  border: 1px solid #2b2b2b;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.ai-activity-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.status-live-pill {
+  margin-left: auto;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ai-activity-body {
+  font-size: 12px;
+  color: #a3a3a3;
+  line-height: 1.6;
+}
+
+.ai-activity-body code {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+}

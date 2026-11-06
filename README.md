@@ -37,17 +37,26 @@ SkillWeave AI provides an end-to-end learning workspace:
 
 ## 🧠 Core Features & User Journey
 
-### 1. 🎓 In-App Cinema Learning Workspace (`/workspace`)
-- **Pinned Video Player**: Anchored on the top-left with custom controls, completion toggles, and seamless previous/next module traversal.
-- **Hierarchical Curriculum Explorer**: Folder-tree style curriculum sidebar on the right showing step-by-step modules, active video indicators, and completion checkmarks.
-- **Modular Sub-Video Feature Drawer**:
-  - 📝 **Handwritten Notes**: Structured notes with summaries, key takeaways, code blocks, and diagrams.
-  - 💬 **AI Video Tutor**: Real-time Q&A assistant referencing timestamps and transcript contexts with one-click follow-up prompts.
-  - 🎯 **Interactive Quizzes**: On-demand comprehension quizzes with instant score feedback.
-  - 📜 **Clickable Transcript**: Full timestamped transcripts that jump directly to specific parts of the video.
-  - 📋 **Module Objectives**: Step-by-step learning outcomes and practical code exercises.
+### 1. 💻 VS Code-Style Learning Workspace IDE (`/workspace`)
+- **Activity Bar (Far Left)**: Quick-switch navigation icons for Explorer, My Learning, Roadmaps, Courses, Saved Lessons, History, and Settings.
+- **Primary Sidebar (Collapsible & Resizable)**: Dynamic sidebar with curriculum tree, folder toggle, lesson completion, and real-time search. Toggle with `Ctrl+B`.
+- **Draggable Splitters**: Smooth horizontal and vertical splitters allowing custom resizing of sidebar, bottom terminal, and right AI copilot.
+- **Multi-Tab Editor Area**: Top tab bar supporting Video Player, Handwritten Notes, Quizzes, Transcripts, and Roadmap Overview with Split-View and Theater mode.
+- **AI Copilot Panel (Right Side)**: Resizable panel with Gemini 2.5, clickable timestamp seeking, suggested follow-ups, and transcript synchronization. Toggle with `Ctrl+\`.
+- **Integrated Terminal & Console (Bottom Panel)**: Resizable bottom panel with live interactive Terminal, Output, Problems, and AI Activity logs. Toggle with `Ctrl+J`.
+- **Status Bar (Bottom)**: Displays target Git branch (`feature-security`), video timestamp, Supabase sync status, and active E2EE/RLS indicators.
+- **Theme Support**: Seamless VS Code Dark (`#1e1e1e`) and Light (`#ffffff`) theme switching with layout persistence.
 
-### 2. 🗺️ AI Roadmap Architect (`/create` & `/roadmap`)
+### 2. 🔐 Enterprise Security & Privacy Architecture
+- **Supabase Auth & Centralized JWT Verification**: Every protected API route enforces cryptographically verified Supabase JWTs (`get_current_user` dependency). Missing, expired, or malformed tokens return HTTP 401.
+- **Strict User Isolation & Anti-IDOR**: All queries strictly enforce `(SELECT auth.uid()) = user_id`. Client-supplied `user_id` fields in request bodies or query params are strictly ignored and overwritten by the verified JWT identity.
+- **Authenticated AES-256-GCM Encryption at Rest**: Sensitive user data is encrypted before database persistence using authenticated AES-256-GCM envelope encryption with versioned metadata (`version`, `iv`, `tag`, `ciphertext`).
+- **Client-Side End-to-End Encryption (E2EE)**: Private notes can be encrypted directly on the client using the standard Web Crypto API (`AES-GCM-256` derived via PBKDF2 with 100,000 iterations). Plaintext never touches the server.
+- **Transparent AI Processing**: AI features (Gemini tutor & syllabus synthesis) use transient in-memory processing over TLS with zero raw conversation retention on backend servers.
+- **OWASP Defense-in-Depth**: Strict security headers (`nosniff`, `DENY`, `1; mode=block`, `strict-origin-when-cross-origin`), Pydantic model validation, token-bucket rate limiting (40 req/min), and sanitized error handling.
+
+### 3. 🗺️ AI Roadmap Architect (`/create` & `/roadmap`)
+
 - Enter any topic (e.g. *Machine Learning*, *React Architecture*, *Golang Microservices*) or paste a YouTube URL / Playlist.
 - Customize by **Skill Level** (*Beginner*, *Intermediate*, *Advanced*) and **Instructor Accent** (*Any*, *US English*, *Indian English*, *British English*).
 - AI verifies continuity, topic flow, and curriculum depth before assembling the syllabus.
@@ -105,10 +114,12 @@ SkillWeave AI Architecture
 All database access is protected by Supabase Row-Level Security (RLS):
 
 - **`public.profiles`**: Tied to `auth.users(id) on delete cascade`. Trigger `handle_new_user()` auto-populates profiles on sign-up.
-- **`public.courses`**: Tracks curriculum modules, progress, timestamps, and active lesson IDs. Accessible only by the owning authenticated user.
-- **`public.projects`**: Stores custom syllabus data and roadmaps. RLS restricts access to `auth.uid() = user_id`.
-- **`public.notes`**: Stores generated notes tied to specific YouTube video IDs.
+- **`public.courses`**: Tracks curriculum modules, progress, timestamps, and active lesson IDs. Protected by RLS: `(SELECT auth.uid()) = user_id`.
+- **`public.projects`**: Stores custom syllabus data and roadmaps. RLS restricts access to `(SELECT auth.uid()) = user_id`.
+- **`public.notes`**: Stores private user study notes with envelope encryption flags (`is_encrypted`, `encryption_metadata`). RLS restricts access to `(SELECT auth.uid()) = user_id`.
+- **`public.workspace_settings`**: Stores VS Code workspace preferences (panel widths, heights, collapse state, active tabs, theme). RLS restricts access to `(SELECT auth.uid()) = user_id`.
 - **`storage.buckets ('user-assets')`**: Public read bucket with authenticated upload/update/delete policies for profile pictures.
+
 
 ---
 
@@ -166,6 +177,20 @@ npm install
 npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### 5. Run Automated Security & Anti-IDOR Test Suite
+```bash
+cd backend
+pytest tests/test_security_auth.py
+```
+Verified checks include:
+- OWASP security headers injection
+- 401 unauthenticated request rejection on missing, invalid, or expired tokens
+- Authenticated AES-256-GCM envelope encryption & decryption roundtrip
+- Ciphertext tampering detection
+- Strict User Isolation and Anti-IDOR (Insecure Direct Object Reference) prevention
+- Mass-assignment body `user_id` spoofing override
+
 
 ---
 

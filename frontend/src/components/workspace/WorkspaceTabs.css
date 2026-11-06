@@ -1,0 +1,114 @@
+/* VS Code Editor Tabs Strip */
+.vscode-tabs-strip {
+  height: 35px;
+  min-height: 35px;
+  background-color: var(--vsc-tabbar-bg, #252526);
+  border-bottom: 1px solid var(--vsc-border, #1e1e1e);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  overflow: hidden;
+}
+
+.tabs-list-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tabs-list-wrapper::-webkit-scrollbar {
+  height: 2px;
+}
+
+.vscode-tab-item {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  font-size: 0.75rem;
+  color: var(--vsc-tab-fg, #969696);
+  background-color: var(--vsc-tab-inactive, #2d2d2d);
+  border-right: 1px solid var(--vsc-border, #1e1e1e);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.1s ease;
+}
+
+.vscode-tab-item:hover {
+  background-color: var(--vsc-tab-hover, #333333);
+  color: #ffffff;
+}
+
+.vscode-tab-item.active-tab {
+  background-color: var(--vsc-editor-bg, #1e1e1e);
+  color: #ffffff;
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.tab-title-text {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-close-action {
+  background: transparent;
+  border: none;
+  color: #777777;
+  padding: 2px;
+  margin-left: 2px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-close-action:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.tab-bottom-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--vsc-accent, #007acc);
+}
+
+.tabs-right-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.tab-action-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--vsc-muted, #858585);
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-action-icon-btn:hover,
+.tab-action-icon-btn.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}

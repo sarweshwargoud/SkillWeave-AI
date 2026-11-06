@@ -1,0 +1,92 @@
+/* VS Code Style Activity Bar */
+.vscode-activity-bar {
+  width: 50px;
+  min-width: 50px;
+  height: 100%;
+  background-color: var(--vsc-activitybar-bg, #181818);
+  border-right: 1px solid var(--vsc-border, #2d2d2d);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0 0.25rem;
+  user-select: none;
+  z-index: 20;
+}
+
+.activity-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.activity-icon-button {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--vsc-activitybar-icon, #858585);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.activity-icon-button:hover {
+  color: var(--vsc-activitybar-icon-active, #ffffff);
+  background-color: var(--vsc-activitybar-hover, rgba(255, 255, 255, 0.05));
+}
+
+.activity-icon-button.is-active {
+  color: var(--vsc-activitybar-icon-active, #ffffff);
+}
+
+.activity-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background-color: var(--vsc-accent, #007acc);
+  border-radius: 0 2px 2px 0;
+}
+
+.privacy-indicator {
+  cursor: help;
+}
+
+.privacy-indicator.e2ee-active {
+  color: #10b981;
+}
+
+.activity-user-badge {
+  width: 28px;
+  height: 28px;
+  margin: 0.25rem 0 0.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #252526;
+  border: 1px solid var(--vsc-border, #3c3c3c);
+  cursor: pointer;
+}
+
+.activity-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.activity-avatar-initials {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.05em;
+}
