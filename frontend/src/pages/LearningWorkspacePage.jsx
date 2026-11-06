@@ -53,7 +53,9 @@ const LearningWorkspacePage = () => {
   const [openFolders, setOpenFolders] = useState({});
 
   // Layout & Under-Video Tabs
-  const [activeTab, setActiveTab] = useState('notes'); // Default to 'notes' under video
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('skillweave_active_tab') || 'notes';
+  });
   const [playlistCollapsed, setPlaylistCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
@@ -86,7 +88,17 @@ const LearningWorkspacePage = () => {
   const loadCourseData = async () => {
     let courseToLoad = state?.courseData;
 
-    // Fallback: If no course in state, fetch the most recent course from storage/DB
+    // Fallback 1: Restore from localStorage (recovers after browser refresh!)
+    if (!courseToLoad) {
+      const cached = localStorage.getItem('skillweave_active_course');
+      if (cached) {
+        try {
+          courseToLoad = JSON.parse(cached);
+        } catch (e) {}
+      }
+    }
+
+    // Fallback 2: If still no course, fetch the most recent course from storage/DB
     if (!courseToLoad) {
       const { data: courses } = await client.from('courses').select('*');
       if (courses && courses.length > 0) {
@@ -95,6 +107,9 @@ const LearningWorkspacePage = () => {
     }
 
     if (courseToLoad) {
+      try {
+        localStorage.setItem('skillweave_active_course', JSON.stringify(courseToLoad));
+      } catch (e) {}
       setCourse(courseToLoad);
 
       // Extract all flattened videos
@@ -111,9 +126,13 @@ const LearningWorkspacePage = () => {
 
       if (allVideos.length > 0) {
         let selectedVid = allVideos[0];
+        const savedVidId = localStorage.getItem('skillweave_active_vid_id');
         // If an initialVideoId was passed from ProfilePage, activate it directly
         if (state?.initialVideoId) {
           const matched = allVideos.find(v => v.id === state.initialVideoId);
+          if (matched) selectedVid = matched;
+        } else if (savedVidId) {
+          const matched = allVideos.find(v => v.id === savedVidId);
           if (matched) selectedVid = matched;
         }
 
@@ -165,11 +184,24 @@ const LearningWorkspacePage = () => {
     }));
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    try {
+      localStorage.setItem('skillweave_active_tab', tab);
+    } catch (e) {}
+  };
+
   const handleSelectVideo = (modIdx, vidIdx, videoObj) => {
     setActiveModuleIdx(modIdx);
     setActiveVideoIdx(vidIdx);
     setActiveVideo(videoObj);
     setMobileDrawerOpen(false);
+
+    if (videoObj?.id) {
+      try {
+        localStorage.setItem('skillweave_active_vid_id', videoObj.id);
+      } catch (e) {}
+    }
 
     // Update iframe source cleanly
     if (iframeRef.current && videoObj?.id) {
@@ -539,7 +571,7 @@ const LearningWorkspacePage = () => {
             <div className="under-video-tab-strip">
               <button
                 className={`feature-tab-item ${activeTab === 'notes' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('notes')}
+                onClick={() => handleTabChange('notes')}
               >
                 <FileText size={16} />
                 <span>✍️ AI Handwritten Notes</span>
@@ -547,7 +579,7 @@ const LearningWorkspacePage = () => {
 
               <button
                 className={`feature-tab-item ${activeTab === 'tutor' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('tutor')}
+                onClick={() => handleTabChange('tutor')}
               >
                 <MessageSquare size={16} />
                 <span>🤖 AI Video Tutor</span>
@@ -555,7 +587,7 @@ const LearningWorkspacePage = () => {
 
               <button
                 className={`feature-tab-item ${activeTab === 'quiz' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('quiz')}
+                onClick={() => handleTabChange('quiz')}
               >
                 <HelpCircle size={16} />
                 <span>🎯 Lesson Quiz</span>
@@ -563,7 +595,7 @@ const LearningWorkspacePage = () => {
 
               <button
                 className={`feature-tab-item ${activeTab === 'transcript' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('transcript')}
+                onClick={() => handleTabChange('transcript')}
               >
                 <ListOrdered size={16} />
                 <span>📜 Interactive Transcript</span>
@@ -571,7 +603,7 @@ const LearningWorkspacePage = () => {
 
               <button
                 className={`feature-tab-item ${activeTab === 'roadmap' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('roadmap')}
+                onClick={() => handleTabChange('roadmap')}
               >
                 <Map size={16} />
                 <span>🗺️ Module Objectives</span>

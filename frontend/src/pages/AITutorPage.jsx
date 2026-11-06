@@ -15,9 +15,15 @@ import { parseYouTube } from '../services/api';
 import './AITutorPage.css';
 
 const AITutorPage = () => {
-  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=t_k_k_t');
-  const [activeVideoId, setActiveVideoId] = useState('t_k_k_t');
-  const [videoTitle, setVideoTitle] = useState('Python Memory Architecture & Variables Demystified');
+  const [videoUrl, setVideoUrl] = useState(() => {
+    return localStorage.getItem('skillweave_tutor_url') || 'https://www.youtube.com/watch?v=t_k_k_t';
+  });
+  const [activeVideoId, setActiveVideoId] = useState(() => {
+    return localStorage.getItem('skillweave_tutor_vid_id') || 't_k_k_t';
+  });
+  const [videoTitle, setVideoTitle] = useState(() => {
+    return localStorage.getItem('skillweave_tutor_title') || 'Python Memory Architecture & Variables Demystified';
+  });
   const [currentTimestamp, setCurrentTimestamp] = useState('02:15');
   const iframeRef = useRef(null);
 
@@ -30,13 +36,25 @@ const AITutorPage = () => {
   const handleLoadVideo = async () => {
     if (!videoUrl.trim()) return;
     try {
+      try {
+        localStorage.setItem('skillweave_tutor_url', videoUrl);
+      } catch (e) {}
+
       const parsed = await parseYouTube(videoUrl);
       if (parsed.type === 'video') {
         setActiveVideoId(parsed.data.id);
         setVideoTitle(parsed.data.title);
+        try {
+          localStorage.setItem('skillweave_tutor_vid_id', parsed.data.id);
+          localStorage.setItem('skillweave_tutor_title', parsed.data.title);
+        } catch (e) {}
       } else if (parsed.type === 'playlist' && parsed.data.videos.length > 0) {
         setActiveVideoId(parsed.data.videos[0].id);
         setVideoTitle(parsed.data.videos[0].title);
+        try {
+          localStorage.setItem('skillweave_tutor_vid_id', parsed.data.videos[0].id);
+          localStorage.setItem('skillweave_tutor_title', parsed.data.videos[0].title);
+        } catch (e) {}
       }
     } catch (e) {
       // Fallback extract id
@@ -44,6 +62,10 @@ const AITutorPage = () => {
       if (match) {
         setActiveVideoId(match[1]);
         setVideoTitle("Loaded YouTube Lesson");
+        try {
+          localStorage.setItem('skillweave_tutor_vid_id', match[1]);
+          localStorage.setItem('skillweave_tutor_title', "Loaded YouTube Lesson");
+        } catch (e) {}
       }
     }
   };

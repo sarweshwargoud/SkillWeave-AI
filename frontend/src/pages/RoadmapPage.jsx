@@ -9,12 +9,35 @@ import './RoadmapPage.css';
 const RoadmapPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const course = state?.courseData;
+  const [course, setCourse] = useState(() => {
+    if (state?.courseData) {
+      try {
+        localStorage.setItem('skillweave_active_roadmap', JSON.stringify(state.courseData));
+      } catch (e) {}
+      return state.courseData;
+    }
+    const cached = localStorage.getItem('skillweave_active_roadmap') || localStorage.getItem('skillweave_active_course');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return null;
+  });
   const [user, setUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const client = getClient();
+
+  useEffect(() => {
+    if (state?.courseData) {
+      setCourse(state.courseData);
+      try {
+        localStorage.setItem('skillweave_active_roadmap', JSON.stringify(state.courseData));
+      } catch (e) {}
+    }
+  }, [state?.courseData]);
 
   useEffect(() => {
     const checkUser = async () => {

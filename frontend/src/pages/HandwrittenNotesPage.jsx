@@ -17,10 +17,18 @@ import { getClient } from '../services/supabaseClient';
 import './HandwrittenNotesPage.css';
 
 const HandwrittenNotesPage = () => {
-  const [videoUrl, setVideoUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState(() => {
+    return localStorage.getItem('skillweave_notes_url') || '';
+  });
   const [noteStyle, setNoteStyle] = useState('detailed');
   const [loading, setLoading] = useState(false);
-  const [notesData, setNotesData] = useState(null);
+  const [notesData, setNotesData] = useState(() => {
+    const cached = localStorage.getItem('skillweave_notes_data');
+    if (cached) {
+      try { return JSON.parse(cached); } catch (e) {}
+    }
+    return null;
+  });
   const [videoDetails, setVideoDetails] = useState(null);
   const client = getClient();
 
@@ -36,6 +44,10 @@ const HandwrittenNotesPage = () => {
     setLoading(true);
 
     try {
+      try {
+        localStorage.setItem('skillweave_notes_url', urlToUse);
+      } catch (e) {}
+
       // 1. Try to parse YouTube target
       try {
         const parsed = await parseYouTube(urlToUse);
@@ -49,6 +61,9 @@ const HandwrittenNotesPage = () => {
       // 2. Generate notes
       const notes = await generateHandwrittenNotes(urlToUse, noteStyle);
       setNotesData(notes);
+      try {
+        localStorage.setItem('skillweave_notes_data', JSON.stringify(notes));
+      } catch (e) {}
     } catch (error) {
       alert("Failed to generate notes. Please verify the YouTube URL or ID.");
     } finally {

@@ -23,6 +23,8 @@ function App() {
         <Route path="/my-learning" element={<MyLearningPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        {/* Wildcard catch-all fallback */}
+        <Route path="*" element={<LandingPage />} />
       </Routes>
     </Router>
   );
