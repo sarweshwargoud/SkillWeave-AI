@@ -24,14 +24,18 @@ const AITutorChat = ({ videoId, videoTitle, currentTimestamp, onSeekTimestamp })
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const scrollAreaRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 1 || loading) {
+      scrollToBottom();
+    }
   }, [messages, loading]);
 
   const handleSend = async (customText = null) => {
@@ -126,7 +130,7 @@ const AITutorChat = ({ videoId, videoTitle, currentTimestamp, onSeekTimestamp })
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="tutor-messages-scroll">
+      <div className="tutor-messages-scroll" ref={scrollAreaRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className={`tutor-message-bubble ${msg.role}`}>
             <div className="bubble-sender">
@@ -231,7 +235,6 @@ const AITutorChat = ({ videoId, videoTitle, currentTimestamp, onSeekTimestamp })
           </div>
         )}
 
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Quick Prompts Bar */}
