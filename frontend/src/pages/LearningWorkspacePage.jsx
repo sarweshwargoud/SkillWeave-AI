@@ -69,6 +69,16 @@ const LearningWorkspacePage = () => {
   // Completed videos tracking
   const [completedVideos, setCompletedVideos] = useState({});
 
+  // Lock window & document scroll while on workspace so the video player stays 100% fixed
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
   useEffect(() => {
     loadCourseData();
   }, [state]);
@@ -469,26 +479,20 @@ const LearningWorkspacePage = () => {
                   {/* Video Control & Milestone Strip */}
                   <div className="player-meta-control-bar">
                     <div className="player-left-info">
-                      <div className="now-playing-pill-row">
-                        <span className="live-playing-pulse-badge">
-                          <span className="pulsing-red-circle"></span>
-                          In-App Cinema Player
-                        </span>
-                        <span className="active-milestone-tag">
-                          {course.modules[activeModuleIdx]?.module_title || 'Module Lesson'}
-                        </span>
+                      <div className="player-left-title-row">
+                        <span className="pulsing-red-circle" title="Now Playing"></span>
+                        <h2 className="current-video-heading" title={activeVideo.title}>{activeVideo.title}</h2>
                       </div>
-                      <h2 className="current-video-heading">{activeVideo.title}</h2>
-                      <span className="video-author-line">{activeVideo.channelTitle}</span>
                     </div>
 
                     <div className="player-right-actions">
                       <button
                         className={`btn-complete-toggle ${completedVideos[activeVideo.id] ? 'is-completed' : ''}`}
                         onClick={() => handleToggleComplete(activeVideo.id)}
+                        title={completedVideos[activeVideo.id] ? 'Lesson Done' : 'Mark Completed'}
                       >
-                        <CheckCircle2 size={16} />
-                        <span>{completedVideos[activeVideo.id] ? 'Lesson Done' : 'Mark Completed'}</span>
+                        <CheckCircle2 size={14} />
+                        <span>{completedVideos[activeVideo.id] ? 'Done' : 'Complete'}</span>
                       </button>
 
                       <div className="prev-next-arrows-box">
@@ -497,14 +501,14 @@ const LearningWorkspacePage = () => {
                           onClick={handlePrevVideo}
                           title="Previous Lesson"
                         >
-                          <ChevronLeft size={18} /> Prev
+                          <ChevronLeft size={16} /> Prev
                         </button>
                         <button
                           className="step-arrow-btn"
                           onClick={handleNextVideo}
                           title="Next Lesson"
                         >
-                          Next <ChevronRight size={18} />
+                          Next <ChevronRight size={16} />
                         </button>
                       </div>
 
@@ -513,7 +517,7 @@ const LearningWorkspacePage = () => {
                         onClick={() => setTheaterMode(!theaterMode)}
                         title={theaterMode ? "Exit Full Screen Theater" : "Switch to Full Screen Theater"}
                       >
-                        {theaterMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                        {theaterMode ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                       </button>
                     </div>
                   </div>

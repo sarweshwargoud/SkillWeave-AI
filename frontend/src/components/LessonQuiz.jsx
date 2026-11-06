@@ -97,10 +97,14 @@ const LessonQuiz = ({ videoId, videoTitle, onQuizComplete }) => {
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
       <div className="quiz-empty-state">
-        <HelpCircle size={36} />
-        <h4>No Quiz Available Yet</h4>
-        <button className="btn-primary" onClick={loadQuiz}>
-          Generate Quiz with AI
+        <div className="quiz-empty-icon-wrap">
+          <HelpCircle size={36} className="quiz-empty-icon" />
+        </div>
+        <h4>Interactive Lesson Quiz</h4>
+        <p>Test your comprehension of the key concepts and code patterns covered in this lesson.</p>
+        <button className="quiz-generate-btn" onClick={loadQuiz}>
+          <Sparkles size={16} />
+          <span>Generate & Start Quiz</span>
         </button>
       </div>
     );
