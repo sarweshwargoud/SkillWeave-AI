@@ -714,7 +714,8 @@ const LearningWorkspacePage = () => {
             : (module.video ? [module.video] : (module.lessons && module.lessons.length > 0 ? module.lessons : []));
           const isCurrentModule = mIdx === activeModuleIdx;
           const isFolderOpen = openFolders[mIdx] ?? true; // open by default
-          const moduleTitle = module.module_title || module.title || module.name || module.topic || `Module ${mIdx + 1}`;
+          const rawModTitle = (module.module_title || module.title || module.name || module.topic || '').toString().trim();
+          const moduleTitle = rawModTitle || `Module ${mIdx + 1}: Core Concepts`;
 
           return (
             <div key={mIdx} className={`folder-module-block ${isCurrentModule ? 'current-active-folder' : ''}`}>
@@ -746,7 +747,8 @@ const LearningWorkspacePage = () => {
                   {videoList.map((vid, vIdx) => {
                     const isPlaying = activeVideo?.id === vid.id;
                     const isDone = completedVideos[vid.id] || vid.completed;
-                    const videoTitle = vid.title || vid.video_title || vid.name || `Lesson ${vIdx + 1}`;
+                    const rawVidTitle = (vid.title || vid.video_title || vid.name || '').toString().trim();
+                    const videoTitle = rawVidTitle || `Lesson ${vIdx + 1}: Video`;
                     const videoDuration = vid.durationFormatted || (vid.duration ? `${Math.floor(vid.duration / 60)}:${String(Math.floor(vid.duration % 60)).padStart(2, '0')}` : 'Lesson');
 
                     return (
