@@ -13,18 +13,19 @@ import {
   ListOrdered, 
   Clock, 
   Sparkles, 
-  Check, 
-  Bookmark, 
+  Home,
+  User,
+  BookOpen,
+  ArrowLeft,
   Maximize2, 
   Minimize2,
-  ExternalLink,
   Search,
-  BookOpen,
   SidebarClose,
   SidebarOpen,
-  Menu,
+  Layers,
   X,
-  Layers
+  Tv,
+  Award
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import AITutorChat from '../components/AITutorChat';
@@ -40,16 +41,17 @@ const LearningWorkspacePage = () => {
   const client = getClient();
   const iframeRef = useRef(null);
 
-  // Active course data (passed from state, loaded from library, or seeded default)
+  // Active course data
   const [course, setCourse] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeVideoIdx, setActiveVideoIdx] = useState(0);
 
-  // Workspace panels & tabs
-  const [activeTab, setActiveTab] = useState('tutor'); // 'tutor' | 'notes' | 'roadmap' | 'transcript' | 'quiz'
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  // Layout & Under-Video Tabs
+  const [activeTab, setActiveTab] = useState('notes'); // Default to 'notes' under video
+  const [playlistCollapsed, setPlaylistCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [theaterMode, setTheaterMode] = useState(false);
   const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
 
   // Video-specific assets state
@@ -59,7 +61,7 @@ const LearningWorkspacePage = () => {
   const [transcriptSearch, setTranscriptSearch] = useState('');
   const [transcriptLoading, setTranscriptLoading] = useState(false);
 
-  // Completed videos tracking (persisted)
+  // Completed videos tracking
   const [completedVideos, setCompletedVideos] = useState({});
 
   useEffect(() => {
@@ -69,7 +71,7 @@ const LearningWorkspacePage = () => {
   const loadCourseData = async () => {
     let courseToLoad = state?.courseData;
 
-    // If no course in state, try to fetch the most recent course from local storage / db
+    // Fallback: If no course in state, fetch the most recent course from storage/DB
     if (!courseToLoad) {
       const { data: courses } = await client.from('courses').select('*');
       if (courses && courses.length > 0) {
@@ -80,7 +82,7 @@ const LearningWorkspacePage = () => {
     if (courseToLoad) {
       setCourse(courseToLoad);
 
-      // Extract all flat videos
+      // Extract all flattened videos
       const allVideos = [];
       courseToLoad.modules?.forEach((mod, mIdx) => {
         if (mod.videos && mod.videos.length > 0) {
@@ -93,20 +95,25 @@ const LearningWorkspacePage = () => {
       });
 
       if (allVideos.length > 0) {
-        // Select either last watched or first video
-        const initialVid = allVideos[0];
-        setActiveVideo(initialVid);
-        setActiveModuleIdx(initialVid.moduleIdx);
-        setActiveVideoIdx(initialVid.videoIdx);
+        let selectedVid = allVideos[0];
+        // If an initialVideoId was passed from ProfilePage, activate it directly
+        if (state?.initialVideoId) {
+          const matched = allVideos.find(v => v.id === state.initialVideoId);
+          if (matched) selectedVid = matched;
+        }
+
+        setActiveVideo(selectedVid);
+        setActiveModuleIdx(selectedVid.moduleIdx);
+        setActiveVideoIdx(selectedVid.videoIdx);
       }
     }
   };
 
-  // When active video changes, fetch its transcript & prepare its notes
+  // When active video changes, fetch its transcript and auto-load notes
   useEffect(() => {
     if (activeVideo?.id) {
       loadTranscript(activeVideo.id);
-      setVideoNotes(null); // Reset or load cache
+      loadNotesForVideo(activeVideo.id);
     }
   }, [activeVideo?.id]);
 
@@ -123,11 +130,10 @@ const LearningWorkspacePage = () => {
     }
   };
 
-  const loadNotesForActiveVideo = async () => {
-    if (!activeVideo?.id) return;
+  const loadNotesForVideo = async (vidId) => {
     setNotesLoading(true);
     try {
-      const notes = await generateHandwrittenNotes(activeVideo.id, 'detailed');
+      const notes = await generateHandwrittenNotes(vidId, 'detailed');
       setVideoNotes(notes);
     } catch (e) {
       console.error("Notes generation error:", e);
@@ -140,7 +146,12 @@ const LearningWorkspacePage = () => {
     setActiveModuleIdx(modIdx);
     setActiveVideoIdx(vidIdx);
     setActiveVideo(videoObj);
-    setMobileDrawerOpen(false); // Close mobile drawer on selection
+    setMobileDrawerOpen(false);
+
+    // Update iframe source cleanly
+    if (iframeRef.current && videoObj?.id) {
+      iframeRef.current.src = `https://www.youtube.com/embed/${videoObj.id}?autoplay=1&enablejsapi=1`;
+    }
   };
 
   const handleToggleComplete = async (vidId) => {
@@ -148,7 +159,6 @@ const LearningWorkspacePage = () => {
     const updated = { ...completedVideos, [vidId]: newStatus };
     setCompletedVideos(updated);
 
-    // Calculate updated progress percentage
     if (course) {
       let totalVids = 0;
       let finishedVids = 0;
@@ -176,11 +186,9 @@ const LearningWorkspacePage = () => {
     const vList = currentMod?.videos || (currentMod?.video ? [currentMod.video] : []);
 
     if (activeVideoIdx < vList.length - 1) {
-      // Next video in same module
       const nextVid = vList[activeVideoIdx + 1];
       handleSelectVideo(activeModuleIdx, activeVideoIdx + 1, nextVid);
     } else if (activeModuleIdx < course.modules.length - 1) {
-      // First video of next module
       const nextMod = course.modules[activeModuleIdx + 1];
       const nextVList = nextMod.videos || (nextMod.video ? [nextMod.video] : []);
       if (nextVList.length > 0) {
@@ -222,13 +230,16 @@ const LearningWorkspacePage = () => {
         <Navbar />
         <div className="workspace-empty-center">
           <h2>No Active Course in Workspace</h2>
-          <p>Generate a new syllabus or select a saved course from My Learning.</p>
+          <p>Generate a new syllabus or select a saved course from your profile or library.</p>
           <div className="empty-actions-row">
             <button className="btn-primary" onClick={() => navigate('/create')}>
               Generate New Roadmap
             </button>
+            <button className="btn-secondary" onClick={() => navigate('/profile')}>
+              Open Profile & Projects
+            </button>
             <button className="btn-secondary" onClick={() => navigate('/my-learning')}>
-              Open My Learning
+              My Learning
             </button>
           </div>
         </div>
@@ -248,19 +259,19 @@ const LearningWorkspacePage = () => {
   });
   const overallPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
-  // Shared Curriculum Navigation Renderer (Used in desktop sidebar and mobile drawer)
+  // Curriculum Step-by-Step Navigation List
   const renderCurriculumNavigation = () => (
-    <>
+    <div className="curriculum-playlist-inner">
       <div className="sidebar-course-header">
         <div className="header-meta-row">
-          <span className="course-type-tag">Active Curriculum</span>
-          <span className="course-done-badge">{doneCount}/{totalCount} Finished</span>
+          <span className="course-type-tag">Step-by-Step Curriculum</span>
+          <span className="course-done-badge">{doneCount}/{totalCount} Completed</span>
         </div>
         <h3 className="sidebar-course-title">{course.title}</h3>
         
         <div className="course-progress-indicator">
           <div className="progress-text-row">
-            <span>Course Progress</span>
+            <span>Overall Progress</span>
             <strong>{overallPercent}%</strong>
           </div>
           <div className="progress-track-small">
@@ -277,7 +288,7 @@ const LearningWorkspacePage = () => {
           return (
             <div key={mIdx} className={`module-nav-section ${isCurrentModule ? 'current-module' : ''}`}>
               <div className="module-nav-header">
-                <span className="module-idx-pill">M{mIdx + 1}</span>
+                <span className="module-idx-pill">Step {String(mIdx + 1).padStart(2, '0')}</span>
                 <h5 className="module-nav-heading">{module.module_title}</h5>
               </div>
 
@@ -302,9 +313,9 @@ const LearningWorkspacePage = () => {
                         aria-label="Toggle completed"
                       >
                         {isDone ? (
-                          <CheckCircle2 size={18} className="icon-check-done" />
+                          <CheckCircle2 size={16} className="icon-check-done" />
                         ) : (
-                          <Circle size={18} className="icon-check-pending" />
+                          <Circle size={16} className="icon-check-pending" />
                         )}
                       </button>
 
@@ -315,7 +326,13 @@ const LearningWorkspacePage = () => {
                         </span>
                       </div>
 
-                      {isPlaying && <div className="now-playing-dot" />}
+                      {isPlaying && (
+                        <div className="now-playing-indicator" title="Now Playing">
+                          <span className="soundwave-bar"></span>
+                          <span className="soundwave-bar"></span>
+                          <span className="soundwave-bar"></span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -324,276 +341,365 @@ const LearningWorkspacePage = () => {
           );
         })}
       </div>
-    </>
+    </div>
   );
 
   return (
     <div className="workspace-page-container">
       <Navbar />
 
-      {/* Mobile Top Curriculum Quick Bar (Visible only on mobile/tablet screens) */}
-      <div className="workspace-mobile-subbar">
-        <button
-          className="mobile-curriculum-btn"
-          onClick={() => setMobileDrawerOpen(true)}
-          aria-label="Open course playlist"
-        >
-          <Layers size={16} />
-          <span>Curriculum Playlist ({overallPercent}%)</span>
-        </button>
+      {/* Global Breadcrumbs & Quick Return Navigation Bar */}
+      <nav className="workspace-sticky-top-nav">
+        <div className="workspace-nav-left-group">
+          <button 
+            className="workspace-nav-btn return-home"
+            onClick={() => navigate('/')}
+            title="Return to Home"
+          >
+            <Home size={15} /> <span>Home</span>
+          </button>
+          
+          <span className="nav-sep">/</span>
 
-        <div className="mobile-lesson-counter">
-          <span>Module {activeModuleIdx + 1}</span>
+          <button 
+            className="workspace-nav-btn return-mylearning"
+            onClick={() => navigate('/my-learning')}
+            title="Return to My Learning"
+          >
+            <BookOpen size={15} /> <span>My Learning</span>
+          </button>
+
+          <span className="nav-sep">/</span>
+
+          <button 
+            className="workspace-nav-btn return-profile"
+            onClick={() => navigate('/profile')}
+            title="Return to Profile & Projects"
+          >
+            <User size={15} /> <span>Profile & Projects</span>
+          </button>
         </div>
-      </div>
 
-      {/* Main Full-Screen Responsive 3-Column Studio Layout */}
-      <div className={`workspace-studio-stage ${rightPanelCollapsed ? 'right-collapsed' : ''}`}>
+        <div className="workspace-nav-center-meta">
+          <span className="active-course-label">{course.title}</span>
+          <span className="active-progress-pill">{overallPercent}% Done</span>
+        </div>
+
+        <div className="workspace-nav-right-actions">
+          <button 
+            className="workspace-toggle-sidebar-btn"
+            onClick={() => setPlaylistCollapsed(!playlistCollapsed)}
+            title={playlistCollapsed ? "Show Playlist" : "Hide Playlist"}
+          >
+            {playlistCollapsed ? <SidebarOpen size={16} /> : <SidebarClose size={16} />}
+            <span>{playlistCollapsed ? "Show Playlist" : "Hide Playlist"}</span>
+          </button>
+
+          <button 
+            className="mobile-playlist-drawer-trigger"
+            onClick={() => setMobileDrawerOpen(true)}
+            title="Open Playlist"
+          >
+            <Layers size={16} />
+            <span>Playlist ({doneCount}/{totalCount})</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Studio Viewport (2-Column: Step-by-Step Playlist + Video Theater & Under-Video Features) */}
+      <div className={`workspace-theater-stage ${playlistCollapsed ? 'playlist-hidden' : ''} ${theaterMode ? 'theater-expanded' : ''}`}>
         
-        {/* COLUMN A: Left Sidebar Course & Lesson Navigation (Desktop) */}
-        <aside className="workspace-nav-sidebar">
+        {/* COLUMN 1: Step-by-Step Curriculum Playlist (Sidebar) */}
+        <aside className="workspace-curriculum-sidebar">
           {renderCurriculumNavigation()}
         </aside>
 
-        {/* COLUMN B: Center Video Player & Lesson Learning Area */}
-        <section className="workspace-player-center">
-          {activeVideo ? (
-            <div className="player-stage-card">
-              {/* YouTube Responsive Embed */}
-              <div className="video-player-aspect">
-                <iframe
-                  ref={iframeRef}
-                  src={`https://www.youtube.com/embed/${activeVideo.id}?enablejsapi=1`}
-                  title={activeVideo.title}
-                  className="yt-workspace-iframe"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-
-              {/* Lesson Controls & Information */}
-              <div className="video-control-banner">
-                <div className="video-title-area">
-                  <span className="current-milestone-tag">
-                    {course.modules[activeModuleIdx]?.module_title || 'Current Milestone'}
-                  </span>
-                  <h2 className="current-video-title">{activeVideo.title}</h2>
-                  <span className="video-channel-subtitle">{activeVideo.channelTitle}</span>
-                </div>
-
-                <div className="video-actions-strip">
-                  <button
-                    className={`btn-complete-lesson ${completedVideos[activeVideo.id] ? 'is-completed' : ''}`}
-                    onClick={() => handleToggleComplete(activeVideo.id)}
-                  >
-                    <CheckCircle2 size={16} />
-                    <span>{completedVideos[activeVideo.id] ? 'Lesson Completed' : 'Mark as Completed'}</span>
-                  </button>
-
-                  <div className="prev-next-nav-group">
-                    <button
-                      className="nav-arrow-btn"
-                      onClick={handlePrevVideo}
-                      title="Previous lesson"
-                    >
-                      <ChevronLeft size={18} /> Prev
-                    </button>
-                    <button
-                      className="nav-arrow-btn"
-                      onClick={handleNextVideo}
-                      title="Next lesson"
-                    >
-                      Next <ChevronRight size={18} />
-                    </button>
+        {/* COLUMN 2: Main Stage (Sticky Undisturbed Video Player + Features Below) */}
+        <main className="workspace-video-and-features-main">
+          
+          {/* STICKY THEATER VIDEO PLAYER CONTAINER */}
+          {/* Remains pinned at top while user scrolls down through notes/tutor below */}
+          <section className="sticky-player-bezel-wrapper">
+            <div className="player-stage-bezel">
+              {activeVideo ? (
+                <>
+                  <div className="in-app-player-aspect-frame">
+                    <iframe
+                      ref={iframeRef}
+                      src={`https://www.youtube.com/embed/${activeVideo.id}?autoplay=1&enablejsapi=1`}
+                      title={activeVideo.title}
+                      className="yt-theater-iframe"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
                   </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="no-video-selected-card">
-              <Play size={48} />
-              <h3>Select a video from the sidebar</h3>
-            </div>
-          )}
-        </section>
 
-        {/* COLUMN C: Right Panel AI Assistant Tabs */}
-        <aside className={`workspace-ai-panel ${rightPanelCollapsed ? 'collapsed' : ''}`}>
-          {/* Panel Top Tabs */}
-          <div className="ai-tabs-header">
-            <div className="tabs-scroller">
+                  {/* Video Control & Milestone Strip */}
+                  <div className="player-meta-control-bar">
+                    <div className="player-left-info">
+                      <div className="now-playing-pill-row">
+                        <span className="live-playing-pulse-badge">
+                          <span className="pulsing-red-circle"></span>
+                          In-App Cinema Player
+                        </span>
+                        <span className="active-milestone-tag">
+                          {course.modules[activeModuleIdx]?.module_title || 'Module Lesson'}
+                        </span>
+                      </div>
+                      <h2 className="current-video-heading">{activeVideo.title}</h2>
+                      <span className="video-author-line">{activeVideo.channelTitle}</span>
+                    </div>
+
+                    <div className="player-right-actions">
+                      <button
+                        className={`btn-complete-toggle ${completedVideos[activeVideo.id] ? 'is-completed' : ''}`}
+                        onClick={() => handleToggleComplete(activeVideo.id)}
+                      >
+                        <CheckCircle2 size={16} />
+                        <span>{completedVideos[activeVideo.id] ? 'Lesson Done' : 'Mark Completed'}</span>
+                      </button>
+
+                      <div className="prev-next-arrows-box">
+                        <button
+                          className="step-arrow-btn"
+                          onClick={handlePrevVideo}
+                          title="Previous Lesson"
+                        >
+                          <ChevronLeft size={18} /> Prev
+                        </button>
+                        <button
+                          className="step-arrow-btn"
+                          onClick={handleNextVideo}
+                          title="Next Lesson"
+                        >
+                          Next <ChevronRight size={18} />
+                        </button>
+                      </div>
+
+                      <button
+                        className="theater-expand-btn"
+                        onClick={() => setTheaterMode(!theaterMode)}
+                        title={theaterMode ? "Exit Theater Mode" : "Expand Theater Mode"}
+                      >
+                        {theaterMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="no-video-placeholder">
+                  <Play size={44} />
+                  <h3>Select a lesson from the curriculum playlist</h3>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* UNDER-VIDEO FEATURE SUITE */}
+          {/* Notes generation, AI tutor chat, quizzes, and transcripts displayed directly under video */}
+          <section className="under-video-features-hub">
+            
+            {/* Feature Tab Selector Strip */}
+            <div className="under-video-tab-strip">
               <button
-                className={`tab-btn ${activeTab === 'tutor' ? 'active' : ''}`}
-                onClick={() => setActiveTab('tutor')}
-              >
-                <MessageSquare size={14} /> AI Tutor
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
+                className={`feature-tab-item ${activeTab === 'notes' ? 'active-tab' : ''}`}
                 onClick={() => {
                   setActiveTab('notes');
-                  if (!videoNotes) loadNotesForActiveVideo();
+                  if (!videoNotes && activeVideo?.id) loadNotesForVideo(activeVideo.id);
                 }}
               >
-                <FileText size={14} /> Notes
+                <FileText size={16} />
+                <span>✍️ AI Handwritten Notes</span>
               </button>
+
               <button
-                className={`tab-btn ${activeTab === 'roadmap' ? 'active' : ''}`}
-                onClick={() => setActiveTab('roadmap')}
+                className={`feature-tab-item ${activeTab === 'tutor' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('tutor')}
               >
-                <Map size={14} /> Syllabus
+                <MessageSquare size={16} />
+                <span>🤖 AI Video Tutor</span>
               </button>
+
               <button
-                className={`tab-btn ${activeTab === 'transcript' ? 'active' : ''}`}
-                onClick={() => setActiveTab('transcript')}
-              >
-                <ListOrdered size={14} /> Transcript
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'quiz' ? 'active' : ''}`}
+                className={`feature-tab-item ${activeTab === 'quiz' ? 'active-tab' : ''}`}
                 onClick={() => setActiveTab('quiz')}
               >
-                <HelpCircle size={14} /> Quiz
+                <HelpCircle size={16} />
+                <span>🎯 Lesson Quiz</span>
+              </button>
+
+              <button
+                className={`feature-tab-item ${activeTab === 'transcript' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('transcript')}
+              >
+                <ListOrdered size={16} />
+                <span>📜 Interactive Transcript</span>
+              </button>
+
+              <button
+                className={`feature-tab-item ${activeTab === 'roadmap' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('roadmap')}
+              >
+                <Map size={16} />
+                <span>🗺️ Module Objectives</span>
               </button>
             </div>
 
-            <button
-              className="collapse-panel-btn desktop-only"
-              onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-              title={rightPanelCollapsed ? "Expand panel" : "Collapse panel"}
-            >
-              {rightPanelCollapsed ? <SidebarOpen size={16} /> : <SidebarClose size={16} />}
-            </button>
-          </div>
-
-          {/* Tab Content Panes (Persistent, state preserving) */}
-          <div className="ai-tab-body">
-            {/* TAB 1: AI TUTOR */}
-            {activeTab === 'tutor' && activeVideo && (
-              <AITutorChat
-                videoId={activeVideo.id}
-                videoTitle={activeVideo.title}
-                currentTimestamp={currentTimestamp}
-                onSeekTimestamp={handleSeekTimestamp}
-              />
-            )}
-
-            {/* TAB 2: HANDWRITTEN NOTES */}
-            {activeTab === 'notes' && (
-              <div className="tab-notes-wrapper">
-                {notesLoading ? (
-                  <div className="tab-loading-state">
-                    <Sparkles size={24} className="tab-spinner" />
-                    <h4>Synthesizing Handwritten Notes...</h4>
-                    <p>Extracting formulas, definitions, and high-yield concepts from this video.</p>
-                  </div>
-                ) : videoNotes ? (
-                  <HandwrittenNotesViewer
-                    notesData={videoNotes}
-                    onSaveNote={() => alert("Note saved to your personal library!")}
-                  />
-                ) : (
-                  <div className="tab-empty-state">
-                    <FileText size={32} />
-                    <h4>Generate Notes for This Lesson</h4>
-                    <button className="btn-primary" onClick={loadNotesForActiveVideo}>
-                      Generate Handwritten Notes
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 3: ROADMAP & MODULE MILESTONES */}
-            {activeTab === 'roadmap' && (
-              <div className="tab-roadmap-view">
-                <div className="current-milestone-overview">
-                  <span className="milestone-badge">Current Module</span>
-                  <h4>{course.modules[activeModuleIdx]?.module_title}</h4>
-                  <p>{course.modules[activeModuleIdx]?.objective || course.modules[activeModuleIdx]?.description}</p>
-                </div>
-
-                {course.modules[activeModuleIdx]?.exercise && (
-                  <div className="milestone-exercise-card">
-                    <h5>✍ Practical Milestone Exercise:</h5>
-                    <p>{course.modules[activeModuleIdx].exercise}</p>
-                  </div>
-                )}
-
-                <div className="syllabus-mini-stack">
-                  <h5>All Course Milestones:</h5>
-                  {course.modules?.map((mod, idx) => (
-                    <div
-                      key={idx}
-                      className={`mini-milestone-row ${idx === activeModuleIdx ? 'active-row' : ''}`}
-                      onClick={() => {
-                        const vList = mod.videos || (mod.video ? [mod.video] : []);
-                        if (vList.length > 0) handleSelectVideo(idx, 0, vList[0]);
-                      }}
-                    >
-                      <span className="milestone-step-pill">{idx + 1}</span>
-                      <span className="milestone-row-title">{mod.module_title}</span>
+            {/* TAB CONTENTS (Scrollable below without disturbing the sticky video player) */}
+            <div className="under-video-tab-content-panel">
+              
+              {/* FEATURE 1: AI HANDWRITTEN NOTES (Display under video) */}
+              {activeTab === 'notes' && (
+                <div className="tab-pane-notes-container">
+                  {notesLoading ? (
+                    <div className="notes-generating-card">
+                      <Sparkles size={28} className="notes-spin-sparkle" />
+                      <h4>Synthesizing AI Handwritten Notes for This Video...</h4>
+                      <p>Extracting definitions, core formulas, key exam takeaways, and visual diagrams.</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 4: INTERACTIVE SEARCHABLE TRANSCRIPT */}
-            {activeTab === 'transcript' && (
-              <div className="tab-transcript-view">
-                <div className="transcript-search-bar">
-                  <Search size={14} />
-                  <input
-                    type="text"
-                    placeholder="Search keywords in transcript..."
-                    value={transcriptSearch}
-                    onChange={(e) => setTranscriptSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="transcript-segments-scroll">
-                  {transcriptLoading ? (
-                    <p className="loading-transcript-text">Loading transcript...</p>
-                  ) : transcriptData?.segments && transcriptData.segments.length > 0 ? (
-                    transcriptData.segments
-                      .filter(seg => !transcriptSearch || seg.text.toLowerCase().includes(transcriptSearch.toLowerCase()))
-                      .map((seg, sIdx) => (
-                        <div
-                          key={sIdx}
-                          className="transcript-line-item"
-                          onClick={() => handleSeekTimestamp(seg.timestamp)}
-                        >
-                          <span className="ts-pill">{seg.timestamp}</span>
-                          <span className="ts-text">{seg.text}</span>
-                        </div>
-                      ))
+                  ) : videoNotes ? (
+                    <div className="notes-viewer-fullwidth">
+                      <HandwrittenNotesViewer
+                        notesData={videoNotes}
+                        onSaveNote={() => alert("Note successfully saved to your personal library!")}
+                      />
+                    </div>
                   ) : (
-                    <div className="no-transcript-box">
-                      <p>Subtitles are not publicly provided for this video.</p>
-                      <p className="sub-hint">The AI Tutor and Notes engines still function using audio transcription parsing.</p>
+                    <div className="notes-generate-prompt-box">
+                      <FileText size={36} />
+                      <h4>Handwritten Notes for: {activeVideo?.title}</h4>
+                      <p>Generate clean, readable handwritten-style notes with ruled paper and diagram boxes.</p>
+                      <button 
+                        className="btn-primary"
+                        onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
+                      >
+                        <Sparkles size={16} /> Generate Handwritten Notes
+                      </button>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* TAB 5: VIDEO QUIZ */}
-            {activeTab === 'quiz' && activeVideo && (
-              <div className="tab-quiz-view">
-                <LessonQuiz
-                  videoId={activeVideo.id}
-                  videoTitle={activeVideo.title}
-                  onQuizComplete={(result) => {
-                    if (result.passed) {
-                      handleToggleComplete(activeVideo.id);
-                    }
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </aside>
+              {/* FEATURE 2: AI VIDEO TUTOR (Display under video) */}
+              {activeTab === 'tutor' && activeVideo && (
+                <div className="tab-pane-tutor-container">
+                  <div className="tutor-header-intro">
+                    <span className="intro-badge">Interactive Video Tutor</span>
+                    <h3>Ask Questions About This Lesson</h3>
+                    <p>Ask anything about what is covered in this video. The AI tutor uses transcript grounding and timestamp references.</p>
+                  </div>
+                  <AITutorChat
+                    videoId={activeVideo.id}
+                    videoTitle={activeVideo.title}
+                    currentTimestamp={currentTimestamp}
+                    onSeekTimestamp={handleSeekTimestamp}
+                  />
+                </div>
+              )}
+
+              {/* FEATURE 3: LESSON QUIZ (Display under video) */}
+              {activeTab === 'quiz' && activeVideo && (
+                <div className="tab-pane-quiz-container">
+                  <LessonQuiz
+                    videoId={activeVideo.id}
+                    videoTitle={activeVideo.title}
+                    onQuizComplete={(result) => {
+                      if (result.passed) {
+                        handleToggleComplete(activeVideo.id);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* FEATURE 4: SEARCHABLE INTERACTIVE TRANSCRIPT (Display under video) */}
+              {activeTab === 'transcript' && (
+                <div className="tab-pane-transcript-container">
+                  <div className="transcript-search-strip">
+                    <Search size={16} className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search words and concepts in transcript..."
+                      value={transcriptSearch}
+                      onChange={(e) => setTranscriptSearch(e.target.value)}
+                      className="transcript-search-input"
+                    />
+                  </div>
+
+                  <div className="transcript-segments-stream">
+                    {transcriptLoading ? (
+                      <div className="transcript-loading-state">
+                        <Sparkles size={20} className="spinner-icon" />
+                        <span>Transcribing audio stream...</span>
+                      </div>
+                    ) : transcriptData?.segments && transcriptData.segments.length > 0 ? (
+                      transcriptData.segments
+                        .filter(seg => !transcriptSearch || seg.text.toLowerCase().includes(transcriptSearch.toLowerCase()))
+                        .map((seg, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className="transcript-segment-card"
+                            onClick={() => handleSeekTimestamp(seg.timestamp)}
+                            title="Click to jump video to this moment"
+                          >
+                            <span className="timestamp-badge">{seg.timestamp}</span>
+                            <span className="segment-text">{seg.text}</span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="transcript-unavailable-card">
+                        <p>Direct captions were not provided by YouTube for this video.</p>
+                        <p className="caption-sub">The AI Video Tutor and Notes generator continue to analyze the video speech through audio intelligence.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* FEATURE 5: MODULE OBJECTIVES & ROADMAP (Display under video) */}
+              {activeTab === 'roadmap' && (
+                <div className="tab-pane-roadmap-container">
+                  <div className="current-milestone-card">
+                    <div className="milestone-badge-pill">Step {activeModuleIdx + 1} Milestone</div>
+                    <h3>{course.modules[activeModuleIdx]?.module_title}</h3>
+                    <p className="milestone-desc">
+                      {course.modules[activeModuleIdx]?.objective || course.modules[activeModuleIdx]?.description}
+                    </p>
+
+                    {course.modules[activeModuleIdx]?.exercise && (
+                      <div className="hands-on-exercise-box">
+                        <h5>✍️ Hands-On Milestone Exercise</h5>
+                        <p>{course.modules[activeModuleIdx].exercise}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="all-milestones-stepper">
+                    <h4>All Curriculum Milestones ({course.modules?.length} Steps)</h4>
+                    <div className="milestones-steps-list">
+                      {course.modules?.map((mod, idx) => (
+                        <div
+                          key={idx}
+                          className={`milestone-step-item ${idx === activeModuleIdx ? 'is-active-step' : ''}`}
+                          onClick={() => {
+                            const vList = mod.videos || (mod.video ? [mod.video] : []);
+                            if (vList.length > 0) handleSelectVideo(idx, 0, vList[0]);
+                          }}
+                        >
+                          <span className="step-count-pill">{idx + 1}</span>
+                          <div className="step-info">
+                            <strong>{mod.module_title}</strong>
+                            <span className="step-sub">{mod.videos?.length || 1} video lesson(s)</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        </main>
       </div>
 
       {/* Mobile Slide-Out Curriculum Drawer Modal */}
@@ -601,7 +707,7 @@ const LearningWorkspacePage = () => {
         <div className="workspace-mobile-drawer-backdrop" onClick={() => setMobileDrawerOpen(false)}>
           <div className="workspace-mobile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer-header">
-              <h4>Course Syllabus & Videos</h4>
+              <h4>Step-by-Step Curriculum</h4>
               <button
                 className="close-drawer-btn"
                 onClick={() => setMobileDrawerOpen(false)}
