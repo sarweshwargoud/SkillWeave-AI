@@ -30,18 +30,18 @@
 }
 
 .brand-icon-box {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   background: #111827;
-  border-radius: 7px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .brand-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   background: #ffffff;
   border-radius: 50%;
 }
@@ -49,18 +49,18 @@
 .brand-title {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 900;
-  font-size: 1.2rem;
-  letter-spacing: -0.02em;
+  font-size: 1.45rem;
+  letter-spacing: -0.025em;
   color: #111827;
 }
 
 .brand-ai-badge {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 850;
   background: #111827;
   color: #ffffff;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
 }
 
 /* Desktop Menu */
@@ -73,12 +73,12 @@
 .nav-menu-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #4b5563;
-  padding: 0.5rem 0.85rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #374151;
+  padding: 0.55rem 0.95rem;
   border-radius: 9999px;
   transition: all 0.2s ease;
 }

@@ -14,7 +14,6 @@ import {
   Map, 
   Search, 
   RotateCcw, 
-  Columns, 
   Maximize2, 
   Minimize2, 
   Download, 
@@ -22,19 +21,23 @@ import {
   ShieldCheck,
   Lock,
   Layers,
-  ArrowLeft,
-  Tv
+  Home,
+  User,
+  BookOpen,
+  SidebarClose,
+  SidebarOpen,
+  Folder,
+  FolderOpen,
+  ArrowUpDown,
+  Bot,
+  MessageSquare,
+  Check,
+  Zap,
+  ListOrdered
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
-import ActivityBar from '../components/workspace/ActivityBar';
-import PrimarySidebar from '../components/workspace/PrimarySidebar';
-import Splitter from '../components/workspace/Splitter';
-import WorkspaceTabs from '../components/workspace/WorkspaceTabs';
-import RightAIPanel from '../components/workspace/RightAIPanel';
-import BottomTerminalPanel from '../components/workspace/BottomTerminalPanel';
-import StatusBar from '../components/workspace/StatusBar';
-
+import AITutorChat from '../components/AITutorChat';
 import HandwrittenNotesViewer from '../components/HandwrittenNotesViewer';
 import LessonQuiz from '../components/LessonQuiz';
 
@@ -48,33 +51,27 @@ import {
   saveUserNote
 } from '../services/api';
 import { getClient } from '../services/supabaseClient';
-import { encryptData, decryptData, isEncryptedPayload } from '../services/crypto';
+import { encryptData, isEncryptedPayload } from '../services/crypto';
 import './LearningWorkspacePage.css';
-
-const DEFAULT_TABS = [
-  { id: 'video', title: 'Lesson Player', closable: false },
-  { id: 'notes', title: 'Handwritten Notes' },
-  { id: 'quiz', title: 'Lesson Quiz' },
-  { id: 'transcript', title: 'Transcript' },
-  { id: 'roadmap', title: 'Roadmap Tree' }
-];
 
 const LearningWorkspacePage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const client = getClient();
   const iframeRef = useRef(null);
+  const workspaceContainerRef = useRef(null);
+  const centerStageRef = useRef(null);
+  const topRowRef = useRef(null);
 
   // Authentication & User State
   const [user, setUser] = useState(null);
 
   // Active course data
   const [course, setCourse] = useState(null);
-  const [userCourses, setUserCourses] = useState([]);
-  const [userProjects, setUserProjects] = useState([]);
   const [activeVideo, setActiveVideo] = useState(null);
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeVideoIdx, setActiveVideoIdx] = useState(0);
+  const [openFolders, setOpenFolders] = useState({});
 
   // Video-specific assets state
   const [videoNotes, setVideoNotes] = useState(null);
@@ -85,113 +82,75 @@ const LearningWorkspacePage = () => {
   const [completedVideos, setCompletedVideos] = useState({});
   const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
 
-  // VS Code Layout Dimensions & Collapse States
-  const [theme, setTheme] = useState(() => localStorage.getItem('skillweave_theme') || 'dark');
-  const [activeSidebarView, setActiveSidebarView] = useState('explorer');
-  const [sidebarWidth, setSidebarWidth] = useState(280);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [aiPanelWidth, setAiPanelWidth] = useState(360);
-  const [isAIPanelCollapsed, setIsAIPanelCollapsed] = useState(false);
-  const [terminalHeight, setTerminalHeight] = useState(180);
-  const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false);
+  // --- Flexible Yellow-Bar Guided Workspace Layout State ---
+  // 1. Top row: Video vs Side-Middle Feature width percentage
+  const [videoWidthPercent, setVideoWidthPercent] = useState(() => {
+    return Number(localStorage.getItem('sw_video_width_pct')) || 52;
+  });
 
-  // Editor Tabs & Split View
-  const [openTabs, setOpenTabs] = useState(DEFAULT_TABS);
-  const [activeTab, setActiveTab] = useState('video');
-  const [isSplitView, setIsSplitView] = useState(false);
-  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  // 2. Vertical split: Top row (Video + Middle Feature) vs Bottom row (Features) height percentage
+  const [topRowHeightPercent, setTopRowHeightPercent] = useState(() => {
+    return Number(localStorage.getItem('sw_top_height_pct')) || 58;
+  });
+
+  // 3. Right Sidebar width (pixels)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    return Number(localStorage.getItem('sw_sidebar_width_px')) || 360;
+  });
+
+  const [playlistCollapsed, setPlaylistCollapsed] = useState(false);
+  const [theaterMode, setTheaterMode] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  // Client-Side E2EE State
-  const [e2eeKey, setE2eeKey] = useState(() => localStorage.getItem('skillweave_e2ee_pass') || 'my-secure-vault-key-2026');
-  const [e2eeEnabled, setE2eeEnabled] = useState(true);
+  // --- Feature Switchers ---
+  // Middle pane feature (defaults to 'chat' / AI Assistant Chatbot!)
+  const [middleFeature, setMiddleFeature] = useState(() => {
+    return localStorage.getItem('sw_middle_feature') || 'chat';
+  });
 
-  // Load User & Layout Settings from Supabase on mount
+  // Bottom pane feature (defaults to 'notes' / AI Handwritten Notes!)
+  const [bottomFeature, setBottomFeature] = useState(() => {
+    return localStorage.getItem('sw_bottom_feature') || 'notes';
+  });
+
+  // Active dragging flag to prevent iframe event interception
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Load User & Layout Settings on mount
   useEffect(() => {
-    const initUserAndSettings = async () => {
+    const initUser = async () => {
       try {
         const { data: { session } } = await client.auth.getSession();
         if (session?.user) {
           setUser(session.user);
         }
-
-        // Load Remote Workspace Settings
-        const remoteSettings = await getWorkspaceSettings();
-        if (remoteSettings) {
-          if (remoteSettings.theme) setTheme(remoteSettings.theme);
-          if (remoteSettings.sidebar_width) setSidebarWidth(remoteSettings.sidebar_width);
-          if (remoteSettings.ai_panel_width) setAiPanelWidth(remoteSettings.ai_panel_width);
-          if (remoteSettings.terminal_height) setTerminalHeight(remoteSettings.terminal_height);
-          if (typeof remoteSettings.sidebar_collapsed === 'boolean') setIsSidebarCollapsed(remoteSettings.sidebar_collapsed);
-          if (typeof remoteSettings.ai_panel_collapsed === 'boolean') setIsAIPanelCollapsed(remoteSettings.ai_panel_collapsed);
-          if (typeof remoteSettings.terminal_collapsed === 'boolean') setIsTerminalCollapsed(remoteSettings.terminal_collapsed);
-          if (remoteSettings.active_sidebar_view) setActiveSidebarView(remoteSettings.active_sidebar_view);
-        }
-
-        // Fetch User's courses and projects for sidebar
-        const [courses, projects] = await Promise.all([
-          getUserCourses().catch(() => []),
-          getUserProjects().catch(() => [])
-        ]);
-        if (courses) setUserCourses(courses);
-        if (projects) setUserProjects(projects);
       } catch (err) {
-        console.warn('Workspace initial settings note:', err);
+        console.warn('Session check note:', err);
       }
     };
-
-    initUserAndSettings();
+    initUser();
   }, []);
 
-  // Save Settings when changed (debounced)
-  const saveTimeoutRef = useRef(null);
-  const persistSettings = useCallback(() => {
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    saveTimeoutRef.current = setTimeout(async () => {
-      const payload = {
-        theme,
-        sidebar_width: sidebarWidth,
-        ai_panel_width: aiPanelWidth,
-        terminal_height: terminalHeight,
-        sidebar_collapsed: isSidebarCollapsed,
-        ai_panel_collapsed: isAIPanelCollapsed,
-        terminal_collapsed: isTerminalCollapsed,
-        active_tab: activeTab,
-        active_sidebar_view: activeSidebarView
-      };
-      try {
-        localStorage.setItem('skillweave_theme', theme);
-        await updateWorkspaceSettings(payload);
-      } catch (e) {
-        // Fallback already in localStorage
-      }
-    }, 1000);
-  }, [theme, sidebarWidth, aiPanelWidth, terminalHeight, isSidebarCollapsed, isAIPanelCollapsed, isTerminalCollapsed, activeTab, activeSidebarView]);
-
+  // Lock root document scroll so the workspace acts like an IDE canvas
   useEffect(() => {
-    persistSettings();
-  }, [sidebarWidth, aiPanelWidth, terminalHeight, isSidebarCollapsed, isAIPanelCollapsed, isTerminalCollapsed, activeSidebarView, theme, persistSettings]);
-
-  // Handle global keyboard shortcuts: Ctrl+B (sidebar), Ctrl+J (terminal), Ctrl+\ (AI panel)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Check for Ctrl or Meta (Cmd on Mac)
-      const ctrlOrCmd = e.ctrlKey || e.metaKey;
-      if (ctrlOrCmd && e.key.toLowerCase() === 'b') {
-        e.preventDefault();
-        setIsSidebarCollapsed(prev => !prev);
-      } else if (ctrlOrCmd && e.key.toLowerCase() === 'j') {
-        e.preventDefault();
-        setIsTerminalCollapsed(prev => !prev);
-      } else if (ctrlOrCmd && e.key === '\\') {
-        e.preventDefault();
-        setIsAIPanelCollapsed(prev => !prev);
-      }
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Save layout state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('sw_video_width_pct', videoWidthPercent);
+      localStorage.setItem('sw_top_height_pct', topRowHeightPercent);
+      localStorage.setItem('sw_sidebar_width_px', sidebarWidth);
+      localStorage.setItem('sw_middle_feature', middleFeature);
+      localStorage.setItem('sw_bottom_feature', bottomFeature);
+    } catch (e) {}
+  }, [videoWidthPercent, topRowHeightPercent, sidebarWidth, middleFeature, bottomFeature]);
 
   // Load Course data
   useEffect(() => {
@@ -211,7 +170,7 @@ const LearningWorkspacePage = () => {
       }
     }
 
-    // Fallback 2: Fetch the user's latest course
+    // Fallback 2: Fetch user's latest course from DB
     if (!courseToLoad) {
       try {
         const courses = await getUserCourses();
@@ -283,38 +242,18 @@ const LearningWorkspacePage = () => {
     try {
       const notes = await generateHandwrittenNotes(vidId, 'detailed');
       setVideoNotes(notes);
-      
-      // Auto-save to user notes in Supabase with optional client E2EE
-      if (notes && user) {
-        let contentToStore = notes.content || JSON.stringify(notes);
-        let isEncrypted = false;
-        let encMetadata = null;
-
-        if (e2eeEnabled && e2eeKey) {
-          const encryptedResult = await encryptData(contentToStore, e2eeKey);
-          contentToStore = encryptedResult.ciphertext;
-          isEncrypted = true;
-          encMetadata = {
-            iv: encryptedResult.iv,
-            salt: encryptedResult.salt,
-            algorithm: 'AES-GCM-256'
-          };
-        }
-
-        await saveUserNote({
-          course_id: course?.id || null,
-          video_id: vidId,
-          title: `Notes: ${activeVideo?.title || 'Lesson'}`,
-          content: contentToStore,
-          is_encrypted: isEncrypted,
-          encryption_metadata: encMetadata
-        }).catch(err => console.warn('Note save note:', err));
-      }
     } catch (e) {
       console.error("Notes generation error:", e);
     } finally {
       setNotesLoading(false);
     }
+  };
+
+  const toggleFolder = (mIdx) => {
+    setOpenFolders(prev => ({
+      ...prev,
+      [mIdx]: prev[mIdx] === false ? true : false
+    }));
   };
 
   const handleSelectVideo = (modIdx, vidIdx, videoObj) => {
@@ -408,30 +347,109 @@ const LearningWorkspacePage = () => {
     }
   };
 
-  const handleCloseTab = (tabId) => {
-    if (tabId === 'video') return; // Cannot close primary video tab
-    setOpenTabs(prev => prev.filter(t => t.id !== tabId));
-    if (activeTab === tabId) {
-      setActiveTab('video');
-    }
+  // Swap feature displayed in middle with bottom feature
+  const handleSwapPanes = () => {
+    const currentMiddle = middleFeature;
+    const currentBottom = bottomFeature;
+    setMiddleFeature(currentBottom);
+    setBottomFeature(currentMiddle);
   };
 
-  const handleResetLayout = () => {
-    setSidebarWidth(280);
-    setAiPanelWidth(360);
-    setTerminalHeight(180);
-    setIsSidebarCollapsed(false);
-    setIsAIPanelCollapsed(false);
-    setIsTerminalCollapsed(false);
-    setOpenTabs(DEFAULT_TABS);
-    setActiveTab('video');
-    setIsSplitView(false);
-    setIsTheaterMode(false);
+  // =========================================================================
+  // DRAGGING SPLITTERS HANDLERS (Simple Dragging Edges)
+  // =========================================================================
+
+  // 1. Drag Splitter 1: Video Width vs Side-Middle Feature Width
+  const handleStartDragVideo = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (moveEvent) => {
+      if (!topRowRef.current) return;
+      const rect = topRowRef.current.getBoundingClientRect();
+      const clientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
+      const newPct = Math.min(76, Math.max(30, ((clientX - rect.left) / rect.width) * 100));
+      setVideoWidthPercent(Math.round(newPct));
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onMouseMove);
+      window.removeEventListener('touchend', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onMouseMove);
+    window.addEventListener('touchend', onMouseUp);
+  };
+
+  // 2. Drag Splitter 2: Top Row (Video + Chat) Height vs Bottom Row Height
+  const handleStartDragRow = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (moveEvent) => {
+      if (!centerStageRef.current) return;
+      const rect = centerStageRef.current.getBoundingClientRect();
+      const clientY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
+      const newPct = Math.min(80, Math.max(34, ((clientY - rect.top) / rect.height) * 100));
+      setTopRowHeightPercent(Math.round(newPct));
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onMouseMove);
+      window.removeEventListener('touchend', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onMouseMove);
+    window.addEventListener('touchend', onMouseUp);
+  };
+
+  // 3. Drag Splitter 3: Right Sidebar Width (Curriculum Explorer)
+  const handleStartDragSidebar = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.userSelect = 'none';
+    const startX = e.touches ? e.touches[0].clientX : e.clientX;
+    const initialWidth = sidebarWidth;
+
+    const onMouseMove = (moveEvent) => {
+      const clientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
+      const delta = startX - clientX;
+      const newWidth = Math.min(550, Math.max(260, initialWidth + delta));
+      setSidebarWidth(Math.round(newWidth));
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onMouseMove);
+      window.removeEventListener('touchend', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onMouseMove);
+    window.addEventListener('touchend', onMouseUp);
   };
 
   if (!course) {
     return (
-      <div className={`vscode-workspace-page theme-${theme}`}>
+      <div className="workspace-page-container">
         <Navbar />
         <div className="workspace-empty-center">
           <h2>No Active Course in Workspace</h2>
@@ -464,120 +482,406 @@ const LearningWorkspacePage = () => {
   });
   const overallPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
-  // Filtered transcript search
+  // Filtered transcript lines
   const filteredTranscript = transcriptData?.transcript?.filter(item => 
     !transcriptSearch || item.text.toLowerCase().includes(transcriptSearch.toLowerCase())
   ) || [];
 
+  // =========================================================================
+  // MODULAR FEATURE RENDERER (Used in both Middle Pane and Bottom Pane!)
+  // =========================================================================
+  const renderFeatureContent = (featureName, paneLocation = 'bottom') => {
+    switch (featureName) {
+      case 'chat':
+        return (
+          <div className="feature-wrapper chat-feature-wrapper">
+            <AITutorChat
+              videoId={activeVideo?.id}
+              videoTitle={activeVideo?.title}
+              currentTimestamp={currentTimestamp}
+              onSeekTimestamp={handleSeekTimestamp}
+            />
+          </div>
+        );
+
+      case 'notes':
+        return (
+          <div className="feature-wrapper notes-feature-wrapper">
+            <div className="feature-pane-hero-bar">
+              <div className="feature-hero-title-box">
+                <FileText size={20} className="text-amber-500" />
+                <div>
+                  <h3 className="feature-main-heading">AI Handwritten Study Notes</h3>
+                  <p className="feature-sub-heading">Detailed handwritten lecture summary on ruled notebook paper with LaTeX math</p>
+                </div>
+              </div>
+
+              {!videoNotes && (
+                <button
+                  className="btn-feature-generate"
+                  onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
+                  disabled={notesLoading || !activeVideo?.id}
+                >
+                  <Sparkles size={14} />
+                  <span>{notesLoading ? 'Synthesizing...' : 'Generate Notes'}</span>
+                </button>
+              )}
+            </div>
+
+            {notesLoading ? (
+              <div className="feature-loading-box">
+                <Sparkles size={26} className="spinning text-amber-500" />
+                <h4>Synthesizing Handwritten Notes from Lecture Transcript...</h4>
+                <p>Generating structured topics, code examples, formulas, and flashcards.</p>
+              </div>
+            ) : videoNotes ? (
+              <div className="handwritten-notes-view-box">
+                <HandwrittenNotesViewer notesData={videoNotes} />
+              </div>
+            ) : (
+              <div className="feature-empty-state-box">
+                <FileText size={38} className="text-gray-400" />
+                <h4>Handwritten notes not generated yet for this lesson</h4>
+                <p>Click below to generate clean, ruled-paper handwritten study notes.</p>
+                <button
+                  className="btn-primary"
+                  onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
+                >
+                  Generate Handwritten Notes
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'quiz':
+        return (
+          <div className="feature-wrapper quiz-feature-wrapper">
+            <LessonQuiz
+              videoId={activeVideo?.id}
+              videoTitle={activeVideo?.title}
+              onQuizComplete={(sc) => console.log('Quiz score:', sc)}
+            />
+          </div>
+        );
+
+      case 'transcript':
+        return (
+          <div className="feature-wrapper transcript-feature-wrapper">
+            <div className="transcript-controls-strip">
+              <div className="transcript-search-box">
+                <Search size={15} className="text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Filter synchronized captions..."
+                  value={transcriptSearch}
+                  onChange={(e) => setTranscriptSearch(e.target.value)}
+                  className="transcript-search-input-field"
+                />
+              </div>
+              <span className="transcript-matches-pill">{filteredTranscript.length} lines</span>
+            </div>
+
+            {transcriptLoading ? (
+              <div className="feature-loading-box">
+                <AlignLeft size={24} className="spinning text-sky-500" />
+                <h4>Fetching synchronized video captions...</h4>
+              </div>
+            ) : filteredTranscript.length > 0 ? (
+              <div className="transcript-scroll-stream">
+                {filteredTranscript.map((line, idx) => (
+                  <div
+                    key={idx}
+                    className="transcript-line-card"
+                    onClick={() => handleSeekTimestamp(line.timestamp || '00:00')}
+                    title={`Click to jump video to ${line.timestamp}`}
+                  >
+                    <span className="transcript-time-badge">
+                      <Clock size={11} /> {line.timestamp}
+                    </span>
+                    <span className="transcript-text-body">{line.text}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="feature-empty-state-box">
+                <AlignLeft size={36} className="text-gray-400" />
+                <h4>No transcript available for this lesson</h4>
+                <p>Captions could not be loaded or no matching lines were found.</p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'objectives':
+        return (
+          <div className="feature-wrapper objectives-feature-wrapper">
+            <div className="objectives-header-strip">
+              <div>
+                <h3 className="feature-main-heading">Module Objectives & Roadmap</h3>
+                <p className="feature-sub-heading">Step-by-step learning progression and curriculum milestone tracker</p>
+              </div>
+              <span className="curriculum-badge-pill">{doneCount} of {totalCount} Lessons Done ({overallPercent}%)</span>
+            </div>
+
+            <div className="objectives-cards-grid">
+              {course.modules?.map((mod, mIdx) => (
+                <div key={mIdx} className="objective-module-box">
+                  <div className="objective-mod-head">
+                    <span className="obj-step-tag">Step {String(mIdx + 1).padStart(2, '0')}</span>
+                    <h4 className="obj-title">{mod.module_title}</h4>
+                  </div>
+                  <div className="objective-lessons-list">
+                    {(mod.videos || (mod.video ? [mod.video] : [])).map((v, vIdx) => {
+                      const isDone = completedVideos[v.id] || v.completed;
+                      const isCurrent = activeVideo?.id === v.id;
+                      return (
+                        <div
+                          key={vIdx}
+                          className={`objective-leaf-row ${isCurrent ? 'is-active-leaf' : ''} ${isDone ? 'is-done-leaf' : ''}`}
+                          onClick={() => handleSelectVideo(mIdx, vIdx, v)}
+                        >
+                          {isDone ? (
+                            <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                          ) : (
+                            <Circle size={15} className="text-gray-400 flex-shrink-0" />
+                          )}
+                          <span className="obj-leaf-name">{v.title}</span>
+                          <span className="obj-leaf-dur">{v.durationFormatted || ''}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Curriculum Step-by-Step Navigation List (Folder Tree)
+  const renderCurriculumNavigation = () => (
+    <div className="curriculum-playlist-inner">
+      <div className="sidebar-course-header">
+        <div className="header-meta-row">
+          <span className="course-type-tag">Curriculum Explorer</span>
+          <span className="course-done-badge">{doneCount}/{totalCount} Completed</span>
+        </div>
+        <h3 className="sidebar-course-title">{course.title}</h3>
+        
+        <div className="course-progress-indicator">
+          <div className="progress-text-row">
+            <span>Overall Progress</span>
+            <strong>{overallPercent}%</strong>
+          </div>
+          <div className="progress-track-small">
+            <div className="progress-bar-fill" style={{ width: `${overallPercent}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="sidebar-modules-scroll">
+        {course.modules?.map((module, mIdx) => {
+          const videoList = module.videos || (module.video ? [module.video] : []);
+          const isCurrentModule = mIdx === activeModuleIdx;
+          const isFolderOpen = openFolders[mIdx] !== false; // open by default
+
+          return (
+            <div key={mIdx} className={`folder-module-block ${isCurrentModule ? 'current-active-folder' : ''}`}>
+              <div 
+                className="folder-module-header"
+                onClick={() => toggleFolder(mIdx)}
+                title="Click to toggle folder"
+              >
+                <div className="folder-icon-wrapper">
+                  {isFolderOpen ? (
+                    <FolderOpen size={17} className="icon-folder-open" />
+                  ) : (
+                    <Folder size={17} className="icon-folder-closed" />
+                  )}
+                </div>
+                
+                <div className="folder-label-group">
+                  <span className="folder-step-badge">Step {String(mIdx + 1).padStart(2, '0')}</span>
+                  <h5 className="folder-name-title">{module.module_title}</h5>
+                </div>
+
+                <span className="folder-lesson-count">{videoList.length}</span>
+              </div>
+
+              {isFolderOpen && (
+                <div className="folder-contents-tree">
+                  {videoList.map((vid, vIdx) => {
+                    const isPlaying = activeVideo?.id === vid.id;
+                    const isDone = completedVideos[vid.id] || vid.completed;
+
+                    return (
+                      <div
+                        key={vIdx}
+                        className={`tree-leaf-item ${isPlaying ? 'active-tree-leaf' : ''} ${isDone ? 'done-tree-leaf' : ''}`}
+                        onClick={() => handleSelectVideo(mIdx, vIdx, vid)}
+                      >
+                        <div className="tree-branch-line" />
+
+                        <button
+                          className="leaf-status-toggle"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleComplete(vid.id);
+                          }}
+                          title={isDone ? "Mark incomplete" : "Mark completed"}
+                        >
+                          {isDone ? (
+                            <CheckCircle2 size={16} className="icon-leaf-done" />
+                          ) : (
+                            <Circle size={16} className="icon-leaf-pending" />
+                          )}
+                        </button>
+
+                        <div className="tree-leaf-details">
+                          <span className="tree-leaf-title">{vid.title}</span>
+                          <span className="tree-leaf-meta">
+                            <Clock size={11} /> {vid.durationFormatted || 'Lesson'}
+                          </span>
+                        </div>
+
+                        {isPlaying && (
+                          <div className="tree-playing-pulse" title="Now Playing">
+                            <span className="pulse-bar" />
+                            <span className="pulse-bar" />
+                            <span className="pulse-bar" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
-    <div className={`vscode-workspace-page theme-${theme}`}>
-      {/* Top Main Navigation */}
+    <div className={`workspace-page-container ${isResizing ? 'is-resizing' : ''}`}>
+      {/* Global Brand Navbar */}
       <Navbar />
 
-      {/* Main VS Code Workspace Grid */}
-      <div className="vscode-ide-viewport">
-        {/* 1. FAR LEFT: Activity Bar */}
-        <ActivityBar
-          activeView={activeSidebarView}
-          setActiveView={setActiveSidebarView}
-          sidebarCollapsed={isSidebarCollapsed}
-          setSidebarCollapsed={setIsSidebarCollapsed}
-          theme={theme}
-          setTheme={setTheme}
-          user={user}
-          e2eeEnabled={e2eeEnabled}
-          onOpenSettings={() => {
-            setActiveSidebarView('settings');
-            setIsSidebarCollapsed(false);
-          }}
-        />
+      {/* Top Sub-Navbar & Breadcrumbs Bar with Increased Prominent Typography */}
+      <nav className="workspace-sticky-top-nav">
+        <div className="workspace-nav-left-group">
+          <button 
+            className="workspace-nav-btn return-home"
+            onClick={() => navigate('/')}
+            title="Return to Home"
+          >
+            <Home size={16} /> <span>Home</span>
+          </button>
+          
+          <span className="nav-sep">/</span>
 
-        {/* 2. PRIMARY SIDEBAR */}
-        <PrimarySidebar
-          activeView={activeSidebarView}
-          width={sidebarWidth}
-          isCollapsed={isSidebarCollapsed}
-          onCollapse={() => setIsSidebarCollapsed(true)}
-          course={course}
-          activeVideo={activeVideo}
-          completedVideos={completedVideos}
-          onSelectVideo={handleSelectVideo}
-          userCourses={userCourses}
-          userProjects={userProjects}
-          onLoadCourse={(c) => {
-            setCourse(c);
-            loadCourseData();
-          }}
-          onResetLayout={handleResetLayout}
-          e2eeKey={e2eeKey}
-          setE2eeKey={setE2eeKey}
-          e2eeEnabled={e2eeEnabled}
-          setE2eeEnabled={setE2eeEnabled}
-          theme={theme}
-          setTheme={setTheme}
-        />
+          <button 
+            className="workspace-nav-btn return-mylearning"
+            onClick={() => navigate('/my-learning')}
+            title="Return to My Learning"
+          >
+            <BookOpen size={16} /> <span>My Learning</span>
+          </button>
 
-        {/* 3. SPLITTER: Primary Sidebar Resize Handle */}
-        {!isSidebarCollapsed && (
-          <Splitter
-            direction="horizontal"
-            onResize={(delta) => {
-              setSidebarWidth(prev => Math.min(550, Math.max(200, prev + delta)));
-            }}
-          />
-        )}
+          <span className="nav-sep">/</span>
 
-        {/* 4. CENTRAL WORKING AREA (Editor + Terminal) */}
-        <div className="vscode-central-canvas">
-          {/* Top Multi-Tab Bar */}
-          <WorkspaceTabs
-            openTabs={openTabs}
-            activeTab={activeTab}
-            onSelectTab={setActiveTab}
-            onCloseTab={handleCloseTab}
-            isSplitView={isSplitView}
-            onToggleSplitView={() => setIsSplitView(!isSplitView)}
-            isTheaterMode={isTheaterMode}
-            onToggleTheaterMode={() => setIsTheaterMode(!isTheaterMode)}
-          />
+          <button 
+            className="workspace-nav-btn return-profile"
+            onClick={() => navigate('/profile')}
+            title="Return to Profile & Projects"
+          >
+            <User size={16} /> <span>Profile & Projects</span>
+          </button>
+        </div>
 
-          {/* Editor Canvas Content Area */}
-          <div className={`vscode-editor-body ${isSplitView ? 'split-active' : ''} ${isTheaterMode ? 'theater-expanded' : ''}`}>
-            
-            {/* MAIN PANE: Video Player */}
-            <div className={`editor-pane pane-primary ${(isSplitView || activeTab === 'video') ? 'visible-pane' : 'hidden-pane'}`}>
-              <div className="cinema-player-wrapper">
+        {/* Scaled-up prominent course header */}
+        <div className="workspace-nav-center-meta">
+          <h1 className="active-course-label" title={course.title}>{course.title}</h1>
+          <span className="active-progress-pill">{overallPercent}% Done</span>
+        </div>
+
+        <div className="workspace-nav-right-actions">
+          <button 
+            className="workspace-toggle-sidebar-btn"
+            onClick={() => setPlaylistCollapsed(!playlistCollapsed)}
+            title={playlistCollapsed ? "Show Playlist Sidebar" : "Hide Playlist Sidebar"}
+          >
+            {playlistCollapsed ? <SidebarOpen size={17} /> : <SidebarClose size={17} />}
+            <span>{playlistCollapsed ? "Show Playlist" : "Hide Playlist"}</span>
+          </button>
+
+          <button 
+            className="mobile-playlist-drawer-trigger"
+            onClick={() => setMobileDrawerOpen(true)}
+            title="Open Playlist"
+          >
+            <Layers size={17} />
+            <span>Playlist ({doneCount}/{totalCount})</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Workspace Canvas: Split between Center Stage & Right Playlist Sidebar */}
+      <div 
+        className={`workspace-main-body ${playlistCollapsed ? 'playlist-is-collapsed' : ''} ${theaterMode ? 'theater-is-expanded' : ''}`}
+        ref={workspaceContainerRef}
+      >
+        {/* CENTER / LEFT STAGE: Holds TOP ROW and BOTTOM ROW with horizontal resize splitter */}
+        <div className="workspace-center-stage" ref={centerStageRef}>
+
+          {/* TOP ROW: Video Player (Left) + Side-Middle Feature / Chatbot (Right) */}
+          <div 
+            className="workspace-top-row" 
+            ref={topRowRef}
+            style={{ height: `${topRowHeightPercent}%` }}
+          >
+            {/* TOP LEFT: In-App Cinema Video Player */}
+            <div 
+              className="top-video-column"
+              style={{ width: `${videoWidthPercent}%` }}
+            >
+              <div className="video-player-bezel-frame">
                 {activeVideo ? (
                   <>
-                    <div className="cinema-iframe-bezel">
+                    <div className="in-app-player-aspect-frame">
                       <iframe
                         ref={iframeRef}
                         src={`https://www.youtube.com/embed/${activeVideo.id}?autoplay=1&enablejsapi=1`}
                         title={activeVideo.title}
-                        className="vscode-theater-iframe"
+                        className="yt-theater-iframe"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       />
                     </div>
 
-                    {/* Integrated Lesson Controls Bar */}
+                    {/* Integrated Lesson Controls Strip */}
                     <div className="player-meta-control-bar">
                       <div className="player-left-info">
-                        <span className="live-playing-badge" />
-                        <div className="player-title-box">
-                          <span className="player-module-sub">{activeVideo.moduleTitle || `Module ${activeModuleIdx + 1}`}</span>
-                          <h2 className="current-video-heading" title={activeVideo.title}>{activeVideo.title}</h2>
-                        </div>
+                        <span className="pulsing-red-circle" title="Now Playing" />
+                        <h2 className="current-video-heading" title={activeVideo.title}>
+                          {activeVideo.title}
+                        </h2>
                       </div>
 
                       <div className="player-right-actions">
                         <button
                           className={`btn-complete-toggle ${completedVideos[activeVideo.id] ? 'is-completed' : ''}`}
                           onClick={() => handleToggleComplete(activeVideo.id)}
-                          title={completedVideos[activeVideo.id] ? 'Completed' : 'Mark Completed'}
+                          title={completedVideos[activeVideo.id] ? 'Lesson Done' : 'Mark Completed'}
                         >
-                          <CheckCircle2 size={13} />
-                          <span>{completedVideos[activeVideo.id] ? 'Done' : 'Mark Complete'}</span>
+                          <CheckCircle2 size={15} />
+                          <span>{completedVideos[activeVideo.id] ? 'Done' : 'Complete'}</span>
                         </button>
 
                         <div className="prev-next-arrows-box">
@@ -586,242 +890,215 @@ const LearningWorkspacePage = () => {
                             onClick={handlePrevVideo}
                             title="Previous Lesson"
                           >
-                            <ChevronLeft size={15} /> Prev
+                            <ChevronLeft size={16} /> Prev
                           </button>
                           <button
                             className="step-arrow-btn"
                             onClick={handleNextVideo}
                             title="Next Lesson"
                           >
-                            Next <ChevronRight size={15} />
+                            Next <ChevronRight size={16} />
                           </button>
                         </div>
 
                         <button
                           className="theater-expand-btn"
-                          onClick={() => setIsTheaterMode(!isTheaterMode)}
-                          title={isTheaterMode ? "Exit Theater Mode" : "Expand Theater Mode"}
+                          onClick={() => setTheaterMode(!theaterMode)}
+                          title={theaterMode ? "Exit Full Theater" : "Full Theater Mode"}
                         >
-                          {isTheaterMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                          {theaterMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                         </button>
                       </div>
                     </div>
                   </>
                 ) : (
                   <div className="no-video-placeholder">
-                    <Play size={40} />
-                    <h3>Select a lesson from the curriculum explorer to begin</h3>
+                    <Play size={44} />
+                    <h3>Select a lesson from the curriculum playlist</h3>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* SECONDARY PANE: Notes, Quiz, Transcript, or Roadmap Tree */}
-            <div className={`editor-pane pane-secondary ${(!isSplitView && activeTab === 'video') ? 'hidden-pane' : 'visible-pane'}`}>
-              
-              {/* TAB: NOTES */}
-              {activeTab === 'notes' && (
-                <div className="tab-pane-scroll notes-tab-pane">
-                  <div className="notes-hero-controls">
-                    <div className="notes-heading-group">
-                      <FileText size={18} className="text-amber-400" />
-                      <div>
-                        <h3>AI Handwritten Study Notes</h3>
-                        <p>Detailed handwritten summary with ruled paper background & LaTeX math</p>
-                      </div>
-                    </div>
+            {/* SPLITTER 1 (Vertical Drag Bar): Between Video Player and Side-Middle Feature */}
+            <div 
+              className="resize-splitter splitter-vertical splitter-video-middle"
+              onMouseDown={handleStartDragVideo}
+              onTouchStart={handleStartDragVideo}
+              title="Drag to resize Video vs Side Feature (Double-click to reset)"
+              onDoubleClick={() => setVideoWidthPercent(52)}
+            >
+              <div className="splitter-handle-pill" />
+            </div>
 
-                    <div className="notes-action-buttons">
-                      {!videoNotes && (
-                        <button
-                          className="btn-generate-notes-action"
-                          onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
-                          disabled={notesLoading || !activeVideo?.id}
-                        >
-                          <Sparkles size={14} />
-                          <span>{notesLoading ? 'Synthesizing Notes...' : 'Generate Notes for This Lesson'}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {notesLoading ? (
-                    <div className="notes-loading-state">
-                      <Sparkles size={24} className="spinning text-amber-400" />
-                      <h4>Analyzing Lecture Audio & Video Transcripts...</h4>
-                      <p>Drafting handwritten-style key takeaways, code examples, and review flashcards.</p>
-                    </div>
-                  ) : videoNotes ? (
-                    <HandwrittenNotesViewer notesData={videoNotes} />
-                  ) : (
-                    <div className="notes-empty-card">
-                      <FileText size={36} className="text-gray-500" />
-                      <h4>No notes generated yet for this lesson</h4>
-                      <p>Click "Generate Notes" above to create clean, structured notes.</p>
-                      <button
-                        className="btn-primary"
-                        onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
-                      >
-                        Generate Notes
-                      </button>
-                    </div>
-                  )}
+            {/* TOP RIGHT: Side-Middle Feature (Defaults to AI Assistant Chatbot!) */}
+            <div 
+              className="top-side-middle-feature-column"
+              style={{ width: `calc(${100 - videoWidthPercent}% - 10px)` }}
+            >
+              {/* Feature Switcher Header Strip */}
+              <div className="side-middle-switcher-header">
+                <div className="side-feature-selector-tabs">
+                  <button 
+                    className={`side-feat-tab ${middleFeature === 'chat' ? 'is-active' : ''}`}
+                    onClick={() => setMiddleFeature('chat')}
+                    title="Display AI Video Tutor in side-middle"
+                  >
+                    <Bot size={15} /> <span>AI Tutor</span>
+                  </button>
+                  <button 
+                    className={`side-feat-tab ${middleFeature === 'notes' ? 'is-active' : ''}`}
+                    onClick={() => setMiddleFeature('notes')}
+                    title="Display Handwritten Notes in side-middle"
+                  >
+                    <FileText size={15} /> <span>Notes</span>
+                  </button>
+                  <button 
+                    className={`side-feat-tab ${middleFeature === 'quiz' ? 'is-active' : ''}`}
+                    onClick={() => setMiddleFeature('quiz')}
+                    title="Display Lesson Quiz in side-middle"
+                  >
+                    <HelpCircle size={15} /> <span>Quiz</span>
+                  </button>
+                  <button 
+                    className={`side-feat-tab ${middleFeature === 'transcript' ? 'is-active' : ''}`}
+                    onClick={() => setMiddleFeature('transcript')}
+                    title="Display Transcript in side-middle"
+                  >
+                    <AlignLeft size={15} /> <span>Transcript</span>
+                  </button>
+                  <button 
+                    className={`side-feat-tab ${middleFeature === 'objectives' ? 'is-active' : ''}`}
+                    onClick={() => setMiddleFeature('objectives')}
+                    title="Display Objectives in side-middle"
+                  >
+                    <Map size={15} /> <span>Objectives</span>
+                  </button>
                 </div>
-              )}
 
-              {/* TAB: QUIZ */}
-              {activeTab === 'quiz' && (
-                <div className="tab-pane-scroll quiz-tab-pane">
-                  <LessonQuiz
-                    videoId={activeVideo?.id}
-                    videoTitle={activeVideo?.title}
-                    onQuizComplete={(sc) => console.log('Quiz completed with score:', sc)}
-                  />
-                </div>
-              )}
+                {/* Quick Swap with Bottom Pane Button */}
+                <button 
+                  className="side-swap-panes-btn"
+                  onClick={handleSwapPanes}
+                  title="Swap feature with bottom panel"
+                >
+                  <ArrowUpDown size={14} />
+                  <span>Swap with Bottom</span>
+                </button>
+              </div>
 
-              {/* TAB: TRANSCRIPT */}
-              {activeTab === 'transcript' && (
-                <div className="tab-pane-scroll transcript-tab-pane">
-                  <div className="transcript-search-bar">
-                    <Search size={14} className="search-icon" />
-                    <input
-                      type="text"
-                      placeholder="Filter transcript lines..."
-                      value={transcriptSearch}
-                      onChange={(e) => setTranscriptSearch(e.target.value)}
-                      className="transcript-search-input"
-                    />
-                    <span className="transcript-count-pill">{filteredTranscript.length} lines</span>
-                  </div>
-
-                  {transcriptLoading ? (
-                    <div className="transcript-loading-box">
-                      <AlignLeft size={20} className="spinning text-sky-400" />
-                      <span>Fetching synchronized captions...</span>
-                    </div>
-                  ) : filteredTranscript.length > 0 ? (
-                    <div className="transcript-lines-list">
-                      {filteredTranscript.map((line, idx) => (
-                        <div
-                          key={idx}
-                          className="transcript-line-row"
-                          onClick={() => handleSeekTimestamp(line.timestamp || '00:00')}
-                          title={`Jump video to ${line.timestamp}`}
-                        >
-                          <span className="ts-badge"><Clock size={10} /> {line.timestamp}</span>
-                          <span className="ts-text">{line.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="transcript-empty-state">
-                      <AlignLeft size={32} className="text-gray-500" />
-                      <p>No transcript available or matches found for this lesson.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* TAB: ROADMAP TREE */}
-              {activeTab === 'roadmap' && (
-                <div className="tab-pane-scroll roadmap-tab-pane">
-                  <div className="roadmap-overview-header">
-                    <h3>Curriculum Architecture</h3>
-                    <span className="roadmap-stats-pill">{doneCount} of {totalCount} Completed ({overallPercent}%)</span>
-                  </div>
-                  <div className="roadmap-modules-grid">
-                    {course.modules?.map((mod, mIdx) => (
-                      <div key={mIdx} className="roadmap-module-card">
-                        <div className="roadmap-module-header">
-                          <span className="roadmap-step-pill">Step {String(mIdx + 1).padStart(2, '0')}</span>
-                          <h4>{mod.module_title}</h4>
-                        </div>
-                        <div className="roadmap-module-lessons">
-                          {(mod.videos || (mod.video ? [mod.video] : [])).map((v, vIdx) => {
-                            const isDone = completedVideos[v.id] || v.completed;
-                            const isCurrent = activeVideo?.id === v.id;
-                            return (
-                              <div
-                                key={vIdx}
-                                className={`roadmap-lesson-item ${isCurrent ? 'active' : ''} ${isDone ? 'done' : ''}`}
-                                onClick={() => {
-                                  handleSelectVideo(mIdx, vIdx, v);
-                                  setActiveTab('video');
-                                }}
-                              >
-                                {isDone ? <CheckCircle2 size={13} className="text-emerald-400" /> : <Circle size={13} />}
-                                <span className="lesson-name">{v.title}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Render selected middle feature */}
+              <div className="side-middle-feature-canvas">
+                {renderFeatureContent(middleFeature, 'middle')}
+              </div>
             </div>
           </div>
 
-          {/* 5. SPLITTER: Bottom Terminal Resize Handle */}
-          {!isTerminalCollapsed && (
-            <Splitter
-              direction="vertical"
-              onResize={(delta) => {
-                setTerminalHeight(prev => Math.min(450, Math.max(120, prev - delta)));
-              }}
-            />
-          )}
+          {/* SPLITTER 2 (Horizontal Drag Bar): Between Top Row (Video+Chat) and Bottom Features Row */}
+          <div 
+            className="resize-splitter splitter-horizontal splitter-top-bottom"
+            onMouseDown={handleStartDragRow}
+            onTouchStart={handleStartDragRow}
+            title="Drag to resize Top (Video + Chat) vs Bottom Features (Double-click to reset)"
+            onDoubleClick={() => setTopRowHeightPercent(58)}
+          >
+            <div className="splitter-handle-pill horizontal-pill" />
+          </div>
 
-          {/* 6. BOTTOM TERMINAL / CONSOLE PANEL */}
-          <BottomTerminalPanel
-            height={terminalHeight}
-            isCollapsed={isTerminalCollapsed}
-            onToggleCollapse={() => setIsTerminalCollapsed(true)}
-            activeVideo={activeVideo}
-            course={course}
-            user={user}
-          />
+          {/* BOTTOM ROW: The Rest of the Features */}
+          <div 
+            className="workspace-bottom-row"
+            style={{ height: `calc(${100 - topRowHeightPercent}% - 10px)` }}
+          >
+            {/* Bottom Feature Selector Tab Strip */}
+            <div className="bottom-feature-tab-strip">
+              <div className="bottom-feature-tabs-group">
+                <button 
+                  className={`bottom-feat-tab ${bottomFeature === 'notes' ? 'active-tab' : ''}`}
+                  onClick={() => setBottomFeature('notes')}
+                >
+                  <FileText size={17} /> <span>✍️ AI Handwritten Notes</span>
+                </button>
+                <button 
+                  className={`bottom-feat-tab ${bottomFeature === 'chat' ? 'active-tab' : ''}`}
+                  onClick={() => setBottomFeature('chat')}
+                >
+                  <Bot size={17} /> <span>💬 AI Video Tutor</span>
+                </button>
+                <button 
+                  className={`bottom-feat-tab ${bottomFeature === 'quiz' ? 'active-tab' : ''}`}
+                  onClick={() => setBottomFeature('quiz')}
+                >
+                  <HelpCircle size={17} /> <span>🎯 Lesson Quiz</span>
+                </button>
+                <button 
+                  className={`bottom-feat-tab ${bottomFeature === 'transcript' ? 'active-tab' : ''}`}
+                  onClick={() => setBottomFeature('transcript')}
+                >
+                  <AlignLeft size={17} /> <span>📋 Interactive Transcript</span>
+                </button>
+                <button 
+                  className={`bottom-feat-tab ${bottomFeature === 'objectives' ? 'active-tab' : ''}`}
+                  onClick={() => setBottomFeature('objectives')}
+                >
+                  <Map size={17} /> <span>📖 Module Objectives</span>
+                </button>
+              </div>
+
+              <div className="bottom-tab-right-meta">
+                <button 
+                  className="quick-swap-bottom-btn"
+                  onClick={handleSwapPanes}
+                  title="Swap with middle pane"
+                >
+                  <ArrowUpDown size={13} /> <span>Swap with Middle</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Feature Independent Scroll Canvas */}
+            <div className="bottom-feature-scroll-canvas">
+              {renderFeatureContent(bottomFeature, 'bottom')}
+            </div>
+          </div>
         </div>
 
-        {/* 7. SPLITTER: Right AI Panel Resize Handle */}
-        {!isAIPanelCollapsed && (
-          <Splitter
-            direction="horizontal"
-            onResize={(delta) => {
-              setAiPanelWidth(prev => Math.min(650, Math.max(260, prev - delta)));
-            }}
-          />
+        {/* SPLITTER 3 (Vertical Drag Bar): Between Main Workspace and Curriculum Playlist Sidebar */}
+        {!playlistCollapsed && (
+          <div 
+            className="resize-splitter splitter-vertical splitter-main-sidebar"
+            onMouseDown={handleStartDragSidebar}
+            onTouchStart={handleStartDragSidebar}
+            title="Drag to resize Playlist Sidebar (Double-click to reset)"
+            onDoubleClick={() => setSidebarWidth(360)}
+          >
+            <div className="splitter-handle-pill" />
+          </div>
         )}
 
-        {/* 8. RIGHT AI COPILOT PANEL */}
-        <RightAIPanel
-          activeVideo={activeVideo}
-          course={course}
-          currentTimestamp={currentTimestamp}
-          onSeekTimestamp={handleSeekTimestamp}
-          isCollapsed={isAIPanelCollapsed}
-          onToggleCollapse={() => setIsAIPanelCollapsed(true)}
-          width={aiPanelWidth}
-        />
+        {/* RIGHT COLUMN: Curriculum Explorer Playlist Sidebar */}
+        {!playlistCollapsed && (
+          <aside 
+            className="workspace-curriculum-sidebar"
+            style={{ width: `${sidebarWidth}px` }}
+          >
+            {renderCurriculumNavigation()}
+          </aside>
+        )}
       </div>
 
-      {/* 9. BOTTOM STATUS BAR */}
-      <StatusBar
-        branch="feature-security"
-        activeVideo={activeVideo}
-        currentTimestamp={currentTimestamp}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={() => setIsSidebarCollapsed(prev => !prev)}
-        isAIPanelCollapsed={isAIPanelCollapsed}
-        onToggleAIPanel={() => setIsAIPanelCollapsed(prev => !prev)}
-        isTerminalCollapsed={isTerminalCollapsed}
-        onToggleTerminal={() => setIsTerminalCollapsed(prev => !prev)}
-        theme={theme}
-        onToggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-        isE2EE={e2eeEnabled}
-      />
+      {/* Mobile Drawer Overlay */}
+      {mobileDrawerOpen && (
+        <div className="mobile-drawer-backdrop" onClick={() => setMobileDrawerOpen(false)}>
+          <div className="mobile-drawer-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-drawer-header">
+              <h4>Curriculum Explorer</h4>
+              <button className="mobile-drawer-close" onClick={() => setMobileDrawerOpen(false)}>✕</button>
+            </div>
+            {renderCurriculumNavigation()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
