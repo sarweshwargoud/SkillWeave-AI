@@ -4,6 +4,10 @@ import CourseInputPage from './pages/CourseInputPage';
 import RoadmapPage from './pages/RoadmapPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
+import HandwrittenNotesPage from './pages/HandwrittenNotesPage';
+import AITutorPage from './pages/AITutorPage';
+import LearningWorkspacePage from './pages/LearningWorkspacePage';
+import MyLearningPage from './pages/MyLearningPage';
 import './App.css';
 
 function App() {
@@ -13,6 +17,10 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/create" element={<CourseInputPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
+        <Route path="/workspace" element={<LearningWorkspacePage />} />
+        <Route path="/notes" element={<HandwrittenNotesPage />} />
+        <Route path="/tutor" element={<AITutorPage />} />
+        <Route path="/my-learning" element={<MyLearningPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>

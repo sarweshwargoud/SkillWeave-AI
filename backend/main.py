@@ -1,19 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import search, analyze, course
+from routers import search, analyze, course, learning
 
-app = FastAPI(title="EduPath API", version="0.1.0")
+app = FastAPI(title="SkillWeave AI Learning Platform API", version="0.2.0")
 
-# CORS  Setup
-origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://skillweave-ai-1.onrender.com",   # frontend on Render (if any)
-    "https://skillweave.vercel.app",          
-    "https://skillweave-ai.vercel.app",
-]
-
-
+# CORS Setup
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,14 +13,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include Routers
 app.include_router(search.router, prefix="/api/v1", tags=["Search"])
 app.include_router(analyze.router, prefix="/api/v1", tags=["Analysis"])
 app.include_router(course.router, prefix="/api/v1", tags=["Course"])
+app.include_router(learning.router, prefix="/api/v1", tags=["Learning Ecosystem"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to SkillWeave API"}
+    return {"message": "Welcome to SkillWeave AI Platform API"}
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "0.2.0"}

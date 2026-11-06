@@ -60,3 +60,6 @@ Thumbs.db
 *.avi
 SkillWeave.mp4
 
+
+# Test screenshots & reports
+screenshot_*.png

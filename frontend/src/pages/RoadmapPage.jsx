@@ -1,217 +1,247 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, Clock, CheckCircle, Download, FolderHeart, Sparkles } from 'lucide-react';
+import { ArrowLeft, Play, Clock, CheckCircle, Download, FolderHeart, Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
 import { getClient } from '../services/supabaseClient';
+import FloatingTiles from '../components/FloatingTiles';
 import './RoadmapPage.css';
 
 const RoadmapPage = () => {
-    const { state } = useLocation();
-    const navigate = useNavigate();
-    const course = state?.courseData;
-    const [user, setUser] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [saved, setSaved] = useState(false);
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const course = state?.courseData;
+  const [user, setUser] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-    const client = getClient();
+  const client = getClient();
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user: currentUser } } = await client.auth.getUser();
-            setUser(currentUser);
-        };
-        checkUser();
-    }, []);
-
-    const handleDownload = async () => {
-        if (!course) return;
-
-        try {
-            const response = await fetch('http://localhost:8000/api/v1/download-docx', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ course_data: course }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${course.title.replace(/\s+/g, '_')}_Roadmap.docx`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error downloading roadmap:', error);
-            alert('Failed to download roadmap. Please try again.');
-        }
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user: currentUser } } = await client.auth.getUser();
+      setUser(currentUser);
     };
+    checkUser();
+  }, []);
 
-    const handleSaveToProfile = async () => {
-        if (!user) {
-            alert('Please login to save this roadmap to your profile workspace.');
-            navigate('/auth');
-            return;
-        }
+  const handleDownload = async () => {
+    if (!course) return;
 
-        setSaving(true);
-        try {
-            // Map modules to include completion status
-            const structuredModules = course.modules.map(mod => ({
-                ...mod,
-                completed: false
-            }));
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/download-docx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ course_data: course }),
+      });
 
-            const newProject = {
-                user_id: user.id,
-                title: course.title,
-                description: `AI-Curated Roadmap for learning ${course.title}. Contains ${course.modules.length} lessons.`,
-                level: state?.level || 'Beginner',
-                accent: state?.accent || 'Any',
-                status: 'In Progress',
-                progress: 0,
-                roadmap_data: {
-                    title: course.title,
-                    modules: structuredModules
-                },
-                custom_tasks: []
-            };
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
 
-            const { data, error } = await client
-                .from('projects')
-                .insert(newProject);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${course.title.replace(/\s+/g, '_')}_Roadmap.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading roadmap:', error);
+      alert('Failed to download roadmap. Please ensure the backend is running.');
+    }
+  };
 
-            if (error) throw error;
-
-            setSaved(true);
-            alert('Roadmap saved successfully to your profile workspace!');
-        } catch (error) {
-            console.error('Error saving project:', error);
-            alert('Failed to save project: ' + error.message);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    if (!course) {
-        return (
-            <div className="roadmap-container center-error">
-                <p>No course data found. <button className="link-btn" onClick={() => navigate('/create')}>Create one</button></p>
-            </div>
-        );
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      alert('Please login to save this roadmap to your profile workspace.');
+      navigate('/auth');
+      return;
     }
 
+    setSaving(true);
+    try {
+      const structuredModules = course.modules.map(mod => ({
+        ...mod,
+        completed: false
+      }));
+
+      const newProject = {
+        user_id: user.id,
+        title: course.title,
+        description: `AI-Curated Roadmap for learning ${course.title}. Contains ${course.modules.length} lessons.`,
+        level: state?.level || 'Beginner',
+        accent: state?.accent || 'Any',
+        status: 'In Progress',
+        progress: 0,
+        roadmap_data: {
+          title: course.title,
+          modules: structuredModules
+        },
+        custom_tasks: []
+      };
+
+      const { error } = await client
+        .from('projects')
+        .insert(newProject);
+
+      if (error) throw error;
+
+      setSaved(true);
+      alert('Roadmap saved successfully to your profile workspace!');
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert('Failed to save project: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!course) {
     return (
-        <div className="roadmap-container">
-            {/* Top Navigation banner */}
-            <nav className="roadmap-nav-top">
-                <button className="nav-back-button" onClick={() => navigate('/create')}>
-                    <ArrowLeft size={18} /> Back
-                </button>
-                <div className="nav-logo" onClick={() => navigate('/')}>SkillWeave AI</div>
-                <div>
-                    {user ? (
-                        <button className="nav-profile-button" onClick={() => navigate('/profile')}>My Workspace</button>
-                    ) : (
-                        <button className="nav-profile-button" onClick={() => navigate('/auth')}>Login</button>
-                    )}
-                </div>
-            </nav>
+      <div className="roadmap-studio-page center-empty">
+        <div className="empty-box">
+          <h2>No Course Selected</h2>
+          <p>Please generate a learning pathway first to inspect your custom syllabus.</p>
+          <button className="btn-primary" onClick={() => navigate('/create')}>
+            Design Learning Path
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-            <header className="roadmap-header">
-                <div className="header-content">
-                    <span className="ai-curated-badge"><Sparkles size={14} /> Gemini Verified Sequence</span>
-                    <h1>{course.title}</h1>
-                    <p className="subtitle">{course.modules.length} Modules • Topics Continuity Analyzed</p>
-                </div>
-                <div className="roadmap-header-actions">
-                    {saved ? (
-                        <button className="save-btn btn-success-saved" disabled>
-                            <CheckCircle size={18} /> Saved to Profile
-                        </button>
-                    ) : (
-                        <button className="save-btn" onClick={handleSaveToProfile} disabled={saving}>
-                            <FolderHeart size={18} /> {saving ? 'Saving...' : 'Save to Profile'}
-                        </button>
-                    )}
-                    <button className="download-btn" onClick={handleDownload} title="Download Roadmap (DOCX)">
-                        <Download size={18} />
-                        <span className="btn-text">Download</span>
-                    </button>
-                </div>
-            </header>
+  return (
+    <div className="roadmap-studio-page">
+      <FloatingTiles />
 
-            <div className="timeline">
-                {course.modules.map((mod, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="timeline-item"
-                    >
-                        <div className="timeline-marker">{index + 1}</div>
-                        <div className="timeline-content card">
-                            <div className="module-info">
-                                <h3>{mod.module_title}</h3>
-                                <p>{mod.description}</p>
-                            </div>
+      {/* Top Navbar */}
+      <nav className="roadmap-studio-nav">
+        <button className="nav-back-studio-btn" onClick={() => navigate('/create')}>
+          <ArrowLeft size={16} /> Back to Generator
+        </button>
+        <div className="nav-brand-title" onClick={() => navigate('/')}>
+          SKILLWEAVE AI
+        </div>
+        <div>
+          {user ? (
+            <button className="btn-secondary nav-action-pill" onClick={() => navigate('/profile')}>
+              My Workspace
+            </button>
+          ) : (
+            <button className="btn-secondary nav-action-pill" onClick={() => navigate('/auth')}>
+              Sign In
+            </button>
+          )}
+        </div>
+      </nav>
 
-                            {mod.video && (
-                                <div className="video-preview">
-                                    <a
-                                        href={`https://www.youtube.com/watch?v=${mod.video.id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="thumbnail-wrapper"
-                                    >
-                                        <img src={mod.video.thumbnail} alt={mod.video.title} />
-                                        <div className="duration-badge">
-                                            {Math.floor(mod.video.duration / 60)}:{String(Math.floor(mod.video.duration % 60)).padStart(2, '0')}
-                                        </div>
-                                    </a>
-                                    <div className="video-details">
-                                        <a
-                                            href={`https://www.youtube.com/watch?v=${mod.video.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="video-title-link"
-                                            style={{ textDecoration: 'none', color: 'inherit' }}
-                                        >
-                                            <h4>{mod.video.title}</h4>
-                                        </a>
-                                        <span className="channel-name">{mod.video.channelTitle}</span>
-                                        <div className="badges">
-                                            <span className="badge score-badge">Match: {Math.round(mod.video.final_score)}%</span>
-                                        </div>
-                                        <a
-                                            href={`https://www.youtube.com/watch?v=${mod.video.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="play-link"
-                                        >
-                                            <Play size={16} /> Watch Lesson
-                                        </a>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                ))}
+      {/* Header Banner */}
+      <header className="roadmap-studio-header">
+        <div className="header-meta-block">
+          <div className="verified-pill">
+            <Sparkles size={14} className="pill-sparkle" />
+            <span>Gemini Continuity Verified</span>
+          </div>
+          <h1 className="roadmap-main-title">{course.title}</h1>
+          <p className="roadmap-subtitle">
+            {course.modules.length} Sequenced Modules · Calibrated for Continuous Progression
+          </p>
+        </div>
+
+        <div className="roadmap-header-actions-group">
+          {saved ? (
+            <button className="btn-saved-success" disabled>
+              <CheckCircle size={16} /> Saved to Workspace
+            </button>
+          ) : (
+            <button className="btn-save-workspace" onClick={handleSaveToProfile} disabled={saving}>
+              <FolderHeart size={16} /> {saving ? 'Saving...' : 'Save to Workspace'}
+            </button>
+          )}
+          <button className="btn-download-studio" onClick={handleDownload}>
+            <Download size={16} />
+            <span>Download Syllabus (.docx)</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Stepped Timeline */}
+      <div className="studio-timeline-container">
+        {course.modules.map((mod, index) => (
+          <motion.div
+            key={index}
+            className="timeline-row-item"
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.08 }}
+          >
+            <div className="timeline-node-marker">
+              <span className="node-number">{index + 1}</span>
             </div>
 
-            <footer className="roadmap-footer">
-                <p>Created by Sarweshwar • Powered by Gemini AI</p>
-            </footer>
-        </div >
-    );
+            <div className="timeline-card-surface">
+              <div className="module-text-area">
+                <span className="module-overhead">Milestone {index + 1}</span>
+                <h3 className="module-title">{mod.module_title}</h3>
+                <p className="module-desc">{mod.description}</p>
+              </div>
+
+              {mod.video && (
+                <div className="timeline-video-box">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${mod.video.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="video-thumb-link"
+                  >
+                    <img src={mod.video.thumbnail} alt={mod.video.title} />
+                    <div className="video-time-tag">
+                      <Clock size={11} />
+                      {Math.floor(mod.video.duration / 60)}:{String(Math.floor(mod.video.duration % 60)).padStart(2, '0')}
+                    </div>
+                  </a>
+
+                  <div className="video-info-col">
+                    <a
+                      href={`https://www.youtube.com/watch?v=${mod.video.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="video-headline-link"
+                    >
+                      <h4>{mod.video.title}</h4>
+                    </a>
+                    <span className="video-author">{mod.video.channelTitle}</span>
+                    
+                    <div className="video-meta-tags">
+                      <span className="continuity-match-pill">
+                        <ShieldCheck size={12} /> {Math.round(mod.video.final_score)}% Match
+                      </span>
+                      <a
+                        href={`https://www.youtube.com/watch?v=${mod.video.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="watch-link-pill"
+                      >
+                        <Play size={12} /> Watch Lesson <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <footer className="roadmap-studio-footer">
+        <p>© 2026 SkillWeave AI • Sequences Curated & Verified by Gemini AI</p>
+      </footer>
+    </div>
+  );
 };
 
 export default RoadmapPage;
