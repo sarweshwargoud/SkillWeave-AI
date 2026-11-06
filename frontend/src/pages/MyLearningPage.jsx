@@ -56,7 +56,6 @@ const MyLearningPage = () => {
   return (
     <div className="mylearning-page-container">
       <Navbar />
-      <FloatingTiles />
 
       <main className="studio-container mylearning-main">
         {/* Header */}

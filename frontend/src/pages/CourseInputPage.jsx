@@ -113,7 +113,6 @@ const CourseInputPage = () => {
   return (
     <div className="input-studio-page">
       <Navbar />
-      <FloatingTiles />
 
       <div className="input-page-header">
         <button className="back-nav-btn" onClick={() => navigate('/')}>

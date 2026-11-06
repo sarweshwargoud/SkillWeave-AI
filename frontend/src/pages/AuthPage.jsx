@@ -71,6 +71,7 @@ const AuthPage = () => {
         provider: 'google'
       });
       if (error) throw error;
+      navigate('/profile');
     } catch (err) {
       setError(err.message || 'Google Authentication failed.');
       setLoading(false);
@@ -79,8 +80,6 @@ const AuthPage = () => {
 
   return (
     <div className="auth-studio-page">
-      <FloatingTiles />
-
       <button className="auth-back-btn" onClick={() => navigate('/')}>
         <ArrowLeft size={16} />
         <span>Back to Home</span>

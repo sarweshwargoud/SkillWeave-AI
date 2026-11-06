@@ -14,10 +14,11 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  LayoutGrid
+  LayoutGrid,
+  BookOpen
 } from 'lucide-react';
-import { getClient } from '../services/supabaseClient';
-import TiltCard from '../components/TiltCard';
+import { getClient, defaultGoogleLearner } from '../services/supabaseClient';
+import Navbar from '../components/Navbar';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -38,32 +39,29 @@ const ProfilePage = () => {
   const client = getClient();
 
   useEffect(() => {
-    const fetchUserDataAndProjects = async () => {
-      try {
-        const { data: { user: currentUser } } = await client.auth.getUser();
-        if (!currentUser) {
-          navigate('/auth');
-          return;
-        }
-        setUser(currentUser);
-
-        // Fetch user projects
-        const { data: userProjects, error } = await client
-          .from('projects')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setProjects(userProjects || []);
-      } catch (err) {
-        console.error('Error fetching profile data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserDataAndProjects();
-  }, [navigate]);
+  }, []);
+
+  const fetchUserDataAndProjects = async () => {
+    try {
+      const { data } = await client.auth.getUser();
+      const currentUser = data?.user || defaultGoogleLearner;
+      setUser(currentUser);
+
+      // Fetch user projects
+      const { data: userProjects, error } = await client
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(userProjects || []);
+    } catch (err) {
+      console.error('Error fetching profile data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await client.auth.signOut();
@@ -84,11 +82,11 @@ const ProfilePage = () => {
         accent: projectAccent,
         status: 'In Progress',
         progress: 0,
-        roadmap_data: null, // manual projects start without a roadmap
-        custom_tasks: [] // empty custom tasks list
+        roadmap_data: null,
+        custom_tasks: []
       };
 
-      const { data, error } = await client
+      const { error } = await client
         .from('projects')
         .insert(newProject);
 
@@ -116,7 +114,7 @@ const ProfilePage = () => {
   };
 
   const handleDeleteProject = async (projectId, e) => {
-    e.stopPropagation(); // Stop expansion toggle
+    e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this project?')) return;
 
     try {
@@ -136,7 +134,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Toggle tasks inside roadmaps / custom items
   const handleToggleModule = async (project, moduleIndex) => {
     try {
       const updatedModules = [...project.roadmap_data.modules];
@@ -182,72 +179,64 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="profile-loading-container">
-        <div className="profile-orbital-ring"></div>
-        <p>Analyzing profile workspace...</p>
+      <div className="profile-studio-page center-state">
+        <div className="profile-loading-box">
+          <div className="studio-spinner"></div>
+          <p>Analyzing profile workspace...</p>
+        </div>
       </div>
     );
   }
 
-  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Explorer';
-  const userAvatar = user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${userName}`;
+  const userName = user?.user_metadata?.name || 'Google Learner';
+  const userAvatar = user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=GoogleLearner`;
 
   return (
-    <div className="profile-dashboard">
-      {/* Background Mesh */}
-      <div className="profile-bg-mesh"></div>
+    <div className="profile-studio-page">
+      <Navbar />
 
-      {/* Top Banner Navigation */}
-      <nav className="dashboard-nav">
-        <div className="nav-logo" onClick={() => navigate('/')}>SkillWeave AI</div>
-        <div className="nav-actions">
-          <button className="nav-btn-secondary" onClick={() => navigate('/create')}>Create Roadmap</button>
-          <button className="logout-btn" onClick={handleLogout} title="Log Out">
-            <LogOut size={18} /> <span className="btn-text">Logout</span>
-          </button>
-        </div>
-      </nav>
-
-      <main className="dashboard-container">
+      <main className="profile-studio-grid">
         {/* Left Sidebar: User Details */}
-        <section className="dashboard-sidebar">
-          <TiltCard className="user-hologram-card" maxTilt={5}>
-            <div className="user-avatar-wrapper">
-              <img src={userAvatar} alt={userName} className="user-avatar-img" />
-              <div className="avatar-glow"></div>
+        <section className="user-studio-card">
+          <div className="user-avatar-frame">
+            <img src={userAvatar} alt={userName} className="user-avatar-element" />
+          </div>
+          <h3 className="user-name-title">{userName}</h3>
+          <p className="user-email-subtitle">{user?.email || 'learner.google@gmail.com'}</p>
+          
+          <div className="user-stats-bar">
+            <div className="stat-unit">
+              <span className="unit-number">{projects.length}</span>
+              <span className="unit-title">Projects</span>
             </div>
-            <h3 className="user-display-name">{userName}</h3>
-            <p className="user-email-text">{user?.email}</p>
-            <div className="user-meta-info">
-              <div className="meta-stat">
-                <span className="stat-num">{projects.length}</span>
-                <span className="stat-label">Projects</span>
-              </div>
-              <div className="meta-stat">
-                <span className="stat-num">
-                  {projects.filter(p => p.status === 'Completed').length}
-                </span>
-                <span className="stat-label">Done</span>
-              </div>
+            <div className="stat-unit">
+              <span className="unit-number">
+                {projects.filter(p => p.status === 'Completed').length}
+              </span>
+              <span className="unit-title">Done</span>
             </div>
-          </TiltCard>
+          </div>
+
+          <button className="logout-action-btn" onClick={handleLogout} title="Log Out">
+            <LogOut size={16} /> <span>Sign Out</span>
+          </button>
         </section>
 
         {/* Right Content Area: Projects list */}
-        <section className="dashboard-content">
-          <header className="content-header">
+        <section className="profile-content-col">
+          <header className="content-headline-bar">
             <div>
-              <h2 className="section-title">My Projects Workspace</h2>
-              <p className="section-subtitle">Manage your active learning paths and custom project logs</p>
+              <h2 className="workspace-title">Personal Workspace</h2>
+              <p className="workspace-sub">Manage your active learning paths and custom project logs</p>
             </div>
-            <button className="add-project-btn" onClick={() => setShowAddModal(true)}>
-              <Plus size={18} /> Add Project
+            <button className="btn-primary add-custom-btn" onClick={() => setShowAddModal(true)}>
+              <Plus size={16} /> Add Project
             </button>
           </header>
 
           {projects.length === 0 ? (
-            <div className="empty-projects-state">
-              <FolderPlus size={48} className="empty-icon" />
+            <div className="empty-workspace-state">
+              <FolderPlus size={48} className="empty-folder-icon" />
               <h3>No Projects Found</h3>
               <p>You haven't generated or created any projects yet. Start by generating a curriculum roadmap!</p>
               <button className="btn-primary" onClick={() => navigate('/create')}>
@@ -255,55 +244,57 @@ const ProfilePage = () => {
               </button>
             </div>
           ) : (
-            <div className="projects-grid">
+            <div className="projects-list-stack">
               {projects.map((project) => {
                 const isExpanded = selectedProject?.id === project.id;
                 
                 return (
                   <div 
                     key={project.id} 
-                    className={`project-list-card ${isExpanded ? 'card-expanded' : ''}`}
+                    className={`project-studio-item ${isExpanded ? 'is-expanded' : ''}`}
                     onClick={() => setSelectedProject(isExpanded ? null : project)}
                   >
-                    <div className="project-card-summary">
+                    <div className="project-item-summary">
                       <div className="project-main-info">
-                        <div className="project-title-row">
+                        <div className="project-header-line">
                           <h4>{project.title}</h4>
-                          <span className={`status-badge status-${project.status.toLowerCase().replace(' ', '-')}`}>
+                          <span className={`status-pill ${project.status === 'Completed' ? 'pill-completed' : 'pill-in-progress'}`}>
                             {project.status}
                           </span>
                         </div>
-                        <p className="project-desc-preview">{project.description || 'No description provided.'}</p>
+                        <p className="project-description-text">{project.description || 'No description provided.'}</p>
                         
-                        <div className="project-meta-row">
-                          <span className="meta-tag"><Calendar size={12} /> {new Date(project.created_at).toLocaleDateString()}</span>
-                          <span className="meta-tag">Level: {project.level}</span>
-                          <span className="meta-tag">Accent: {project.accent}</span>
+                        <div className="project-tags-row">
+                          <span className="tag-date">
+                            <Calendar size={12} /> {new Date(project.created_at).toLocaleDateString()}
+                          </span>
+                          <span className="tag-pill">Level: {project.level}</span>
+                          <span className="tag-pill">Accent: {project.accent}</span>
                         </div>
                       </div>
 
-                      <div className="project-progress-area">
-                        <div className="progress-value-row">
+                      <div className="project-progress-col">
+                        <div className="progress-labels">
                           <span>Progress</span>
                           <strong>{Math.round(project.progress)}%</strong>
                         </div>
-                        <div className="progress-bar-track">
+                        <div className="progress-track">
                           <div 
-                            className="progress-bar-fill"
+                            className="progress-fill"
                             style={{ width: `${project.progress}%` }}
                           ></div>
                         </div>
                         
-                        <div className="action-buttons-row">
+                        <div className="project-actions-row">
                           <button 
-                            className="delete-icon-btn" 
+                            className="delete-ghost-btn" 
                             onClick={(e) => handleDeleteProject(project.id, e)}
                             title="Delete Project"
                           >
                             <Trash2 size={16} />
                           </button>
-                          <div className="expand-indicator">
-                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          <div className="expand-indicator-icon">
+                            {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                           </div>
                         </div>
                       </div>
@@ -317,8 +308,8 @@ const ProfilePage = () => {
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="project-expanded-details"
-                          onClick={(e) => e.stopPropagation()} // Prevent collapse on detail interaction
+                          className="project-expanded-panel"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {project.roadmap_data ? (
                             <div className="expanded-modules-checklist">
@@ -333,9 +324,9 @@ const ProfilePage = () => {
                                       onClick={() => handleToggleModule(project, index)}
                                     >
                                       {mod.completed ? (
-                                        <CheckSquare size={20} className="check-icon-active" />
+                                        <CheckSquare size={18} className="check-icon-active" />
                                       ) : (
-                                        <Square size={20} className="check-icon-inactive" />
+                                        <Square size={18} className="check-icon-inactive" />
                                       )}
                                     </button>
                                     <div className="module-checklist-info">

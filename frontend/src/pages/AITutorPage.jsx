@@ -65,7 +65,6 @@ const AITutorPage = () => {
   return (
     <div className="tutor-page-container">
       <Navbar />
-      <FloatingTiles />
 
       <main className="studio-container-full tutor-page-main">
         {/* Top Input Bar */}

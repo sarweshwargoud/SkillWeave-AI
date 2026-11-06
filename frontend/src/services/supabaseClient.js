@@ -20,102 +20,307 @@ const STORAGE_PREFIX = 'skillweave_db_';
 const MOCK_USER_KEY = 'skillweave_mock_user';
 
 const getTableData = (table) => {
-  const raw = localStorage.getItem(`${STORAGE_PREFIX}${table}`);
-  return raw ? JSON.parse(raw) : [];
+  try {
+    const raw = localStorage.getItem(`${STORAGE_PREFIX}${table}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
 };
 
 const saveTableData = (table, data) => {
-  localStorage.setItem(`${STORAGE_PREFIX}${table}`, JSON.stringify(data));
+  try {
+    localStorage.setItem(`${STORAGE_PREFIX}${table}`, JSON.stringify(data));
+  } catch (e) {
+    console.error("Storage error:", e);
+  }
 };
 
-// Seed default course if empty so user has immediate access to rich workspace demo
+// Default Google Learner User
+export const defaultGoogleLearner = {
+  id: 'user-google-demo',
+  email: 'learner.google@gmail.com',
+  user_metadata: {
+    name: 'Google Learner',
+    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=GoogleLearner'
+  }
+};
+
+// Seed default courses and projects
 const initializeSeedData = () => {
+  // 1. Seed user if not present
+  if (typeof window !== 'undefined' && !localStorage.getItem(MOCK_USER_KEY)) {
+    localStorage.setItem(MOCK_USER_KEY, JSON.stringify(defaultGoogleLearner));
+  }
+
+  // 2. Seed courses
   const courses = getTableData('courses');
   if (!courses || courses.length === 0) {
-    const seedCourse = {
-      id: 'course-python-ai',
-      title: 'Python for AI & Modern Engineering',
-      description: 'Master practical Python for Machine Learning, Generative AI, and RAG architectures.',
-      thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
-      totalVideos: 3,
-      totalDuration: '28m',
-      progress: 33,
-      status: 'In Progress',
-      lastWatchedVideoId: 't_k_k_t',
-      lastWatchedTimestamp: 120,
-      lastActivity: new Date().toISOString(),
-      modules: [
-        {
-          module_title: 'Module 1: Memory & Execution Models',
-          objective: 'Understand how Python handles variable references and heap allocations.',
-          exercise: 'Trace memory IDs of immutable objects.',
-          videos: [
+    const seedCourses = [
+      {
+        id: 'course-python-ai',
+        title: 'Python for AI & Modern Engineering',
+        description: 'Master practical Python for Machine Learning, Generative AI, and RAG architectures.',
+        thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
+        totalVideos: 3,
+        totalDuration: '28m',
+        progress: 33,
+        status: 'In Progress',
+        lastWatchedVideoId: 't_k_k_t',
+        lastWatchedTimestamp: 120,
+        lastActivity: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        modules: [
+          {
+            module_title: 'Module 1: Memory & Execution Models',
+            objective: 'Understand how Python handles variable references and heap allocations.',
+            exercise: 'Trace memory IDs of immutable objects.',
+            videos: [
+              {
+                id: 't_k_k_t',
+                title: 'Python Memory Architecture & Variables Demystified',
+                channelTitle: 'TechDemystified',
+                duration: 412,
+                durationFormatted: '06:52',
+                thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80',
+                completed: true
+              }
+            ]
+          },
+          {
+            module_title: 'Module 2: Iterators & Coroutines',
+            objective: 'Master generator functions and async execution loops.',
+            exercise: 'Implement a stream pipeline using yield.',
+            videos: [
+              {
+                id: 'loop_t',
+                title: 'Mastering Python Generators & Async Coroutines',
+                channelTitle: 'PyGuru',
+                duration: 620,
+                durationFormatted: '10:20',
+                thumbnail: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&q=80',
+                completed: false
+              }
+            ]
+          },
+          {
+            module_title: 'Module 3: Advanced Metaclasses',
+            objective: 'Build reusable class factories and validation frameworks.',
+            exercise: 'Create an automatic schema validator with dunder methods.',
+            videos: [
+              {
+                id: 'fn_t',
+                title: 'Python Metaprogramming & Advanced Class Internals',
+                channelTitle: 'CodeBlocks',
+                duration: 540,
+                durationFormatted: '09:00',
+                thumbnail: 'https://images.unsplash.com/photo-1484417894907-623942c8ea29?auto=format&fit=crop&w=400&q=80',
+                completed: false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'course-react-nextjs',
+        title: 'Modern Next.js & React Architecture',
+        description: 'Zero-bundle server components, streaming hydration, and optimistic cache mutations.',
+        thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80',
+        totalVideos: 3,
+        totalDuration: '35m',
+        progress: 66,
+        status: 'In Progress',
+        lastWatchedVideoId: 'rsc_t',
+        lastWatchedTimestamp: 240,
+        lastActivity: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        modules: [
+          {
+            module_title: 'Module 1: React Server Components (RSC)',
+            objective: 'Distinguish boundary contracts between zero-bundle server trees and client interactive components.',
+            exercise: 'Separate server actions and client forms.',
+            videos: [
+              {
+                id: 'rsc_t',
+                title: 'Deep Dive into React Server Components Architecture',
+                channelTitle: 'WebDevMastery',
+                duration: 820,
+                durationFormatted: '13:40',
+                thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=400&q=80',
+                completed: true
+              }
+            ]
+          },
+          {
+            module_title: 'Module 2: Streaming Hydration & Suspense',
+            objective: 'Progressive HTML streaming, selective hydration, and waterfall avoidance patterns.',
+            exercise: 'Build an asynchronous streaming layout boundary.',
+            videos: [
+              {
+                id: 'hydr_t',
+                title: 'Progressive Hydration & Edge Streaming in React',
+                channelTitle: 'DesignSystems',
+                duration: 590,
+                durationFormatted: '09:50',
+                thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&q=80',
+                completed: true
+              }
+            ]
+          },
+          {
+            module_title: 'Module 3: Optimistic Mutations',
+            objective: 'Syncing UI states instantly while managing background validation and rollbacks.',
+            exercise: 'Implement useOptimistic in a collaborative feed.',
+            videos: [
+              {
+                id: 'db_mut_t',
+                title: 'Optimistic UI & Cache Synchronization',
+                channelTitle: 'SaaSArchitecture',
+                duration: 710,
+                durationFormatted: '11:50',
+                thumbnail: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=400&q=80',
+                completed: false
+              }
+            ]
+          }
+        ]
+      }
+    ];
+    saveTableData('courses', seedCourses);
+  }
+
+  // 3. Seed projects for Google Learner
+  const projects = getTableData('projects');
+  if (!projects || projects.length === 0) {
+    const seedProjects = [
+      {
+        id: 'proj-python-ai-1',
+        user_id: 'user-google-demo',
+        title: 'Python for AI & Modern Engineering',
+        description: 'Master practical Python for Machine Learning, Generative AI, and RAG architectures.',
+        level: 'Beginner',
+        accent: 'Any',
+        status: 'In Progress',
+        progress: 33,
+        created_at: new Date().toISOString(),
+        roadmap_data: {
+          title: 'Python for AI & Modern Engineering',
+          modules: [
             {
-              id: 't_k_k_t',
-              title: 'Python Memory Architecture & Variables Demystified',
-              channelTitle: 'TechDemystified',
-              duration: 412,
-              durationFormatted: '06:52',
-              thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80',
-              completed: true
+              module_title: '1. Memory Architecture & Scope',
+              description: 'Understanding memory allocation in Python.',
+              completed: true,
+              video: {
+                id: 't_k_k_t',
+                title: 'Python Memory Architecture & Variables Demystified',
+                channelTitle: 'TechDemystified',
+                duration: 412,
+                final_score: 99
+              }
+            },
+            {
+              module_title: '2. Generators & Async Coroutines',
+              description: 'Mastering yield statements and event loops.',
+              completed: false,
+              video: {
+                id: 'loop_t',
+                title: 'Mastering Python Generators & Async Coroutines',
+                channelTitle: 'PyGuru',
+                duration: 620,
+                final_score: 98
+              }
+            },
+            {
+              module_title: '3. Metaclasses & Internals',
+              description: 'Dunder protocols and class metaprogramming.',
+              completed: false,
+              video: {
+                id: 'fn_t',
+                title: 'Python Metaprogramming & Advanced Class Internals',
+                channelTitle: 'CodeBlocks',
+                duration: 540,
+                final_score: 97
+              }
             }
           ]
         },
-        {
-          module_title: 'Module 2: Iterators & Coroutines',
-          objective: 'Master generator functions and async execution loops.',
-          exercise: 'Implement a stream pipeline using yield.',
-          videos: [
-            {
-              id: 'loop_t',
-              title: 'Mastering Python Generators & Async Coroutines',
-              channelTitle: 'PyGuru',
-              duration: 620,
-              durationFormatted: '10:20',
-              thumbnail: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&q=80',
-              completed: false
-            }
-          ]
-        },
-        {
-          module_title: 'Module 3: Advanced Metaclasses',
-          objective: 'Build reusable class factories and validation frameworks.',
-          exercise: 'Create an automatic schema validator with dunder methods.',
-          videos: [
-            {
-              id: 'fn_t',
-              title: 'Python Metaprogramming & Advanced Class Internals',
-              channelTitle: 'CodeBlocks',
-              duration: 540,
-              durationFormatted: '09:00',
-              thumbnail: 'https://images.unsplash.com/photo-1484417894907-623942c8ea29?auto=format&fit=crop&w=400&q=80',
-              completed: false
-            }
-          ]
-        }
-      ]
-    };
-    saveTableData('courses', [seedCourse]);
+        custom_tasks: [
+          { id: 'task-1', title: 'Complete Memory Scope code exercise', completed: true },
+          { id: 'task-2', title: 'Implement a stream pipeline using yield', completed: false }
+        ]
+      }
+    ];
+    saveTableData('projects', seedProjects);
   }
 };
 
 initializeSeedData();
 
+// Chainable mock query builder that is also a Promise (Thenable)
+const createMockQueryBuilder = (table) => {
+  let filters = [];
+  let sortCol = null;
+  let sortAscending = true;
+
+  const execute = () => {
+    let list = [...getTableData(table)];
+
+    // Apply filters
+    for (const { col, val } of filters) {
+      list = list.filter(item => String(item[col]) === String(val));
+    }
+
+    // Apply sort
+    if (sortCol) {
+      list.sort((a, b) => {
+        const valA = a[sortCol] != null ? a[sortCol] : '';
+        const valB = b[sortCol] != null ? b[sortCol] : '';
+        if (valA < valB) return sortAscending ? -1 : 1;
+        if (valA > valB) return sortAscending ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return { data: list, error: null };
+  };
+
+  const builder = {
+    eq: (col, val) => {
+      filters.push({ col, val });
+      return builder;
+    },
+    order: (col, { ascending = true } = {}) => {
+      sortCol = col;
+      sortAscending = ascending;
+      return builder;
+    },
+    then: (resolve, reject) => {
+      return Promise.resolve(execute()).then(resolve, reject);
+    },
+    catch: (reject) => {
+      return Promise.resolve(execute()).catch(reject);
+    }
+  };
+
+  return builder;
+};
+
 // Mock client wrapper to simulate Supabase tables
 export const mockSupabase = {
   auth: {
     signUp: async ({ email, password, options }) => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 200));
       const user = {
         id: 'user-' + Math.random().toString(36).substring(2, 9),
         email,
         user_metadata: { name: options?.data?.name || email.split('@')[0] }
       };
       localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
+      window.dispatchEvent(new Event('storage'));
       return { data: { user, session: { access_token: 'mock-session-token' } }, error: null };
     },
     signInWithPassword: async ({ email, password }) => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 200));
       if (password.length < 4) {
         return { data: { user: null, session: null }, error: { message: "Invalid password (must be at least 4 characters)" } };
       }
@@ -126,25 +331,24 @@ export const mockSupabase = {
         user_metadata: { name: email.split('@')[0] }
       };
       localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
+      window.dispatchEvent(new Event('storage'));
       return { data: { user, session: { access_token: 'mock-session-token' } }, error: null };
     },
     signInWithOAuth: async ({ provider }) => {
-      await new Promise(resolve => setTimeout(resolve, 400));
-      const user = {
-        id: 'user-google-demo',
-        email: 'learner.google@example.com',
-        user_metadata: { name: 'Google Learner', avatar_url: 'https://api.dicebear.com/7.x/initials/svg?seed=Google%20Learner&backgroundColor=111827' }
-      };
+      await new Promise(resolve => setTimeout(resolve, 200));
+      const user = defaultGoogleLearner;
       localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
-      return { data: { user }, error: null };
+      window.dispatchEvent(new Event('storage'));
+      return { data: { user, session: { access_token: 'mock-google-token' } }, error: null };
     },
     signOut: async () => {
       localStorage.removeItem(MOCK_USER_KEY);
+      window.dispatchEvent(new Event('storage'));
       return { error: null };
     },
     getUser: async () => {
       const userStr = localStorage.getItem(MOCK_USER_KEY);
-      return { data: { user: userStr ? JSON.parse(userStr) : null }, error: null };
+      return { data: { user: userStr ? JSON.parse(userStr) : defaultGoogleLearner }, error: null };
     },
     onAuthStateChange: (callback) => {
       const handleStorage = () => {
@@ -154,7 +358,7 @@ export const mockSupabase = {
       };
       window.addEventListener('storage', handleStorage);
       const userStr = localStorage.getItem(MOCK_USER_KEY);
-      const user = userStr ? JSON.parse(userStr) : null;
+      const user = userStr ? JSON.parse(userStr) : defaultGoogleLearner;
       setTimeout(() => callback(user ? 'SIGNED_IN' : 'SIGNED_OUT', user ? { user } : null), 50);
       return { data: { subscription: { unsubscribe: () => window.removeEventListener('storage', handleStorage) } } };
     }
@@ -163,24 +367,7 @@ export const mockSupabase = {
   from: (table) => {
     return {
       select: (columns = '*') => {
-        return {
-          order: (col, { ascending } = {}) => {
-            const list = getTableData(table);
-            list.sort((a, b) => {
-              const valA = a[col] || '';
-              const valB = b[col] || '';
-              if (valA < valB) return ascending ? -1 : 1;
-              if (valA > valB) return ascending ? 1 : -1;
-              return 0;
-            });
-            return Promise.resolve({ data: list, error: null });
-          },
-          eq: (col, val) => {
-            const list = getTableData(table);
-            const filtered = list.filter(item => String(item[col]) === String(val));
-            return Promise.resolve({ data: filtered, error: null });
-          }
-        };
+        return createMockQueryBuilder(table);
       },
       insert: (rows) => {
         const list = getTableData(table);

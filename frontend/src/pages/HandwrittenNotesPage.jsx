@@ -75,7 +75,6 @@ const HandwrittenNotesPage = () => {
   return (
     <div className="handwritten-page-container">
       <Navbar />
-      <FloatingTiles />
 
       <main className="studio-container notes-page-main">
         {/* Hero Section */}

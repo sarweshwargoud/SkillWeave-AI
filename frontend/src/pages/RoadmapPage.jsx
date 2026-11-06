@@ -116,8 +116,6 @@ const RoadmapPage = () => {
 
   return (
     <div className="roadmap-studio-page">
-      <FloatingTiles />
-
       {/* Top Navbar */}
       <nav className="roadmap-studio-nav">
         <button className="nav-back-studio-btn" onClick={() => navigate('/create')}>
