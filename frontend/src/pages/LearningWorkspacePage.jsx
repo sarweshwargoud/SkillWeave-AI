@@ -488,21 +488,9 @@ const LearningWorkspacePage = () => {
                 <h4>Synthesizing Handwritten Notes from Lecture Transcript...</h4>
                 <p>Generating formulas, code examples, and study sheets.</p>
               </div>
-            ) : videoNotes ? (
+            ) : (
               <div className="handwritten-notes-view-box">
                 <HandwrittenNotesViewer notesData={videoNotes} />
-              </div>
-            ) : (
-              <div className="feature-empty-state-box">
-                <FileText size={32} className="text-gray-400" />
-                <h4>Handwritten notes not generated yet</h4>
-                <p>Click below to generate clean study notes for this lesson.</p>
-                <button
-                  className="btn-primary"
-                  onClick={() => activeVideo?.id && loadNotesForVideo(activeVideo.id)}
-                >
-                  Generate Handwritten Notes
-                </button>
               </div>
             )}
           </div>

@@ -1,3 +1,81 @@
+
+/* ==========================================================================
+   Shadcn Two-Column Master / Detail Layout for Notes
+   ========================================================================== */
+.shadcn-notes-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e4e4e7;
+  position: relative;
+}
+
+.shadcn-notes-layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.shadcn-notes-sidebar {
+  width: 220px;
+  flex: 0 0 220px;
+  background: #fafafa;
+  border-right: 1px solid #e4e4e7;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.shadcn-notes-sidebar.is-collapsed {
+  width: 0 !important;
+  flex: 0 0 0 !important;
+  border-right: none;
+  visibility: hidden;
+}
+
+.notes-sidebar-top-strip {
+  padding: 0.65rem 0.65rem 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notes-sidebar-scroll-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.4rem 0.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.shadcn-notes-main-stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.notes-paper-scroll-canvas {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .shadcn-notes-sidebar {
+    display: none !important;
+  }
+}
+
 .handwritten-viewer-wrapper {
   width: 100%;
   display: flex;

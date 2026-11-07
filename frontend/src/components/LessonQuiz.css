@@ -1,3 +1,102 @@
+
+/* ==========================================================================
+   Shadcn Two-Column Master / Detail Layout for Quiz
+   ========================================================================== */
+.shadcn-quiz-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e4e4e7;
+  position: relative;
+}
+
+.shadcn-quiz-layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.shadcn-quiz-sidebar {
+  width: 220px;
+  flex: 0 0 220px;
+  background: #fafafa;
+  border-right: 1px solid #e4e4e7;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.shadcn-quiz-sidebar.is-collapsed {
+  width: 0 !important;
+  flex: 0 0 0 !important;
+  border-right: none;
+  visibility: hidden;
+}
+
+.quiz-sidebar-top-strip {
+  padding: 0.65rem 0.65rem 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.quiz-sidebar-scroll-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.4rem 0.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.shadcn-quiz-main-stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  overflow-y: auto;
+  padding: 0.85rem;
+}
+
+.quiz-score-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 9999px;
+  margin-left: auto;
+}
+
+.quiz-score-badge.passed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.quiz-score-badge.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.quiz-pending-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .shadcn-quiz-sidebar {
+    display: none !important;
+  }
+}
+
 .lesson-quiz-container {
   display: flex;
   flex-direction: column;
