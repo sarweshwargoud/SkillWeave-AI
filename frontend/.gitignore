@@ -1,3 +1,14 @@
+# Environment variables & secrets
+.env
+.env.*
+*.env
+!.env.example
+!.env*.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # Logs
 logs
 *.log
@@ -23,4 +34,3 @@ dist-ssr
 *.sln
 *.sw?
 SkillWeave.mp4
-
