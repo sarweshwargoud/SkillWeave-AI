@@ -1219,3 +1219,83 @@
     align-items: flex-start;
   }
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR PROFILE PAGE
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+  .profile-nav-breadcrumb-strip {
+    top: 50px !important;
+    padding: 0.35rem 0.65rem !important;
+  }
+  .profile-breadcrumb-container {
+    gap: 0.35rem !important;
+  }
+  .breadcrumb-nav-crumbs {
+    font-size: 0.74rem !important;
+  }
+  .profile-sub-actions {
+    display: flex !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+  .profile-sub-actions button {
+    flex: 1 !important;
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.74rem !important;
+    justify-content: center !important;
+  }
+  .profile-studio-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 0.5rem 2rem !important;
+    gap: 0.85rem !important;
+  }
+  .profile-user-card {
+    padding: 1rem 0.85rem !important;
+    border-radius: 14px !important;
+  }
+  .profile-avatar-circle {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.1rem !important;
+  }
+  .profile-user-name {
+    font-size: 1.05rem !important;
+  }
+  .profile-user-email {
+    font-size: 0.74rem !important;
+  }
+  .stats-trio-row {
+    padding: 0.5rem !important;
+    gap: 0.35rem !important;
+  }
+  .stat-trio-item strong {
+    font-size: 1.05rem !important;
+  }
+  .stat-trio-item span {
+    font-size: 0.65rem !important;
+  }
+  .profile-quick-nav-list button {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.78rem !important;
+  }
+  .btn-signout-profile {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.78rem !important;
+  }
+  .content-headline-bar {
+    padding: 0.85rem !important;
+    border-radius: 14px !important;
+  }
+  .headline-text-block h2 {
+    font-size: 1.15rem !important;
+  }
+  .headline-text-block p {
+    font-size: 0.74rem !important;
+  }
+}

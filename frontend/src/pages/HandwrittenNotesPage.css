@@ -273,3 +273,71 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR HANDWRITTEN NOTES PAGE
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+  .chatgpt-workspace-container {
+    height: calc(100vh - 50px - 56px) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .chatgpt-sidebar-threads {
+    display: none !important;
+  }
+  .chatgpt-main-stage {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .chatgpt-grounding-header {
+    padding: 0.4rem 0.65rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.4rem !important;
+  }
+  .grounding-video-title {
+    font-size: 0.82rem !important;
+    max-width: 170px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .grounding-right-controls {
+    flex-direction: row !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+  .density-toggle-group {
+    padding: 0.15rem !important;
+  }
+  .density-pill-btn {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.7rem !important;
+  }
+  .grounding-url-field {
+    width: auto !important;
+    flex: 1 !important;
+    height: 36px !important;
+    padding: 0 0.5rem !important;
+  }
+  .grounding-url-field input {
+    font-size: 0.74rem !important;
+  }
+  .grounding-load-btn {
+    padding: 0.25rem 0.6rem !important;
+    font-size: 0.72rem !important;
+  }
+  .chatgpt-notes-canvas-scroll {
+    flex: 1 1 auto !important;
+    padding: 0.65rem 0.5rem !important;
+  }
+}

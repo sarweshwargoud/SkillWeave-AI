@@ -9,7 +9,9 @@ import {
   User, 
   Menu, 
   X,
-  PlaySquare,
+  Play,
+  Compass,
+  Home,
   LogOut,
   ChevronDown,
   Layers,
@@ -74,7 +76,7 @@ const Navbar = () => {
     { name: "Roadmap Generator", path: "/create", icon: Map },
     { name: "Handwritten Notes", path: "/notes", icon: FileText },
     { name: "AI Video Tutor", path: "/tutor", icon: MessageSquare },
-    { name: "Learning Workspace", path: "/workspace", icon: PlaySquare },
+    { name: "Learning Workspace", path: "/workspace", icon: Play },
     { name: "My Learning", path: "/my-learning", icon: GraduationCap },
   ];
 
@@ -188,7 +190,7 @@ const Navbar = () => {
                           navigate('/workspace');
                         }}
                       >
-                        <PlaySquare size={15} />
+                        <Play size={15} />
                         <span>Learning Workspace</span>
                       </button>
 
@@ -320,6 +322,31 @@ const Navbar = () => {
           </div>
         )}
       </header>
+
+      {/* Mobile Webapp Bottom Tab Bar (Strictly mobile <= 768px) */}
+      <nav className="mobile-app-bottom-bar" aria-label="Mobile Navigation">
+        <Link to="/" className={`mobile-bottom-tab ${location.pathname === '/' ? 'active' : ''}`}>
+          <Home size={19} />
+          <span>Home</span>
+        </Link>
+        <Link to="/create" className={`mobile-bottom-tab ${location.pathname.startsWith('/create') ? 'active' : ''}`}>
+          <Compass size={19} />
+          <span>Roadmap</span>
+        </Link>
+        <Link to="/workspace" className={`mobile-bottom-tab ${location.pathname.startsWith('/workspace') ? 'active' : ''}`}>
+          <Play size={19} />
+          <span>Workspace</span>
+        </Link>
+        <Link to="/tutor" className={`mobile-bottom-tab ${location.pathname.startsWith('/tutor') ? 'active' : ''}`}>
+          <MessageSquare size={19} />
+          <span>AI Tutor</span>
+        </Link>
+        <Link to="/notes" className={`mobile-bottom-tab ${location.pathname.startsWith('/notes') ? 'active' : ''}`}>
+          <FileText size={19} />
+          <span>Notes</span>
+        </Link>
+      </nav>
+
 
       {/* Slide-over Profile Drawer Modal (Openable from ANY page without navigation loss!) */}
       <ProfileDrawerModal 

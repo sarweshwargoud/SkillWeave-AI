@@ -1311,7 +1311,7 @@ const LearningWorkspacePage = () => {
         isOpen={showAuthGate}
         onClose={() => setShowAuthGate(false)}
         featureName="Learning Workspace"
-        featureIcon={PlaySquare}
+        featureIcon={Play}
         featureDescription="Sign in with your account to save your learning progress, curriculum milestones, notes, and AI questions in the cloud."
       />
     </div>

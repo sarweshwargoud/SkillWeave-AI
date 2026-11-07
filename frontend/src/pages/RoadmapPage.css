@@ -428,3 +428,124 @@
     font-size: 1.75rem;
   }
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR ROADMAP PAGE
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+  .roadmap-studio-nav {
+    padding: 0.4rem 0.65rem !important;
+    min-height: 44px !important;
+    gap: 0.4rem !important;
+  }
+  .nav-back-studio-btn {
+    font-size: 0.76rem !important;
+    padding: 0.25rem 0.55rem !important;
+  }
+  .nav-brand-title {
+    font-size: 0.95rem !important;
+  }
+  .nav-action-pill {
+    padding: 0.3rem 0.65rem !important;
+    font-size: 0.74rem !important;
+  }
+  .roadmap-studio-header {
+    padding: 0.85rem 0.75rem !important;
+    border-radius: 14px !important;
+    margin: 0.5rem 0.4rem 1rem !important;
+  }
+  .verified-pill {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.45rem !important;
+  }
+  .roadmap-main-title {
+    font-size: 1.2rem !important;
+    line-height: 1.2 !important;
+    margin: 0.25rem 0 !important;
+  }
+  .roadmap-subtitle {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+  .roadmap-header-actions-group {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.4rem !important;
+  }
+  .roadmap-header-actions-group button {
+    flex: 1 1 auto !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.76rem !important;
+    justify-content: center !important;
+  }
+  .studio-timeline-container {
+    padding: 0 0.5rem 2rem !important;
+  }
+  .studio-timeline-container::before {
+    left: 14px !important;
+  }
+  .timeline-node-marker {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+  }
+  .node-number {
+    font-size: 0.75rem !important;
+  }
+  .timeline-row-item {
+    gap: 0.65rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .timeline-card-surface {
+    padding: 0.75rem !important;
+    border-radius: 12px !important;
+  }
+  .module-overhead {
+    font-size: 0.62rem !important;
+  }
+  .module-title {
+    font-size: 0.92rem !important;
+    line-height: 1.25 !important;
+  }
+  .module-desc {
+    font-size: 0.74rem !important;
+    line-height: 1.35 !important;
+  }
+  .timeline-video-box {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    padding: 0.5rem !important;
+    border-radius: 10px !important;
+    margin-top: 0.5rem !important;
+  }
+  .video-thumb-link {
+    width: 85px !important;
+    height: 52px !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .video-info-col h4 {
+    font-size: 0.78rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.15rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .video-author {
+    font-size: 0.68rem !important;
+  }
+  .continuity-match-pill {
+    font-size: 0.62rem !important;
+    padding: 0.1rem 0.35rem !important;
+  }
+}
