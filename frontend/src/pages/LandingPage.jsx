@@ -626,6 +626,30 @@ const LandingPage = () => {
           {/* Row 2 (Zag): Feature 02 Context Grounding (Card Left, Text Right via reverse-row) */}
           <div className="zigzag-row reverse-row">
             <motion.div 
+              className="zigzag-content-col compact-text-col"
+              initial={{ opacity: 0, x: 25 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="zigzag-badge badge-violet">
+                <MessageSquare size={13} /> <span>Feature 02 • Context Grounding</span>
+              </div>
+              <h3 className="zigzag-title small-title">Instant Clarifications with Lecture Timestamp Seeking</h3>
+              <p className="zigzag-desc small-desc">
+                Don't waste time scouring comment sections or scrubbing through video timelines. Ask questions directly to your AI tutor. It identifies the exact moments concepts are taught and lets you jump the embedded cinema player with one click.
+              </p>
+              <div className="zigzag-points small-points">
+                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>Clickable timestamps seek YouTube video instantly</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>ChatGPT-style persistent history threads</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>Encrypted session history saved in Supabase</span></div>
+              </div>
+              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/tutor')}>
+                Launch AI Tutor <ArrowRight size={14} />
+              </button>
+            </motion.div>
+
+            <motion.div 
               className="zigzag-visual-col"
               initial={{ opacity: 0, x: -25 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -660,30 +684,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-content-col compact-text-col"
-              initial={{ opacity: 0, x: 25 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-violet">
-                <MessageSquare size={13} /> <span>Feature 02 • Context Grounding</span>
-              </div>
-              <h3 className="zigzag-title small-title">Instant Clarifications with Lecture Timestamp Seeking</h3>
-              <p className="zigzag-desc small-desc">
-                Don't waste time scouring comment sections or scrubbing through video timelines. Ask questions directly to your AI tutor. It identifies the exact moments concepts are taught and lets you jump the embedded cinema player with one click.
-              </p>
-              <div className="zigzag-points small-points">
-                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>Clickable timestamps seek YouTube video instantly</span></div>
-                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>ChatGPT-style persistent history threads</span></div>
-                <div className="point-item"><CheckCircle2 size={15} className="text-violet-600" /> <span>Encrypted session history saved in Supabase</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/tutor')}>
-                Launch AI Tutor <ArrowRight size={14} />
-              </button>
             </motion.div>
           </div>
 
@@ -742,8 +742,32 @@ const LandingPage = () => {
             </motion.div>
           </div>
 
-          {/* Row 4 (Zag): Feature 04 Knowledge Testing (Card Left, Text Right via reverse-row - EXACT IMAGE 1 & 2) */}
+          {/* Row 4 (Zag): Feature 04 Knowledge Testing (Card Left, Text Right via reverse-row) */}
           <div className="zigzag-row reverse-row">
+            <motion.div 
+              className="zigzag-content-col compact-text-col"
+              initial={{ opacity: 0, x: 25 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="zigzag-badge badge-emerald">
+                <CheckCircle2 size={13} /> <span>Feature 04 • Knowledge Testing</span>
+              </div>
+              <h3 className="zigzag-title small-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
+              <p className="zigzag-desc small-desc">
+                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
+              </p>
+              <div className="zigzag-points small-points">
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
+              </div>
+              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/workspace')}>
+                Try in Workspace <ArrowRight size={14} />
+              </button>
+            </motion.div>
+
             <motion.div 
               className="zigzag-visual-col"
               initial={{ opacity: 0, x: -25 }}
@@ -774,30 +798,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-content-col compact-text-col"
-              initial={{ opacity: 0, x: 25 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-emerald">
-                <CheckCircle2 size={13} /> <span>Feature 04 • Knowledge Testing</span>
-              </div>
-              <h3 className="zigzag-title small-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
-              <p className="zigzag-desc small-desc">
-                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
-              </p>
-              <div className="zigzag-points small-points">
-                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
-                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
-                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/workspace')}>
-                Try in Workspace <ArrowRight size={14} />
-              </button>
             </motion.div>
           </div>
 
