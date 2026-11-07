@@ -252,3 +252,37 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR MY LEARNING PAGE
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+  .mylearning-header-stage {
+    padding: 1rem 0.75rem 0.75rem !important;
+  }
+  .learning-page-title {
+    font-size: 1.35rem !important;
+  }
+  .learning-page-sub {
+    font-size: 0.78rem !important;
+  }
+  .learning-empty-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: 16px !important;
+    margin: 1rem 0.5rem !important;
+  }
+  .learning-empty-card h3 {
+    font-size: 1.1rem !important;
+  }
+  .learning-empty-card p {
+    font-size: 0.76rem !important;
+  }
+  .learning-empty-card .btn-primary {
+    padding: 0.55rem 1.1rem !important;
+    font-size: 0.82rem !important;
+  }
+}

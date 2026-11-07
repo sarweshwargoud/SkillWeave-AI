@@ -2,8 +2,12 @@
   "name": "skillweave-ai",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "build": "npm --prefix frontend run build",
-    "dev": "npm --prefix frontend run dev"
+    "build": "npm --prefix frontend run build && node -e \"const fs=require('fs'); if(fs.existsSync('frontend/dist')){fs.cpSync('frontend/dist','dist',{recursive:true})}\"",
+    "dev": "npm --prefix frontend run dev",
+    "postinstall": "node -e \"const cp=require('child_process'); if(require('fs').existsSync('frontend/package.json')){try{cp.execSync('npm --prefix frontend install',{stdio:'inherit'})}catch(e){}}\""
   }
 }

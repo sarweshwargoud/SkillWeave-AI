@@ -420,3 +420,85 @@
   font-weight: 750;
   cursor: pointer;
 }
+
+/* Native App-Like Mobile Bottom Navigation Bar */
+.mobile-app-bottom-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .global-navbar-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .global-navbar {
+    padding: 0.5rem 1rem !important;
+    min-height: 50px;
+  }
+  .brand-title {
+    font-size: 1.15rem !important;
+  }
+  .brand-icon-box {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .brand-ai-badge {
+    font-size: 0.65rem !important;
+    padding: 0.12rem 0.4rem !important;
+  }
+  .mobile-hamburger-btn {
+    padding: 0.25rem !important;
+  }
+
+  .mobile-app-bottom-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    z-index: 999;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 0.25rem;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mobile-bottom-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 650;
+    height: 100%;
+    transition: all 0.15s ease;
+    border-radius: 8px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-tab.active {
+    color: #111827;
+    font-weight: 800;
+  }
+
+  .mobile-bottom-tab svg {
+    transition: transform 0.15s ease;
+  }
+
+  .mobile-bottom-tab.active svg {
+    color: #e11d48;
+    transform: scale(1.12);
+  }
+}

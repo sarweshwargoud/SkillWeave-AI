@@ -1289,3 +1289,228 @@
     display: none !important;
   }
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR LEARNING WORKSPACE (<= 768px)
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+
+  .workspace-page-container {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .workspace-sticky-top-nav {
+    padding: 0.35rem 0.65rem !important;
+    min-height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.4rem !important;
+  }
+
+  .workspace-nav-left-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+  }
+
+  /* Keep Back and Home, hide redundant breadcrumb links on mobile */
+  .workspace-nav-btn.return-mylearning,
+  .workspace-nav-btn.return-profile,
+  .workspace-sticky-top-nav .nav-sep:nth-of-type(n+2) {
+    display: none !important;
+  }
+
+  .workspace-nav-btn {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.74rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .workspace-nav-center-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+  }
+
+  .active-course-label {
+    font-size: 0.82rem !important;
+    max-width: 140px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .active-progress-pill {
+    font-size: 0.65rem !important;
+    padding: 0.12rem 0.4rem !important;
+  }
+
+  .workspace-toggle-sidebar-btn {
+    display: none !important;
+  }
+
+  .mobile-playlist-drawer-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    padding: 0.3rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 999px !important;
+  }
+
+  /* Main Workspace Canvas */
+  .workspace-main-body {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .workspace-center-stage {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  .workspace-top-row {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    flex: none !important;
+  }
+
+  .top-video-column {
+    width: 100% !important;
+    height: auto !important;
+    flex: none !important;
+    position: sticky !important;
+    top: 50px !important;
+    z-index: 40 !important;
+    background: #000000 !important;
+  }
+
+  .video-player-bezel-frame {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .in-app-player-aspect-frame {
+    aspect-ratio: 16/9 !important;
+    height: auto !important;
+    max-height: 240px !important;
+  }
+
+  .player-meta-control-bar {
+    padding: 0.4rem 0.65rem !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .current-video-heading {
+    font-size: 0.78rem !important;
+    max-width: 150px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .player-right-actions {
+    gap: 0.35rem !important;
+  }
+
+  .btn-complete-toggle {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .prev-next-arrows-box {
+    gap: 0.2rem !important;
+  }
+
+  .step-arrow-btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .theater-expand-btn {
+    display: none !important;
+  }
+
+  /* Hide Desktop Splitters */
+  .splitter-video-middle,
+  .splitter-horizontal,
+  .splitter-sidebar {
+    display: none !important;
+  }
+
+  /* Hide Desktop Bottom Pane on Mobile - Tabs below player switch the view */
+  .bottom-feature-row {
+    display: none !important;
+  }
+
+  /* Single Feature Column below Video */
+  .top-side-middle-feature-column {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 480px !important;
+    flex: 1 1 auto !important;
+    background: #ffffff !important;
+  }
+
+  .side-middle-switcher-header {
+    padding: 0.4rem 0.5rem !important;
+    background: #f8fafc !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    position: sticky !important;
+    top: calc(50px + 240px + 36px) !important;
+    z-index: 30 !important;
+  }
+
+  .side-feature-selector-tabs {
+    display: flex !important;
+    width: 100% !important;
+    gap: 0.3rem !important;
+  }
+
+  .side-feat-tab {
+    flex: 1 !important;
+    padding: 0.35rem 0.45rem !important;
+    font-size: 0.74rem !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    gap: 0.25rem !important;
+  }
+
+  /* Feature wrappers inside mobile view */
+  .feature-wrapper {
+    height: auto !important;
+    min-height: 420px !important;
+    overflow: visible !important;
+  }
+
+  /* Mobile Drawer Sheet */
+  .mobile-drawer-sheet {
+    max-height: 82vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding-bottom: 60px !important;
+  }
+}

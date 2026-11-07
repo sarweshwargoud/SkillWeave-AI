@@ -717,3 +717,136 @@
     border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
   }
 }
+
+
+/* =========================================================================
+   NATIVE MOBILE WEBAPP EXPERIENCE FOR AI TUTOR PAGE
+   ========================================================================= */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px !important;
+  }
+  .chatgpt-workspace-container {
+    height: calc(100vh - 50px - 56px) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .chatgpt-sidebar-threads {
+    display: none !important;
+  }
+  .chatgpt-main-stage {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .chatgpt-grounding-header {
+    padding: 0.4rem 0.65rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.4rem !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+  .grounding-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+  }
+  .grounding-video-title {
+    font-size: 0.8rem !important;
+    max-width: 160px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .grounding-right-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+  .grounding-url-field {
+    flex: 1 !important;
+    height: 36px !important;
+    padding: 0 0.5rem !important;
+    border-radius: 8px !important;
+  }
+  .grounding-url-field input {
+    font-size: 0.76rem !important;
+  }
+  .grounding-load-btn {
+    padding: 0.25rem 0.6rem !important;
+    font-size: 0.72rem !important;
+  }
+  .grounding-toggle-video-btn {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.72rem !important;
+    height: 36px !important;
+  }
+  .grounding-presets-strip {
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding: 0.35rem 0.65rem !important;
+    gap: 0.3rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    scrollbar-width: none !important;
+  }
+  .grounding-presets-strip::-webkit-scrollbar {
+    display: none !important;
+  }
+  .preset-chip {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.55rem !important;
+    border-radius: 999px !important;
+  }
+  .chatgpt-cinema-drawer {
+    background: #000000 !important;
+  }
+  .cinema-aspect-box {
+    aspect-ratio: 16/9 !important;
+    max-height: 200px !important;
+  }
+  .chatgpt-messages-container {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 0.75rem !important;
+    gap: 0.65rem !important;
+  }
+  .chat-msg-row {
+    gap: 0.45rem !important;
+  }
+  .msg-avatar-box {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 6px !important;
+  }
+  .msg-bubble-card {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 12px !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
+  .chatgpt-bottom-dock {
+    padding: 0.45rem 0.65rem !important;
+    background: #ffffff !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+  .chatgpt-input-pill-box {
+    min-height: 40px !important;
+    padding: 0.3rem 0.5rem !important;
+    border-radius: 12px !important;
+  }
+  .chatgpt-input-pill-box textarea {
+    font-size: 0.82rem !important;
+  }
+  .send-msg-btn {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+}
