@@ -761,7 +761,7 @@ const LearningWorkspacePage = () => {
             
             {/* VIDEO COLUMN: Full width when activeFeature is null; scaled alongside drawer when feature is open */}
             <div className={`workspace-video-column ${activeFeature ? 'with-drawer' : 'full-width'}`}>
-              <div className="in-app-player-aspect-frame">
+              <div className={`in-app-player-aspect-frame ${theaterMode ? 'is-theater-expanded' : ''}`}>
                 {activeVideo ? (
                   <iframe
                     key={activeVideo.id}
