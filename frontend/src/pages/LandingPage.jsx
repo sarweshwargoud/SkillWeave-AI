@@ -22,7 +22,9 @@ import {
   Zap,
   Check,
   Bot,
-  Video
+  Video,
+  Youtube,
+  Search
 } from 'lucide-react';
 import { getClient } from '../services/supabaseClient';
 import Navbar from '../components/Navbar';
@@ -163,6 +165,7 @@ const LandingPage = () => {
   const [activeDemoKey, setActiveDemoKey] = useState('python');
   const [demoRoadmap, setDemoRoadmap] = useState(DEMO_ROADMAPS.python);
   const [activePillar, setActivePillar] = useState('roadmap'); // 'roadmap', 'notes', 'tutor'
+  const [heroInputUrl, setHeroInputUrl] = useState('');
   
   // AI Continuity Scanner Live Simulation
   const [isScanning, setIsScanning] = useState(false);
@@ -238,118 +241,60 @@ const LandingPage = () => {
             Transform scattered YouTube educational videos into a continuous, structured, and personalized learning roadmap.
             Transcribed and continuity-verified by Gemini AI.
           </motion.p>
-        </div>
 
-        {/* 3 Core AI Features Showcase Stage (Full desktop display) */}
-        <div className="studio-product-stage">
-          <div className="stage-pedestal-arc" />
-
-          {/* Responsive 3-card grid on desktop */}
-          <div className="stage-features-grid">
-            {/* Feature 1: AI Roadmap Generator */}
-            <motion.div
-              className={`feature-hero-card ${activePillar === 'roadmap' ? 'active-card' : ''}`}
-              whileHover={{ y: -8, scale: 1.02 }}
-              onClick={() => navigate('/create')}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            >
-              <div className="feature-card-header">
-                <div className="feature-icon-box">
-                  <Compass size={24} className="text-rose-600" />
-                </div>
-                <span className="feature-top-badge">FEATURE 01</span>
-              </div>
-              <h3 className="feature-card-title">AI Roadmap Generator</h3>
-              <p className="feature-card-desc">
-                Paste any YouTube video or playlist URL. Synthesizes clear beginner, intermediate & advanced milestones with time estimates.
-              </p>
-              <div className="feature-card-tags">
-                <span className="tag-pill">Playlists & Videos</span>
-                <span className="tag-pill">Timestamped</span>
-              </div>
-              <div className="feature-card-action">
-                <span>Generate Roadmap</span>
-                <ArrowRight size={16} />
-              </div>
-            </motion.div>
-
-            {/* Feature 2: AI Handwritten Notes Generator */}
-            <motion.div
-              className={`feature-hero-card ${activePillar === 'notes' ? 'active-card' : ''}`}
-              whileHover={{ y: -8, scale: 1.02 }}
-              onClick={() => navigate('/notes')}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            >
-              <div className="feature-card-header">
-                <div className="feature-icon-box bg-amber-50">
-                  <FileText size={24} className="text-amber-600" />
-                </div>
-                <span className="feature-top-badge badge-amber">FEATURE 02</span>
-              </div>
-              <h3 className="feature-card-title">AI Handwritten Notes</h3>
-              <p className="feature-card-desc">
-                Generates authentic handwritten-style study sheets on ruled, grid or parchment paper with highlighted definitions and PDF export.
-              </p>
-              <div className="feature-card-tags">
-                <span className="tag-pill">Ruled & Grid Layouts</span>
-                <span className="tag-pill">Editable & PDF</span>
-              </div>
-              <div className="feature-card-action">
-                <span>Create Notes</span>
-                <ArrowRight size={16} />
-              </div>
-            </motion.div>
-
-            {/* Feature 3: AI Video Tutor */}
-            <motion.div
-              className={`feature-hero-card ${activePillar === 'tutor' ? 'active-card' : ''}`}
-              whileHover={{ y: -8, scale: 1.02 }}
-              onClick={() => navigate('/tutor')}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            >
-              <div className="feature-card-header">
-                <div className="feature-icon-box bg-indigo-50">
-                  <MessageSquare size={24} className="text-indigo-600" />
-                </div>
-                <span className="feature-top-badge badge-indigo">FEATURE 03</span>
-              </div>
-              <h3 className="feature-card-title">AI Video Tutor</h3>
-              <p className="feature-card-desc">
-                Ask questions about any video concept or timestamp ("Explain what was taught at 05:32"). Click timestamps to jump the player.
-              </p>
-              <div className="feature-card-tags">
-                <span className="tag-pill">Timestamp Jumps</span>
-                <span className="tag-pill">Context-Grounded</span>
-              </div>
-              <div className="feature-card-action">
-                <span>Ask AI Tutor</span>
-                <ArrowRight size={16} />
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Central Workspace Highlight Banner */}
-          <motion.div
-            className="workspace-dock-banner"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+          {/* Hero Action CTA Group */}
+          <motion.div 
+            className="hero-cta-group"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
           >
-            <div className="dock-banner-content">
-              <div className="dock-banner-left">
-                <span className="dock-pill">CENTRAL HUB</span>
-                <h3>My Learning Workspace & Progress Tracker</h3>
-                <p>3-column learning environment with embedded video player, interactive quizzes, transcript search & persistent course progress.</p>
-              </div>
-              <div className="dock-banner-buttons">
-                <button className="btn-primary dock-btn" onClick={() => navigate('/workspace')}>
-                  <PlaySquare size={18} /> Open Workspace
-                </button>
-                <button className="btn-secondary dock-btn" onClick={() => navigate('/my-learning')}>
-                  <GraduationCap size={18} /> My Progress
-                </button>
-              </div>
+            <button className="btn-primary hero-main-btn" onClick={() => navigate('/create')}>
+              <Compass size={18} />
+              <span>Generate AI Roadmap</span>
+              <ArrowRight size={16} />
+            </button>
+            <button className="btn-secondary hero-secondary-btn" onClick={() => navigate('/workspace')}>
+              <PlaySquare size={18} />
+              <span>Explore Learning Workspace</span>
+            </button>
+          </motion.div>
+
+          {/* Quick YouTube URL / Topic Starter Bar */}
+          <motion.div 
+            className="hero-quick-input-card"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
+          >
+            <div className="quick-input-row">
+              <Youtube size={22} className="quick-yt-icon text-rose-500" />
+              <input 
+                type="text"
+                placeholder="Paste YouTube video or playlist URL (e.g. Python, Docker, Next.js)..."
+                value={heroInputUrl}
+                onChange={(e) => setHeroInputUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && heroInputUrl.trim()) {
+                    navigate('/create');
+                  }
+                }}
+              />
+              <button 
+                type="button"
+                className="quick-submit-btn"
+                onClick={() => navigate('/create')}
+              >
+                <span>Curate</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+            <div className="quick-topics-chips">
+              <span className="chips-label">Popular:</span>
+              <button type="button" className="chip-btn" onClick={() => navigate('/create')}>Python ML</button>
+              <button type="button" className="chip-btn" onClick={() => navigate('/create')}>React 19 Deep Dive</button>
+              <button type="button" className="chip-btn" onClick={() => navigate('/create')}>Docker & K8s</button>
+              <button type="button" className="chip-btn" onClick={() => navigate('/create')}>LangChain & RAG</button>
             </div>
           </motion.div>
 
@@ -504,44 +449,190 @@ const LandingPage = () => {
         </motion.div>
       </section>
 
-      {/* ZIG-ZAG FEATURE SHOWCASE WITH LAYERED MOTION CARDS */}
-      <section id="zigzag-showcase" className="zigzag-showcase-section">
+      {/* CORE WORKSPACE CAPABILITIES (Image 1 reference placed after the scanning thing) */}
+      <section id="features-pillars" className="features-pillars-section">
         <div className="section-header-centered">
-          <span className="section-overhead-tag">DEEP WORKSPACE PLATFORM</span>
-          <h2 className="section-heading">Engineered for Rapid Concept Mastery</h2>
-          <p className="section-subtext">Everything you need to turn hours of disjointed video lectures into structured, retention-backed expertise.</p>
+          <span className="section-overhead-tag">CORE PLATFORM CAPABILITIES</span>
+          <h2 className="section-heading">Three Pillars of Accelerated Mastery</h2>
+          <p className="section-subtext">Deconstruct any video lecture into calibrated milestones, authentic study sheets, and interactive tutor grounding.</p>
         </div>
 
+        {/* 3 Core AI Features Showcase Stage (Responsive: 3 in row desktop, 1 at a time mobile) */}
+        <div className="stage-features-grid">
+          {/* Feature 01: AI Roadmap Generator */}
+          <motion.div
+            className={`feature-hero-card ${activePillar === 'roadmap' ? 'active-card' : ''}`}
+            whileHover={{ y: -6, scale: 1.01 }}
+            onClick={() => navigate('/create')}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <div className="feature-card-header">
+              <div className="feature-icon-box">
+                <Compass size={24} className="text-rose-600" />
+              </div>
+              <span className="feature-top-badge">FEATURE 01</span>
+            </div>
+            <h3 className="feature-card-title">AI Roadmap Generator</h3>
+            <p className="feature-card-desc">
+              Paste any YouTube video or playlist URL. Synthesizes clear beginner, intermediate & advanced milestones with time estimates.
+            </p>
+            <div className="feature-card-tags">
+              <span className="tag-pill">Playlists & Videos</span>
+              <span className="tag-pill">Timestamped</span>
+            </div>
+            <div className="feature-card-action">
+              <span>Generate Roadmap</span>
+              <ArrowRight size={16} />
+            </div>
+          </motion.div>
+
+          {/* Feature 02: AI Handwritten Notes Generator */}
+          <motion.div
+            className={`feature-hero-card ${activePillar === 'notes' ? 'active-card' : ''}`}
+            whileHover={{ y: -6, scale: 1.01 }}
+            onClick={() => navigate('/notes')}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <div className="feature-card-header">
+              <div className="feature-icon-box bg-amber-50">
+                <FileText size={24} className="text-amber-600" />
+              </div>
+              <span className="feature-top-badge badge-amber">FEATURE 02</span>
+            </div>
+            <h3 className="feature-card-title">AI Handwritten Notes</h3>
+            <p className="feature-card-desc">
+              Generates authentic handwritten-style study sheets on ruled, grid or parchment paper with highlighted definitions and PDF export.
+            </p>
+            <div className="feature-card-tags">
+              <span className="tag-pill">Ruled & Grid Layouts</span>
+              <span className="tag-pill">Editable & PDF</span>
+            </div>
+            <div className="feature-card-action">
+              <span>Create Notes</span>
+              <ArrowRight size={16} />
+            </div>
+          </motion.div>
+
+          {/* Feature 03: AI Video Tutor */}
+          <motion.div
+            className={`feature-hero-card ${activePillar === 'tutor' ? 'active-card' : ''}`}
+            whileHover={{ y: -6, scale: 1.01 }}
+            onClick={() => navigate('/tutor')}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <div className="feature-card-header">
+              <div className="feature-icon-box bg-indigo-50">
+                <MessageSquare size={24} className="text-indigo-600" />
+              </div>
+              <span className="feature-top-badge badge-indigo">FEATURE 03</span>
+            </div>
+            <h3 className="feature-card-title">AI Video Tutor</h3>
+            <p className="feature-card-desc">
+              Ask questions about any video concept or timestamp ("Explain what was taught at 05:32"). Click timestamps to jump the player.
+            </p>
+            <div className="feature-card-tags">
+              <span className="tag-pill">Timestamp Jumps</span>
+              <span className="tag-pill">Context-Grounded</span>
+            </div>
+            <div className="feature-card-action">
+              <span>Ask AI Tutor</span>
+              <ArrowRight size={16} />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* DEEP GROUNDING & WORKSPACE SHOWCASE (Image 2 reference with small text beside cards) */}
+      <section id="deep-showcase" className="deep-showcase-section">
         <div className="zigzag-container">
-          {/* Zig 1: Syllabus Sequencing (Text Left, Card Right) */}
+          {/* Row 1: Feature 04 Knowledge Testing (Instant Lesson Quizzes) - EXACT IMAGE 2 REFERENCE */}
+          <div className="zigzag-row reverse-row">
+            <motion.div 
+              className="zigzag-visual-col"
+              initial={{ opacity: 0, x: -25 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="layered-card-wrapper">
+                <div className="layered-back-card bg-emerald-glow" />
+                <div className="layered-front-card">
+                  <div className="card-mock-header">
+                    <span className="mock-dot red" />
+                    <span className="mock-dot yellow" />
+                    <span className="mock-dot green" />
+                    <span className="mock-header-title">Knowledge Assessment</span>
+                  </div>
+                  <div className="mock-quiz-body">
+                    <span className="mock-q-num">Question 1 of 5</span>
+                    <h5 className="mock-q-title">What happens when a Python object's reference count drops to 0?</h5>
+                    <div className="mock-options-group">
+                      <div className="mock-opt-item">A) Stored in swap partition</div>
+                      <div className="mock-opt-item is-correct">
+                        <Check size={14} className="text-emerald-500" />
+                        <span>B) Memory is reclaimed instantly by garbage collector</span>
+                      </div>
+                      <div className="mock-opt-item">C) Raises a MemoryError exception</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="zigzag-content-col compact-text-col"
+              initial={{ opacity: 0, x: 25 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="zigzag-badge badge-emerald">
+                <CheckCircle2 size={13} /> <span>Feature 04 • Knowledge Testing</span>
+              </div>
+              <h3 className="zigzag-title small-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
+              <p className="zigzag-desc small-desc">
+                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
+              </p>
+              <div className="zigzag-points small-points">
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
+              </div>
+              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/workspace')}>
+                Try in Workspace <ArrowRight size={14} />
+              </button>
+            </motion.div>
+          </div>
+
+          {/* Row 2: Feature 05 Multi-Modal Workspace Central Hub */}
           <div className="zigzag-row">
             <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: -30 }}
+              className="zigzag-content-col compact-text-col"
+              initial={{ opacity: 0, x: -25 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <div className="zigzag-badge badge-blue">
-                <Sparkles size={14} /> <span>Feature 01 • Sequential Sequencing</span>
+                <PlaySquare size={13} /> <span>Feature 05 • Central Hub</span>
               </div>
-              <h3 className="zigzag-title">Deconstruct Any Playlist Into Calibrated Milestones</h3>
-              <p className="zigzag-desc">
-                Raw YouTube playlists are filled with repeated basics, clickbait intros, and jarring gaps. SkillWeave's AI reads video transcripts, identifies the conceptual prerequisite order, and stitches together a seamless step-by-step curriculum.
+              <h3 className="zigzag-title small-title">Multi-Modal Learning Workspace & Progress Tracking</h3>
+              <p className="zigzag-desc small-desc">
+                A unified 3-column learning canvas combining cinema playback, module milestones, handwritten notes, and instant AI tutor chat with zero tab-switching.
               </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-blue-600" /> <span>Zero concept gaps across consecutive videos</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-blue-600" /> <span>Automatic duration & milestone estimation</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-blue-600" /> <span>Continuity verified by Gemini embeddings</span></div>
+              <div className="zigzag-points small-points">
+                <div className="point-item"><CheckCircle2 size={15} className="text-blue-600" /> <span>Interactive module folder tree and lesson checklist</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-blue-600" /> <span>Auto-syncs timestamps between video and lecture notes</span></div>
+                <div className="point-item"><CheckCircle2 size={15} className="text-blue-600" /> <span>Cloud persistence saved to your Supabase account</span></div>
               </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/create')}>
-                Create Roadmap <ArrowRight size={15} />
+              <button className="btn-primary zigzag-cta-btn compact-btn" onClick={() => navigate('/workspace')}>
+                Open Workspace <ArrowRight size={14} />
               </button>
             </motion.div>
 
             <motion.div 
               className="zigzag-visual-col"
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 25 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
@@ -579,184 +670,6 @@ const LandingPage = () => {
                         <span>14:20 • Up Next</span>
                       </div>
                       <span className="mock-status-pill">Pending</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Zag 2: In-App AI Video Tutor (Card Left, Text Right via row-reverse) */}
-          <div className="zigzag-row reverse-row">
-            <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-violet">
-                <MessageSquare size={14} /> <span>Feature 02 • Context Grounding</span>
-              </div>
-              <h3 className="zigzag-title">Instant Clarifications with Lecture Timestamp Seeking</h3>
-              <p className="zigzag-desc">
-                Don't waste time scouring comment sections or scrubbing through video timelines. Ask questions directly to your AI tutor. It identifies the exact moments concepts are taught and lets you jump the embedded cinema player with one click.
-              </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Clickable timestamps seek YouTube video instantly</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>ChatGPT-style persistent history threads</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-violet-600" /> <span>Encrypted session history saved in Supabase</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/tutor')}>
-                Launch AI Tutor <ArrowRight size={15} />
-              </button>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-visual-col"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="layered-card-wrapper">
-                <div className="layered-back-card bg-violet-glow" />
-                <div className="layered-front-card">
-                  <div className="card-mock-header">
-                    <span className="mock-dot red" />
-                    <span className="mock-dot yellow" />
-                    <span className="mock-dot green" />
-                    <span className="mock-header-title">AI Video Tutor Grounding</span>
-                  </div>
-                  <div className="mock-chat-stream">
-                    <div className="mock-user-bubble">
-                      "Why does the instructor use multi-stage builds at 04:15?"
-                    </div>
-                    <div className="mock-tutor-bubble">
-                      <div className="tutor-head">
-                        <Bot size={14} className="text-blue-500" />
-                        <span>AI Video Tutor</span>
-                      </div>
-                      <p>
-                        At <span className="mock-timestamp-badge">[04:15]</span>, the instructor separates compilation tools from the final image, reducing production container size from 1.2 GB to 48 MB!
-                      </p>
-                      <div className="mock-jump-cta">
-                        <Play size={10} /> <span>Jump player to [04:15]</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Zig 3: Handwritten Notes (Text Left, Card Right) */}
-          <div className="zigzag-row">
-            <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-amber">
-                <FileText size={14} /> <span>Feature 03 • Visual Synthesis</span>
-              </div>
-              <h3 className="zigzag-title">Authentic Handwritten Notes on Ruled & Grid Notebooks</h3>
-              <p className="zigzag-desc">
-                Transform fast-paced lecture audio into high-yield, handwritten-style notebook study sheets. Styled with realistic ink fonts, highlighter accents, formulas, and structural ASCII diagrams.
-              </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-amber-600" /> <span>Ruled paper, engineering grid & parchment skins</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-amber-600" /> <span>One-click PDF download & printing format</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-amber-600" /> <span>Definitions, formulas & exam summary cards</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/notes')}>
-                Open Notes Studio <ArrowRight size={15} />
-              </button>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-visual-col"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="layered-card-wrapper">
-                <div className="layered-back-card bg-amber-glow" />
-                <div className="layered-front-card paper-texture-card">
-                  <div className="mock-paper-header">
-                    <span className="paper-date">Lecture Notes • 2026</span>
-                    <span className="paper-subj">Python Memory Models</span>
-                  </div>
-                  <div className="mock-handwritten-body">
-                    <h4 className="hw-heading">Core Concept: The Private Heap</h4>
-                    <p className="hw-text">
-                      Everything in Python is an object! Variable names are references (pointers) pointing to addresses in memory.
-                    </p>
-                    <div className="hw-highlight-box">
-                      <span className="hw-hl-tag">Important Rule:</span>
-                      <p className="hw-hl-text">LEGB: Local &rarr; Enclosing &rarr; Global &rarr; Built-in</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Zag 4: Interactive Lesson Quizzes (Card Left, Text Right via row-reverse) */}
-          <div className="zigzag-row reverse-row">
-            <motion.div 
-              className="zigzag-content-col"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="zigzag-badge badge-emerald">
-                <CheckCircle2 size={14} /> <span>Feature 04 • Knowledge Testing</span>
-              </div>
-              <h3 className="zigzag-title">Instant Lesson Quizzes Grounded in the Lecture</h3>
-              <p className="zigzag-desc">
-                Passive watching leads to forgetting. SkillWeave tests your retention immediately with realistic scenario-based questions generated directly from the instructor's spoken words.
-              </p>
-              <div className="zigzag-points">
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Immediate explanation rationale for every choice</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Tracks retention scores across course modules</span></div>
-                <div className="point-item"><CheckCircle2 size={16} className="text-emerald-600" /> <span>Grounded in actual lecture transcripts</span></div>
-              </div>
-              <button className="btn-primary zigzag-cta-btn" onClick={() => navigate('/workspace')}>
-                Try in Workspace <ArrowRight size={15} />
-              </button>
-            </motion.div>
-
-            <motion.div 
-              className="zigzag-visual-col"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="layered-card-wrapper">
-                <div className="layered-back-card bg-emerald-glow" />
-                <div className="layered-front-card">
-                  <div className="card-mock-header">
-                    <span className="mock-dot red" />
-                    <span className="mock-dot yellow" />
-                    <span className="mock-dot green" />
-                    <span className="mock-header-title">Knowledge Assessment</span>
-                  </div>
-                  <div className="mock-quiz-body">
-                    <span className="mock-q-num">Question 1 of 5</span>
-                    <h5 className="mock-q-title">What happens when a Python object's reference count drops to 0?</h5>
-                    <div className="mock-options-group">
-                      <div className="mock-opt-item">A) Stored in swap partition</div>
-                      <div className="mock-opt-item is-correct">
-                        <Check size={14} className="text-emerald-500" />
-                        <span>B) Memory is reclaimed instantly by garbage collector</span>
-                      </div>
-                      <div className="mock-opt-item">C) Raises a MemoryError exception</div>
                     </div>
                   </div>
                 </div>

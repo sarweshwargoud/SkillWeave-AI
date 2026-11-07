@@ -1013,7 +1013,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  min-width: 0;
+  min-width: 60px;
 }
 
 .folder-lesson-count {
@@ -1217,19 +1217,53 @@
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 1024px) {
-  .workspace-top-row {
-    flex-direction: column;
+  .workspace-page-container {
     height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    user-select: auto !important;
+  }
+
+  .workspace-main-drag-canvas {
+    height: auto !important;
+    flex: none !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .workspace-center-vertical-split {
+    height: auto !important;
+    flex: none !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .workspace-top-row {
+    flex-direction: column !important;
+    height: auto !important;
+    flex: none !important;
   }
 
   .top-video-column,
   .top-side-middle-feature-column {
     width: 100% !important;
-    min-height: 380px;
+    height: auto !important;
+    min-height: 340px !important;
+    flex: none !important;
   }
 
-  .splitter-video-middle {
-    display: none;
+  .splitter-video-middle,
+  .splitter-horizontal {
+    display: none !important;
+  }
+
+  .bottom-feature-row {
+    height: auto !important;
+    min-height: 480px !important;
+    flex: none !important;
+    overflow: visible !important;
   }
 
   .mobile-playlist-drawer-trigger {
