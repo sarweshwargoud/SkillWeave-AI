@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Download, 
   Printer, 
@@ -9,7 +9,14 @@ import {
   Palette, 
   FileCheck, 
   Share2,
-  Bookmark
+  Bookmark,
+  Plus,
+  FileText,
+  Trash2,
+  PanelLeft,
+  PanelLeftClose,
+  SquarePen,
+  X
 } from 'lucide-react';
 import './HandwrittenNotesViewer.css';
 
@@ -17,14 +24,57 @@ const HandwrittenNotesViewer = ({ notesData, onSaveNote }) => {
   const [theme, setTheme] = useState('ruled'); // 'ruled' | 'grid' | 'parchment' | 'clean'
   const [fontMode, setFontMode] = useState('hand'); // 'hand' | 'cursive' | 'sans'
   const [isEditing, setIsEditing] = useState(false);
-  const [notes, setNotes] = useState(notesData);
+  const defaultFallbackNotes = {
+    title: 'Docker Container Engineering Study Sheet',
+    subject: 'DevOps & Architecture',
+    overview: 'Comprehensive handwritten study notes covering container engines, Linux namespaces, cgroups, image layer caching, and multi-stage builds.',
+    definitions: [
+      { term: 'Container Engine', tag: 'Architecture', definition: 'The core daemon responsible for managing container lifecycles, images, storage, and networking.' },
+      { term: 'Linux Namespaces', tag: 'Isolation', definition: 'Kernel primitives (pid, net, ipc, mnt, uts, user) partitioning system resources.' },
+      { term: 'Layer Caching', tag: 'Optimization', definition: 'Reusing intermediate cached image layers during builds when files have not changed.' }
+    ],
+    sections: [
+      {
+        heading: 'Container vs Virtual Machine Isolation',
+        points: [
+          'Containers share the host Linux kernel; VMs require a hypervisor and full guest OS.',
+          'Start-up time: milliseconds for containers vs minutes for VMs.',
+          'Resource footprint: containers utilize host memory directly without fixed allocation overhead.'
+        ],
+        highlight_box: 'Order Dockerfile instructions from least frequently changed to most frequently changed to maximize layer cache hits.'
+      }
+    ],
+    summary: 'Docker enables immutable, repeatable application packaging by combining Linux namespaces, cgroups, and layered UnionFS storage drivers.'
+  };
+
+  const [notes, setNotes] = useState(notesData || defaultFallbackNotes);
+
+  useEffect(() => {
+    if (notesData) {
+      setNotes(notesData);
+    }
+  }, [notesData]);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Notes Sheets / Sessions (Left Sidebar, ChatGPT style!)
+  const [activeSheetId, setActiveSheetId] = useState('full-notes');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Available Note Sheets / Topics
+  const [noteSheets, setNoteSheets] = useState([
+    { id: 'full-notes', title: '1. Full Lecture Study Sheet', count: 'All Sections' },
+    { id: 'definitions', title: '2. Key Definitions & Terms', count: 'Glossary' },
+    { id: 'architecture', title: '3. Architecture & Code Blocks', count: 'Deep Dive' },
+    { id: 'summary', title: '4. Summary & Review Notes', count: 'Takeaways' }
+  ]);
 
   if (!notes) {
     return (
       <div className="notes-empty-prompt">
-        <p>No notes data provided.</p>
+        <FileText size={36} className="text-zinc-400" />
+        <p>No study notes generated yet for this lesson.</p>
       </div>
     );
   }
@@ -34,22 +84,19 @@ const HandwrittenNotesViewer = ({ notesData, onSaveNote }) => {
   };
 
   const handleCopy = () => {
-    const textRep = `
-# ${notes.title}
-Subject: ${notes.subject}
-
-## Overview
-${notes.overview}
-
-## Key Definitions
-${notes.definitions?.map(d => `- **${d.term}** (${d.tag}): ${d.definition}`).join('\n')}
-
-## Core Sections
-${notes.sections?.map(s => `### ${s.heading}\n${s.points?.map(p => `- ${p}`).join('\n')}\n${s.highlight_box ? `> ${s.highlight_box}` : ''}`).join('\n\n')}
-
-## Summary
-${notes.summary}
-    `.trim();
+    const textRep = [
+      '# ' + (notes.title || ''),
+      'Subject: ' + (notes.subject || ''),
+      '',
+      '## Overview',
+      notes.overview || '',
+      '',
+      '## Key Definitions',
+      ...(notes.definitions || []).map(d => `- **${d.term}** (${d.tag}): ${d.definition}`),
+      '',
+      '## Summary',
+      notes.summary || ''
+    ].join('\n');
 
     navigator.clipboard.writeText(textRep);
     setCopied(true);
@@ -61,6 +108,28 @@ ${notes.summary}
       onSaveNote(notes);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+    }
+  };
+
+  const handleNewNote = () => {
+    const newId = `custom-note-${Date.now()}`;
+    const newSheet = {
+      id: newId,
+      title: `Custom Study Note ${noteSheets.length + 1}`,
+      count: 'User Note'
+    };
+    setNoteSheets(prev => [...prev, newSheet]);
+    setActiveSheetId(newId);
+    setIsMobileDrawerOpen(false);
+  };
+
+  const handleDeleteSheet = (e, targetId) => {
+    e.stopPropagation();
+    if (noteSheets.length <= 1) return;
+    const remaining = noteSheets.filter(s => s.id !== targetId);
+    setNoteSheets(remaining);
+    if (activeSheetId === targetId) {
+      setActiveSheetId(remaining[0].id);
     }
   };
 
@@ -81,231 +150,355 @@ ${notes.summary}
     }
   };
 
+  const activeSheet = noteSheets.find(s => s.id === activeSheetId) || noteSheets[0];
+
   return (
-    <div className="handwritten-viewer-wrapper">
-      {/* Notebook Toolbar */}
-      <div className="notebook-toolbar">
-        <div className="toolbar-left-group">
-          <div className="theme-pill-selector">
-            <span className="selector-label"><Palette size={13} /> Paper:</span>
-            <button
-              className={`pill-btn ${theme === 'ruled' ? 'active' : ''}`}
-              onClick={() => setTheme('ruled')}
-            >
-              Ruled Lines
-            </button>
-            <button
-              className={`pill-btn ${theme === 'grid' ? 'active' : ''}`}
-              onClick={() => setTheme('grid')}
-            >
-              Grid Paper
-            </button>
-            <button
-              className={`pill-btn ${theme === 'parchment' ? 'active' : ''}`}
-              onClick={() => setTheme('parchment')}
-            >
-              Warm Parchment
-            </button>
-            <button
-              className={`pill-btn ${theme === 'clean' ? 'active' : ''}`}
-              onClick={() => setTheme('clean')}
-            >
-              Clean Studio
-            </button>
-          </div>
+    <div className="shadcn-notes-wrapper">
+      {/* =====================================================================
+          CHATGPT-STYLE MOBILE OPENING BAR (Header to open/close drawer on mobile)
+          ===================================================================== */}
+      <div className="chatgpt-mobile-top-bar">
+        <button 
+          type="button" 
+          className="chatgpt-bar-btn chatgpt-bar-menu"
+          onClick={() => setIsMobileDrawerOpen(true)}
+          title="Open notes sheets sidebar"
+          aria-label="Open notes sheets sidebar"
+        >
+          <PanelLeft size={16} />
+        </button>
 
-          <div className="font-pill-selector">
-            <span className="selector-label">Ink Style:</span>
-            <button
-              className={`pill-btn ${fontMode === 'hand' ? 'active' : ''}`}
-              onClick={() => setFontMode('hand')}
-            >
-              Study Script
-            </button>
-            <button
-              className={`pill-btn ${fontMode === 'cursive' ? 'active' : ''}`}
-              onClick={() => setFontMode('cursive')}
-            >
-              Cursive
-            </button>
-            <button
-              className={`pill-btn ${fontMode === 'sans' ? 'active' : ''}`}
-              onClick={() => setFontMode('sans')}
-            >
-              Print Typeset
-            </button>
-          </div>
+        <div className="chatgpt-bar-title-group" onClick={() => setIsMobileDrawerOpen(true)}>
+          <span className="chatgpt-bar-active-title" title={activeSheet.title}>
+            {activeSheet.title}
+          </span>
+          <span className="chatgpt-bar-status-dot" title="Active Note Sheet" />
         </div>
 
-        <div className="toolbar-right-actions">
-          <button 
-            className={`tool-action-btn ${isEditing ? 'active-edit' : ''}`} 
-            onClick={() => setIsEditing(!isEditing)}
-            title="Edit notes"
-          >
-            <Edit3 size={15} />
-            <span>{isEditing ? 'Done Editing' : 'Edit Notes'}</span>
-          </button>
-
-          <button className="tool-action-btn" onClick={handleCopy} title="Copy markdown notes">
-            {copied ? <Check size={15} className="text-green" /> : <Share2 size={15} />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
-          </button>
-
-          <button className="tool-action-btn" onClick={handlePrint} title="Print or Save as PDF">
-            <Printer size={15} />
-            <span>Print / PDF</span>
-          </button>
-
-          {onSaveNote && (
-            <button className="btn-primary tool-save-btn" onClick={handleSaveToLibrary}>
-              <Bookmark size={15} />
-              <span>{saved ? 'Saved to Library!' : 'Save Notes'}</span>
-            </button>
-          )}
-        </div>
+        <button 
+          type="button" 
+          className="chatgpt-bar-btn chatgpt-bar-new"
+          onClick={handleNewNote}
+          title="Create New Note Sheet"
+          aria-label="Create New Note Sheet"
+        >
+          <SquarePen size={16} />
+        </button>
       </div>
 
-      {/* Realistic Notebook Page */}
-      <div className={`notebook-sheet ${getThemeClass()} ${getFontClass()}`}>
-        {/* Notebook Tape / Binding Accent */}
-        <div className="notebook-top-tape"></div>
+      {/* Main Two-Column Master / Detail Layout */}
+      <div className="shadcn-notes-layout">
 
-        {/* Note Header */}
-        <div className="note-page-header">
-          <div className="note-date-stamp">
-            DATE: <span>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-          </div>
-          <div className="note-subject-tag">
-            SUBJECT: <span>{notes.subject || 'Comprehensive Masterclass'}</span>
-          </div>
-        </div>
-
-        {/* Note Title */}
-        <div className="note-title-section">
-          {isEditing ? (
-            <input
-              type="text"
-              className="editable-title-input"
-              value={notes.title}
-              onChange={(e) => setNotes({ ...notes, title: e.target.value })}
-            />
-          ) : (
-            <h1 className="note-handwritten-title">{notes.title}</h1>
-          )}
-          <div className="handwritten-underline" />
-        </div>
-
-        {/* Overview Synthesis */}
-        <div className="note-overview-block">
-          <span className="overview-marker">✦ Synthesis & Core Takeaway:</span>
-          {isEditing ? (
-            <textarea
-              className="editable-textarea"
-              rows={3}
-              value={notes.overview}
-              onChange={(e) => setNotes({ ...notes, overview: e.target.value })}
-            />
-          ) : (
-            <p className="overview-paragraph">{notes.overview}</p>
-          )}
-        </div>
-
-        {/* Highlighted Definitions Callouts */}
-        {notes.definitions && notes.definitions.length > 0 && (
-          <div className="note-definitions-grid">
-            {notes.definitions.map((def, idx) => (
-              <div key={idx} className="definition-card-callout">
-                <div className="def-header">
-                  <span className="def-term">{def.term}</span>
-                  <span className="def-badge">{def.tag || 'DEFINITION'}</span>
-                </div>
-                <p className="def-text">{def.definition}</p>
+        {/* =====================================================================
+            LEFT SIDEBAR: "+ New Note" and Notes Names (ChatGPT style!)
+            ===================================================================== */}
+        <aside className={`shadcn-notes-sidebar ${isSidebarOpen ? 'is-expanded' : 'is-collapsed'}`}>
+          <div className="notes-sidebar-top-strip">
+            <button
+              type="button"
+              className="shadcn-btn-new-chat"
+              onClick={handleNewNote}
+              title="Add a new custom study note"
+            >
+              <div className="new-chat-left-label">
+                <Plus size={15} />
+                <span>New Note</span>
               </div>
-            ))}
+              <SquarePen size={13} className="text-zinc-400" />
+            </button>
+
+            <button
+              type="button"
+              className="chat-sidebar-collapse-btn"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <PanelLeftClose size={15} />
+            </button>
           </div>
-        )}
 
-        {/* Core Sections */}
-        <div className="note-sections-flow">
-          {notes.sections && notes.sections.map((sec, idx) => (
-            <div key={idx} className="note-section-container">
-              <h3 className="section-ink-heading">
-                <span className="section-bullet-num">§{idx + 1}</span> {sec.heading}
-              </h3>
+          <div className="notes-sidebar-scroll-list">
+            <div className="chat-sidebar-section-header">
+              <span>Study Sheets</span>
+              <span className="chat-count-pill">{noteSheets.length}</span>
+            </div>
 
-              <ul className="section-bullets-list">
-                {sec.points && sec.points.map((pt, pIdx) => (
-                  <li key={pIdx} className="section-bullet-item">
-                    <span className="bullet-dash">–</span>
-                    <span className="bullet-content">{pt}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="chat-sessions-column">
+              {noteSheets.map(sheet => {
+                const isActive = sheet.id === activeSheetId;
+                return (
+                  <div
+                    key={sheet.id}
+                    className={`chat-session-row ${isActive ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setActiveSheetId(sheet.id);
+                      setIsMobileDrawerOpen(false);
+                    }}
+                    title={sheet.title}
+                  >
+                    <FileText size={14} className="session-icon" />
+                    <span className="session-title-text">{sheet.title}</span>
 
-              {sec.highlight_box && (
-                <div className="section-highlight-box">
-                  <span className="highlight-pin">📌 KEY OBSERVATION:</span>
-                  <p>{sec.highlight_box}</p>
-                </div>
+                    {noteSheets.length > 1 && (
+                      <button
+                        type="button"
+                        className="session-delete-btn"
+                        onClick={(e) => handleDeleteSheet(e, sheet.id)}
+                        title="Delete note sheet"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="chat-sidebar-footer">
+            <div className="grounded-badge">
+              <span className="status-indicator-dot" />
+              <span>Ruled Handwriting Engine</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* =====================================================================
+            RIGHT STAGE: Notes Content, Paper & Ink Controls
+            ===================================================================== */}
+        <div className="shadcn-notes-main-stage">
+          {/* Top Uncollapse Bar on desktop if sidebar is collapsed */}
+          {!isSidebarOpen && (
+            <div className="chat-desktop-uncollapse-bar">
+              <button
+                type="button"
+                className="shadcn-ghost-icon-btn"
+                onClick={() => setIsSidebarOpen(true)}
+                title="Open notes sidebar"
+              >
+                <PanelLeft size={16} />
+              </button>
+              <span className="collapsed-bar-title">{activeSheet.title}</span>
+              <button
+                type="button"
+                className="shadcn-ghost-icon-btn"
+                onClick={handleNewNote}
+                title="New Note"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* Notebook Paper & Style Controls */}
+          <div className="notebook-toolbar">
+            <div className="toolbar-left-group">
+              <div className="theme-pill-selector">
+                <span className="selector-label"><Palette size={12} /> Paper:</span>
+                <button
+                  className={`pill-btn ${theme === 'ruled' ? 'active' : ''}`}
+                  onClick={() => setTheme('ruled')}
+                >
+                  Ruled
+                </button>
+                <button
+                  className={`pill-btn ${theme === 'grid' ? 'active' : ''}`}
+                  onClick={() => setTheme('grid')}
+                >
+                  Grid
+                </button>
+                <button
+                  className={`pill-btn ${theme === 'parchment' ? 'active' : ''}`}
+                  onClick={() => setTheme('parchment')}
+                >
+                  Parchment
+                </button>
+                <button
+                  className={`pill-btn ${theme === 'clean' ? 'active' : ''}`}
+                  onClick={() => setTheme('clean')}
+                >
+                  Clean
+                </button>
+              </div>
+
+              <div className="font-pill-selector">
+                <span className="selector-label">Ink:</span>
+                <button
+                  className={`pill-btn ${fontMode === 'hand' ? 'active' : ''}`}
+                  onClick={() => setFontMode('hand')}
+                >
+                  Script
+                </button>
+                <button
+                  className={`pill-btn ${fontMode === 'cursive' ? 'active' : ''}`}
+                  onClick={() => setFontMode('cursive')}
+                >
+                  Cursive
+                </button>
+                <button
+                  className={`pill-btn ${fontMode === 'sans' ? 'active' : ''}`}
+                  onClick={() => setFontMode('sans')}
+                >
+                  Print
+                </button>
+              </div>
+            </div>
+
+            <div className="toolbar-right-actions">
+              <button 
+                className={`tool-action-btn ${isEditing ? 'active-edit' : ''}`} 
+                onClick={() => setIsEditing(!isEditing)}
+                title="Edit notes"
+              >
+                <Edit3 size={13} />
+                <span>{isEditing ? 'Done' : 'Edit'}</span>
+              </button>
+
+              <button className="tool-action-btn" onClick={handleCopy} title="Copy markdown notes">
+                {copied ? <Check size={13} className="text-green-600" /> : <Share2 size={13} />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </button>
+
+              <button className="tool-action-btn" onClick={handlePrint} title="Print or Save as PDF">
+                <Printer size={13} />
+                <span>Print</span>
+              </button>
+
+              {onSaveNote && (
+                <button className={`tool-action-btn ${saved ? 'saved' : ''}`} onClick={handleSaveToLibrary}>
+                  {saved ? <FileCheck size={13} className="text-green-600" /> : <Bookmark size={13} />}
+                  <span>{saved ? 'Saved' : 'Save'}</span>
+                </button>
               )}
-
-              {sec.formula_or_code && (
-                <div className="section-formula-box">
-                  <span className="formula-tag">FORMULA / CODE / FLOW:</span>
-                  <pre className="formula-code-body">{sec.formula_or_code}</pre>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Diagram Flowchart */}
-        {notes.diagram && notes.diagram.steps && notes.diagram.steps.length > 0 && (
-          <div className="note-diagram-wrapper">
-            <h4 className="diagram-title">✎ {notes.diagram.title || 'Conceptual Execution Flow'}:</h4>
-            <div className="diagram-steps-strip">
-              {notes.diagram.steps.map((st, sIdx) => (
-                <div key={sIdx} className="diagram-step-box">
-                  <span className="step-num-badge">0{sIdx + 1}</span>
-                  <span className="step-label">{st}</span>
-                  {sIdx < notes.diagram.steps.length - 1 && (
-                    <span className="step-arrow">➔</span>
-                  )}
-                </div>
-              ))}
             </div>
           </div>
-        )}
 
-        {/* High-Yield Exam / Interview Takeaways */}
-        {notes.exam_takeaways && notes.exam_takeaways.length > 0 && (
-          <div className="exam-takeaways-card">
-            <h4 className="exam-takeaways-title">
-              ★ High-Yield Exam & Practical Points:
-            </h4>
-            <div className="exam-points-list">
-              {notes.exam_takeaways.map((tip, tIdx) => (
-                <div key={tIdx} className="exam-point-row">
-                  <span className="exam-check-box">☑</span>
-                  <span>{tip}</span>
+          {/* Render Active Note Sheet Body */}
+          <div className="notes-paper-scroll-canvas">
+            <div className={`notebook-paper-container ${getThemeClass()} ${getFontClass()}`}>
+              {/* Binder Holes */}
+              <div className="binder-margin">
+                <div className="binder-hole"></div>
+                <div className="binder-hole"></div>
+                <div className="binder-hole"></div>
+              </div>
+
+              <div className="notebook-content-body">
+                {/* Note Header */}
+                <div className="paper-header-strip">
+                  <div className="header-meta-group">
+                    <span className="meta-subject-tag">{notes.subject || 'Computer Science'}</span>
+                    <span className="meta-date-stamp">{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  <h2 className="paper-main-title">{notes.title}</h2>
+                  <div className="paper-red-margin-line"></div>
                 </div>
-              ))}
+
+                {/* Section Filter based on activeSheetId */}
+                {(activeSheetId === 'full-notes' || activeSheetId === 'definitions') && notes.definitions && notes.definitions.length > 0 && (
+                  <div className="paper-definitions-section">
+                    <h4 className="section-script-title">1. Key Terms & Definitions</h4>
+                    <div className="definitions-stack">
+                      {notes.definitions.map((item, idx) => (
+                        <div key={idx} className="def-entry-row">
+                          <span className="def-term-label">{item.term}</span>
+                          <span className="def-tag-badge">[{item.tag}]</span>
+                          <span className="def-text-body">{item.definition}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(activeSheetId === 'full-notes' || activeSheetId === 'architecture') && notes.sections && notes.sections.length > 0 && (
+                  <div className="paper-sections-flow">
+                    {notes.sections.map((sec, sIdx) => (
+                      <div key={sIdx} className="notebook-section-block">
+                        <h4 className="section-script-title">{sIdx + 2}. {sec.heading}</h4>
+                        {sec.points && (
+                          <ul className="script-bullet-list">
+                            {sec.points.map((pt, pIdx) => (
+                              <li key={pIdx} className="script-bullet-item">{pt}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {sec.highlight_box && (
+                          <div className="handwritten-callout-box">
+                            <span className="callout-star">★ Key Rule:</span> {sec.highlight_box}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(activeSheetId === 'full-notes' || activeSheetId === 'summary') && notes.summary && (
+                  <div className="paper-summary-card">
+                    <h4 className="section-script-title">Lecture Summary</h4>
+                    <p className="summary-paragraph">{notes.summary}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
-
-        {/* Summary Footer */}
-        {notes.summary && (
-          <div className="note-summary-footer">
-            <strong>FINAL SUMMARY:</strong> {notes.summary}
-          </div>
-        )}
-
-        <div className="notebook-bottom-signature">
-          <span>SkillWeave AI Study System</span> • <span>Verified from Video Transcript</span>
         </div>
       </div>
+
+      {/* =====================================================================
+          CHATGPT-STYLE MOBILE SLIDE-IN SHEET (Drawer on mobile)
+          ===================================================================== */}
+      {isMobileDrawerOpen && (
+        <div className="chatgpt-sheet-backdrop" onClick={() => setIsMobileDrawerOpen(false)}>
+          <div className="chatgpt-mobile-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="chatgpt-sheet-header">
+              <div className="sheet-header-title">
+                <FileText size={16} />
+                <span>Study Sheets</span>
+              </div>
+              <button 
+                type="button" 
+                className="chatgpt-sheet-close-btn"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="chatgpt-sheet-actions">
+              <button
+                type="button"
+                className="shadcn-btn-new-chat"
+                onClick={handleNewNote}
+              >
+                <div className="new-chat-left-label">
+                  <Plus size={15} />
+                  <span>New Note</span>
+                </div>
+                <SquarePen size={13} className="text-zinc-400" />
+              </button>
+            </div>
+
+            <div className="chatgpt-sheet-list">
+              {noteSheets.map(sheet => {
+                const isActive = sheet.id === activeSheetId;
+                return (
+                  <div
+                    key={sheet.id}
+                    className={`chat-session-row ${isActive ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setActiveSheetId(sheet.id);
+                      setIsMobileDrawerOpen(false);
+                    }}
+                  >
+                    <FileText size={14} className="session-icon" />
+                    <span className="session-title-text">{sheet.title}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
