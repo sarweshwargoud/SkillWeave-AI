@@ -974,10 +974,10 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Comprehensive Platform Footer */}
-      <footer className="studio-footer-deep">
+            {/* Concise Light-Themed Platform Footer */}
+      <footer className="studio-footer-light">
         <div className="footer-top-grid">
-          {/* Brand & Deep Platform Description */}
+          {/* Brand & Mission */}
           <div className="footer-brand-col">
             <div className="navbar-brand footer-brand-header" onClick={() => navigate('/')}>
               <div className="brand-icon-box">
@@ -988,47 +988,33 @@ const LandingPage = () => {
               <span className="brand-ai-badge">AI</span>
             </div>
             <p className="footer-brand-summary">
-              SkillWeave AI is an intelligent curriculum synthesis and active learning platform that transforms YouTube playlists and video lectures into sequential, continuity-verified learning paths with in-app AI tutoring, authentic handwritten study sheets, and interactive milestone evaluations.
+              Transforming video lectures into structured, continuity-verified learning paths with in-app AI tutoring and handwritten study sheets.
             </p>
             <div className="footer-security-trust">
-              <span className="trust-pill"><ShieldCheck size={13} /> Supabase Auth JWT Protected</span>
-              <span className="trust-pill"><ShieldCheck size={13} /> AES-256-GCM Encrypted</span>
+              <span className="trust-pill"><ShieldCheck size={13} /> Supabase Auth Secured</span>
+              <span className="trust-pill"><ShieldCheck size={13} /> AES-256 Encrypted</span>
             </div>
           </div>
 
           {/* Product Links */}
           <div className="footer-col">
-            <h5>Learning Products</h5>
+            <h5>Platform</h5>
             <ul>
               <li><Link to="/create">AI Roadmap Generator</Link></li>
-              <li><Link to="/workspace">VS Code Cinema Workspace</Link></li>
+              <li><Link to="/workspace">Learning Workspace</Link></li>
               <li><Link to="/tutor">AI Video Tutor</Link></li>
-              <li><Link to="/notes">Handwritten Notes Studio</Link></li>
-              <li><Link to="/my-learning">My Learning & Progress</Link></li>
+              <li><Link to="/notes">Handwritten Notes</Link></li>
+              <li><Link to="/my-learning">My Learning</Link></li>
             </ul>
           </div>
 
-          {/* Technology & Architecture */}
-          <div className="footer-col">
-            <h5>Architecture & Engine</h5>
-            <ul>
-              <li><span>Gemini 2.5 Flash Transcript Engine</span></li>
-              <li><span>Continuity & Gap Verification</span></li>
-              <li><span>YouTube Data API v3 Services</span></li>
-              <li><span>Multi-Panel Draggable Workspace</span></li>
-              <li><span>Instant Timestamp Seeking</span></li>
-            </ul>
-          </div>
-
-          {/* Legal & Trust */}
+          {/* Legal & Policies */}
           <div className="footer-col">
             <h5>Legal & Policies</h5>
             <ul>
               <li><Link to="/terms">Terms of Service</Link></li>
               <li><Link to="/privacy">Privacy Policy</Link></li>
               <li><a href="https://www.youtube.com/t/terms" target="_blank" rel="noreferrer">YouTube Terms of Service</a></li>
-              <li><a href="/robots.txt" target="_blank" rel="noreferrer">Robots & Indexing (robots.txt)</a></li>
-              <li><a href="/sitemap.xml" target="_blank" rel="noreferrer">Sitemap (sitemap.xml)</a></li>
             </ul>
           </div>
         </div>
@@ -1036,7 +1022,7 @@ const LandingPage = () => {
         <div className="footer-bottom-strip">
           <div className="footer-bottom-inner">
             <span>© 2026 SkillWeave AI. Engineered by Sarweshwar Buddolla. All rights reserved.</span>
-            <span className="footer-disclaimer">YouTube is a registered trademark of Google LLC. SkillWeave AI is an independent educational platform adhering to YouTube API Terms of Service.</span>
+            <span className="footer-disclaimer">YouTube is a registered trademark of Google LLC. SkillWeave AI adheres to YouTube API Services Terms.</span>
           </div>
         </div>
       </footer>
