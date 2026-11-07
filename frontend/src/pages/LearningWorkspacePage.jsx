@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Play, 
   ChevronRight, 
@@ -33,7 +33,8 @@ import {
   MessageSquare,
   Check,
   Zap,
-  ListOrdered
+  ListOrdered,
+  ArrowLeft
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -49,14 +50,108 @@ import {
   updateWorkspaceSettings,
   getUserCourses,
   getUserProjects,
-  saveUserNote
+  saveUserNote,
+  fetchUserCourseById
 } from '../services/api';
 import { getClient } from '../services/supabaseClient';
 import { encryptData, isEncryptedPayload } from '../services/crypto';
 import './LearningWorkspacePage.css';
 
+
+export const DEFAULT_WORKSPACE_COURSE = {
+  id: "course_docker_mastery_default",
+  title: "Docker & Container Engineering Mastery",
+  channel: "TechWorld with Nana",
+  description: "Comprehensive step-by-step masterclass covering container engines, namespaces, layer caching, multi-stage Alpine builds, and production deployments.",
+  thumbnail: "https://images.unsplash.com/photo-1605745341112-85968b19335b?w=800&q=80",
+  progress: 25,
+  status: "In Progress",
+  total_videos: 5,
+  total_duration: "4h 45m",
+  totalVideos: 5,
+  totalDuration: "4h 45m",
+  modules: [
+    {
+      module_title: "Module 01: Container Engines & Linux Namespaces",
+      description: "Deep dive into Docker architecture, virtualization vs containerization, and basic CLI commands.",
+      videos: [
+        {
+          id: "fqMOX6JJhGo",
+          title: "Docker Tutorial for Beginners [Full Course in 3 Hours]",
+          duration: "3h 11m",
+          durationFormatted: "3h 11m",
+          completed: true
+        },
+        {
+          id: "X34imBhy124",
+          title: "Docker Container Architecture & Images Explained",
+          duration: "18m",
+          durationFormatted: "18m",
+          completed: false
+        }
+      ]
+    },
+    {
+      module_title: "Module 02: Layer Caching & Dockerfile Optimization",
+      description: "Writing production-grade Dockerfiles, minimizing layer counts, and multi-stage builds.",
+      videos: [
+        {
+          id: "3c-iBn73dDE",
+          title: "Dockerfile Best Practices & Layer Caching",
+          duration: "24m",
+          durationFormatted: "24m",
+          completed: false
+        },
+        {
+          id: "gAkwW2tuIqE",
+          title: "Docker Compose Multi-Container Orchestration",
+          duration: "22m",
+          durationFormatted: "22m",
+          completed: false
+        }
+      ]
+    },
+    {
+      module_title: "Module 03: Multi-Stage Alpine Builds & Cloud Production",
+      description: "Deploying lightweight microservices, managing container secrets, and health checks.",
+      videos: [
+        {
+          id: "bKFMS5C4CG0",
+          title: "Deploying Docker Containers to Production Environments",
+          duration: "28m",
+          durationFormatted: "28m",
+          completed: false
+        }
+      ]
+    }
+  ]
+};
+
+export const getCleanYoutubeId = (raw) => {
+  if (!raw) return '';
+  if (typeof raw === 'object') {
+    raw = raw.id || raw.videoId || raw.video_id || raw.url || '';
+  }
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  const cleanParamMatch = trimmed.match(/([a-zA-Z0-9_-]{11})/);
+  if (cleanParamMatch && cleanParamMatch[1]) {
+    return cleanParamMatch[1];
+  }
+  return trimmed;
+};
+
 const LearningWorkspacePage = () => {
   const { state } = useLocation();
+  const [searchParams] = useSearchParams();
+  const urlCourseId = searchParams.get('courseId');
   const navigate = useNavigate();
   const client = getClient();
   const iframeRef = useRef(null);
@@ -161,12 +256,34 @@ const LearningWorkspacePage = () => {
   // Load Course data
   useEffect(() => {
     loadCourseData();
-  }, [state]);
+  }, [state, urlCourseId]);
 
   const loadCourseData = async () => {
     let courseToLoad = state?.courseData;
 
-    // Fallback 1: Restore from localStorage
+    // Check query param courseId
+    if (!courseToLoad && urlCourseId) {
+      try {
+        const cached = localStorage.getItem('skillweave_active_course');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.id === urlCourseId || parsed._id === urlCourseId)) {
+            courseToLoad = parsed;
+          }
+        }
+      } catch (e) {}
+
+      if (!courseToLoad) {
+        try {
+          const fetched = await fetchUserCourseById(urlCourseId);
+          if (fetched && !fetched.error) {
+            courseToLoad = fetched;
+          }
+        } catch (e) {}
+      }
+    }
+
+    // Fallback 1: Restore active course from localStorage
     if (!courseToLoad) {
       const cached = localStorage.getItem('skillweave_active_course');
       if (cached) {
@@ -176,7 +293,27 @@ const LearningWorkspacePage = () => {
       }
     }
 
-    // Fallback 2: Fetch user's latest course from DB
+    // Fallback 2: Restore active roadmap from localStorage
+    if (!courseToLoad) {
+      const cachedRoadmap = localStorage.getItem('skillweave_active_roadmap');
+      if (cachedRoadmap) {
+        try {
+          const parsedRoadmap = JSON.parse(cachedRoadmap);
+          if (parsedRoadmap && parsedRoadmap.modules) {
+            courseToLoad = {
+              id: parsedRoadmap.id || `course_${Date.now()}`,
+              title: parsedRoadmap.title || 'Personalized AI Course',
+              modules: parsedRoadmap.modules,
+              description: parsedRoadmap.description || 'Interactive Learning Course',
+              total_videos: parsedRoadmap.modules.length,
+              total_duration: parsedRoadmap.estimated_time || '45m'
+            };
+          }
+        } catch (e) {}
+      }
+    }
+
+    // Fallback 3: Fetch user's latest course from DB
     if (!courseToLoad) {
       try {
         const courses = await getUserCourses();
@@ -186,45 +323,58 @@ const LearningWorkspacePage = () => {
       } catch (e) {}
     }
 
-    if (courseToLoad) {
-      try {
-        localStorage.setItem('skillweave_active_course', JSON.stringify(courseToLoad));
-      } catch (e) {}
-      setCourse(courseToLoad);
+    // Fallback 4: Fallback to DEFAULT_WORKSPACE_COURSE so workspace NEVER shows empty screen
+    if (!courseToLoad || !courseToLoad.modules || courseToLoad.modules.length === 0) {
+      courseToLoad = DEFAULT_WORKSPACE_COURSE;
+    }
 
-      // Extract all flattened videos
-      const allVideos = [];
-      courseToLoad.modules?.forEach((mod, mIdx) => {
-        const vList = (mod.videos && mod.videos.length > 0)
-          ? mod.videos
-          : (mod.video ? [mod.video] : (mod.lessons && mod.lessons.length > 0 ? mod.lessons : []));
-        const modTitle = mod.module_title || mod.title || mod.name || mod.topic || `Module ${mIdx + 1}`;
+    try {
+      localStorage.setItem('skillweave_active_course', JSON.stringify(courseToLoad));
+    } catch (e) {}
+    setCourse(courseToLoad);
 
-        vList.forEach((vid, vIdx) => {
-          allVideos.push({
-            ...vid,
-            moduleIdx: mIdx,
-            videoIdx: vIdx,
-            moduleTitle: modTitle
-          });
+    // Extract all flattened videos and normalize YouTube IDs
+    const allVideos = [];
+    courseToLoad.modules?.forEach((mod, mIdx) => {
+      const vList = (mod.videos && mod.videos.length > 0)
+        ? mod.videos
+        : (mod.video ? [mod.video] : (mod.lessons && mod.lessons.length > 0 ? mod.lessons : []));
+      const modTitle = mod.module_title || mod.title || mod.name || mod.topic || `Module ${mIdx + 1}`;
+
+      vList.forEach((rawVid, vIdx) => {
+        const vidObj = typeof rawVid === 'string' ? { id: rawVid } : { ...rawVid };
+        const cleanId = getCleanYoutubeId(vidObj) || 'fqMOX6JJhGo';
+        const cleanTitle = (vidObj.title || vidObj.video_title || vidObj.name || '').toString().trim() || `Lesson ${vIdx + 1}: Video Lecture`;
+        const cleanDuration = (vidObj.duration || vidObj.durationFormatted || vidObj.time || '').toString().trim() || '15m';
+
+        allVideos.push({
+          ...vidObj,
+          id: cleanId,
+          title: cleanTitle,
+          duration: cleanDuration,
+          durationFormatted: cleanDuration,
+          moduleIdx: mIdx,
+          videoIdx: vIdx,
+          moduleTitle: modTitle,
+          completed: !!(completedVideos[cleanId] || vidObj.completed)
         });
       });
+    });
 
-      if (allVideos.length > 0) {
-        let selectedVid = allVideos[0];
-        const savedVidId = localStorage.getItem('skillweave_active_vid_id');
-        if (state?.initialVideoId) {
-          const matched = allVideos.find(v => v.id === state.initialVideoId);
-          if (matched) selectedVid = matched;
-        } else if (savedVidId) {
-          const matched = allVideos.find(v => v.id === savedVidId);
-          if (matched) selectedVid = matched;
-        }
-
-        setActiveVideo(selectedVid);
-        setActiveModuleIdx(selectedVid.moduleIdx);
-        setActiveVideoIdx(selectedVid.videoIdx);
+    if (allVideos.length > 0) {
+      let selectedVid = allVideos[0];
+      const savedVidId = localStorage.getItem('skillweave_active_vid_id');
+      if (state?.initialVideoId) {
+        const matched = allVideos.find(v => v.id === state.initialVideoId);
+        if (matched) selectedVid = matched;
+      } else if (savedVidId) {
+        const matched = allVideos.find(v => v.id === savedVidId);
+        if (matched) selectedVid = matched;
       }
+
+      setActiveVideo(selectedVid);
+      setActiveModuleIdx(selectedVid.moduleIdx);
+      setActiveVideoIdx(selectedVid.videoIdx);
     }
   };
 
@@ -817,6 +967,22 @@ const LearningWorkspacePage = () => {
       <nav className="workspace-sticky-top-nav">
         <div className="workspace-nav-left-group">
           <button 
+            className="workspace-nav-btn return-back"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate('/create');
+              }
+            }}
+            title="Go Back"
+          >
+            <ArrowLeft size={16} /> <span>Back</span>
+          </button>
+
+          <span className="nav-sep">/</span>
+
+          <button 
             className="workspace-nav-btn return-home"
             onClick={() => navigate('/')}
             title="Return to Home"
@@ -896,11 +1062,12 @@ const LearningWorkspacePage = () => {
                   <>
                     <div className="in-app-player-aspect-frame">
                       <iframe
+                        key={activeVideo.id}
                         ref={iframeRef}
-                        src={`https://www.youtube.com/embed/${activeVideo.id}?autoplay=1&enablejsapi=1`}
+                        src={`https://www.youtube-nocookie.com/embed/${getCleanYoutubeId(activeVideo.id) || 'fqMOX6JJhGo'}?autoplay=1&enablejsapi=1&rel=0`}
                         title={activeVideo.title}
                         className="yt-theater-iframe"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                       />
                     </div>

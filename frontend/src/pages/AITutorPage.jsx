@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { 
   MessageSquare, 
@@ -16,6 +17,7 @@ import {
   Send,
   Loader2,
   Link2,
+  ArrowLeft,
   ChevronDown,
   ChevronUp,
   RotateCcw,
@@ -34,10 +36,11 @@ const DEFAULT_WELCOME_MSG = {
 };
 
 const AITutorPage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=t_k_k_t');
-  const [activeVideoId, setActiveVideoId] = useState('t_k_k_t');
-  const [videoTitle, setVideoTitle] = useState('Python Memory Architecture & Variables Demystified');
+  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=_uQrJ0TkZlc');
+  const [activeVideoId, setActiveVideoId] = useState('_uQrJ0TkZlc');
+  const [videoTitle, setVideoTitle] = useState('Python Tutorial for Beginners [Full Course]');
   const [currentTimestamp, setCurrentTimestamp] = useState('02:15');
   const [showVideoPlayer, setShowVideoPlayer] = useState(false); // Collapsed by default to avoid huge vertical layout!
 
@@ -56,9 +59,9 @@ const AITutorPage = () => {
   const client = getClient();
 
   const sampleTutorVideos = [
-    { label: "Python Memory Models", id: "t_k_k_t", title: "Python Memory Architecture & Variables Demystified" },
-    { label: "React Server Components", id: "rsc_t", title: "React Server Components Deep Dive" },
-    { label: "Vector Embeddings & RAG", id: "emb_t", title: "Mathematical Vector Embeddings in LLMs" }
+    { label: "Python Memory Models", id: "_uQrJ0TkZlc", title: "Python Tutorial for Beginners [Full Course]" },
+    { label: "React Deep Dive", id: "bMknfKXIFA8", title: "React Full Course - Beginner to Advanced" },
+    { label: "Vector Embeddings & RAG", id: "ySus5ZS0b94", title: "Vector Databases & Embeddings in Practice" }
   ];
 
   // 1. Initial User & Saved Chat Sessions Load
@@ -108,9 +111,9 @@ const AITutorPage = () => {
         // Default initial thread
         const defaultChat = {
           id: `chat_${Date.now()}`,
-          title: 'Python Memory Architecture',
-          video_id: 't_k_k_t',
-          video_title: 'Python Memory Architecture & Variables Demystified',
+          title: 'Python Tutorial & Architecture',
+          video_id: '_uQrJ0TkZlc',
+          video_title: 'Python Tutorial for Beginners [Full Course]',
           messages: [DEFAULT_WELCOME_MSG],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -363,7 +366,7 @@ const AITutorPage = () => {
 
     setShowVideoPlayer(true);
     if (iframeRef.current) {
-      iframeRef.current.src = `https://www.youtube.com/embed/${activeVideoId}?start=${secs}&autoplay=1&enablejsapi=1`;
+      iframeRef.current.src = `https://www.youtube-nocookie.com/embed/${activeVideoId}?start=${secs}&autoplay=1&enablejsapi=1`;
     }
   };
 
@@ -379,6 +382,17 @@ const AITutorPage = () => {
           {/* Top Video & Grounding Bar */}
           <div className="chatgpt-grounding-header">
             <div className="grounding-left">
+              <button 
+                className="btn-back-pill" 
+                onClick={() => {
+                  if (window.history.length > 1) navigate(-1);
+                  else navigate('/');
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.75rem', borderRadius: '999px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginRight: '0.5rem' }}
+                title="Go Back"
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
               <span className="grounding-pill">
                 <Sparkles size={13} className="sparkle-anim" /> Grounded Tutor
               </span>
@@ -442,11 +456,12 @@ const AITutorPage = () => {
             <div className="chatgpt-cinema-drawer">
               <div className="cinema-aspect-box">
                 <iframe
+                  key={activeVideoId}
                   ref={iframeRef}
-                  src={`https://www.youtube.com/embed/${activeVideoId}?enablejsapi=1`}
+                  src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?enablejsapi=1`}
                   title={videoTitle}
                   className="cinema-iframe"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 />
               </div>

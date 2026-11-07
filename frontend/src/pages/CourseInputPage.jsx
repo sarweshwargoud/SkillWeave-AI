@@ -131,7 +131,7 @@ const CourseInputPage = () => {
         const { data: authData } = await client.auth.getUser();
         const userId = authData?.user?.id || user?.id || null;
 
-        // Save course to Supabase so it shows up in /workspace and /my-learning
+        // Save course to Supabase & localStorage so it shows up in /workspace and /my-learning
         const newCourse = {
           id: `course_${Date.now()}`,
           user_id: userId,
@@ -149,6 +149,11 @@ const CourseInputPage = () => {
           roadmap: roadmapData,
           created_at: new Date().toISOString()
         };
+
+        try {
+          localStorage.setItem('skillweave_active_course', JSON.stringify(newCourse));
+          localStorage.setItem('skillweave_active_roadmap', JSON.stringify(roadmapData));
+        } catch (e) {}
 
         await client.from('courses').insert([newCourse]);
 
@@ -175,6 +180,10 @@ const CourseInputPage = () => {
       } else {
         const courseData = await generateCourse(inputValue.trim(), level, accent);
         clearInterval(interval);
+        try {
+          localStorage.setItem('skillweave_active_roadmap', JSON.stringify(courseData));
+          localStorage.setItem('skillweave_active_course', JSON.stringify(courseData));
+        } catch (e) {}
         navigate('/roadmap', { state: { courseData, level, accent } });
       }
     } catch (error) {
@@ -195,6 +204,20 @@ const CourseInputPage = () => {
       {/* Main Studio Stage */}
       <main className="course-input-main-stage">
         <div className="input-studio-card">
+          <div className="input-card-nav-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1.25rem' }}>
+            <button
+              className="btn-back-pill"
+              onClick={() => {
+                if (window.history.length > 1) navigate(-1);
+                else navigate('/');
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '0.35rem 0.85rem', cursor: 'pointer' }}
+            >
+              <ArrowLeft size={14} /> Back
+            </button>
+            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>Studio Creator</span>
+          </div>
+
           <div className="card-top-icon">
             <Compass size={28} className="icon-compass" />
           </div>
@@ -387,21 +410,33 @@ const CourseInputPage = () => {
               <div className="success-action-btns">
                 <button
                   className="btn-primary"
-                  onClick={() => navigate(`/workspace?courseId=${generatedResult.course.id}`)}
+                  onClick={() => {
+                    try {
+                      localStorage.setItem('skillweave_active_course', JSON.stringify(generatedResult.course));
+                      localStorage.setItem('skillweave_active_roadmap', JSON.stringify(generatedResult.roadmapData));
+                    } catch (e) {}
+                    navigate(`/workspace?courseId=${generatedResult.course.id}`, {
+                      state: { courseData: generatedResult.course }
+                    });
+                  }}
                 >
                   <BookOpen size={18} /> Open in Learning Workspace
                 </button>
                 <button
                   className="btn-secondary"
-                  onClick={() =>
+                  onClick={() => {
+                    try {
+                      localStorage.setItem('skillweave_active_roadmap', JSON.stringify(generatedResult.roadmapData));
+                      localStorage.setItem('skillweave_active_course', JSON.stringify(generatedResult.course));
+                    } catch (e) {}
                     navigate('/roadmap', {
                       state: {
                         courseData: generatedResult.roadmapData,
                         level,
                         accent
                       }
-                    })
-                  }
+                    });
+                  }}
                 >
                   <Layers size={18} /> View Visual Roadmap
                 </button>
