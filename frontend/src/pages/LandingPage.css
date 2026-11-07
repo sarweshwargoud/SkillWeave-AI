@@ -332,6 +332,7 @@
 }
 
 /* Features Pillars Section (Image 1 reference placed after scanning engine) */
+.hero-pillars-stage,
 .features-pillars-section {
   max-width: 1360px;
   margin: 0 auto;
@@ -2134,7 +2135,8 @@
   }
 
   /* 3 Pillars Single Column Webapp Cards */
-  .features-pillars-section {
+  .hero-pillars-stage,
+.features-pillars-section {
     padding: 2rem 1rem 1.25rem !important;
   }
 
