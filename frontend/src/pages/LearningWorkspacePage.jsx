@@ -135,14 +135,16 @@ const LearningWorkspacePage = () => {
     initUser();
   }, []);
 
-  // Lock root document scroll so the workspace acts like an IDE canvas
+  // Lock root document scroll on desktop so workspace acts like an IDE canvas
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    };
+    if (window.innerWidth > 1024) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      };
+    }
   }, []);
 
   // Save layout state to localStorage

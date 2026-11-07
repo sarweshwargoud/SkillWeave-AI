@@ -204,7 +204,194 @@
   color: #6b7280;
   line-height: 1.6;
   max-width: 780px;
+  margin: 0 auto 2rem;
+}
+
+/* Hero CTA Group */
+.hero-cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.hero-main-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.75rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 750 !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.2);
+}
+
+.hero-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.65rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+}
+
+/* Quick Hero URL Input Bar */
+.hero-quick-input-card {
+  width: 100%;
+  max-width: 660px;
   margin: 0 auto 2.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 0.85rem 1.1rem;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.quick-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.quick-input-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #111827;
+  background: transparent;
+  padding: 0.25rem 0;
+}
+
+.quick-input-row input::placeholder {
+  color: #9ca3af;
+}
+
+.quick-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.quick-submit-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.quick-topics-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chips-label {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chip-btn {
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-btn:hover {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+/* Features Pillars Section (Image 1 reference placed after scanning engine) */
+.features-pillars-section {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 3rem;
+  width: 100%;
+}
+
+.deep-showcase-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+  width: 100%;
+}
+
+/* Compact Text Column (Image 2 reference: small text beside cards) */
+.compact-text-col {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.zigzag-title.small-title {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+  margin: 0;
+}
+
+.zigzag-desc.small-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+}
+
+.zigzag-points.small-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.2rem 0;
+}
+
+.zigzag-points.small-points .point-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.zigzag-cta-btn.compact-btn {
+  padding: 0.65rem 1.35rem !important;
+  font-size: 0.88rem !important;
+  border-radius: 9999px;
+  margin-top: 0.25rem;
 }
 
 /* Studio Product Stage - Expansive Full Desktop Layout */
@@ -1780,11 +1967,11 @@
 @media (max-width: 1024px) {
   .zigzag-row,
   .zigzag-row.reverse-row {
-    flex-direction: column;
-    gap: 2.5rem;
+    flex-direction: column !important;
+    gap: 1.75rem !important;
   }
   .zigzag-content-col {
-    max-width: 100%;
+    max-width: 100% !important;
   }
   .footer-top-grid {
     grid-template-columns: 1fr 1fr;
@@ -1792,12 +1979,302 @@
   }
 }
 
-@media (max-width: 640px) {
-  .footer-top-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+/* Mobile WebApp Layout & Single-Column Stack */
+@media (max-width: 768px) {
+  .landing-studio-container {
+    overflow-x: hidden !important;
+    width: 100% !important;
   }
+
+  .studio-hero-section {
+    padding: 1.75rem 1rem 1.5rem !important;
+  }
+
+  .hero-minimal-sub {
+    font-size: 1.05rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .typo-hero-title {
+    font-size: clamp(1.75rem, 6.8vw, 2.35rem) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .hero-descriptor-text {
+    font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+    margin: 0 auto 1.25rem !important;
+  }
+
+  .hero-cta-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.65rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .hero-main-btn,
+  .hero-secondary-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.8rem 1.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .hero-quick-input-card {
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 16px !important;
+    margin-bottom: 1.5rem !important;
+    max-width: 100% !important;
+  }
+
+  .quick-input-row {
+    gap: 0.5rem !important;
+  }
+
+  .quick-input-row input {
+    font-size: 0.85rem !important;
+  }
+
+  .quick-submit-btn {
+    padding: 0.5rem 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .quick-topics-chips {
+    gap: 0.35rem !important;
+  }
+
+  .chip-btn {
+    font-size: 0.72rem !important;
+    padding: 0.15rem 0.5rem !important;
+  }
+
+  .action-3d-btn {
+    padding: 0.75rem 1.75rem !important;
+    border-radius: 16px !important;
+  }
+
+  .typo-3d-text {
+    font-size: 1.35rem !important;
+  }
+
+  /* Stats section single column */
+  .stats-banner-section {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .stats-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .stat-box {
+    padding: 1.25rem 1.1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .stat-big-num {
+    font-size: 2.25rem !important;
+  }
+
+  .stat-box h4 {
+    font-size: 1rem !important;
+  }
+
+  .stat-box p {
+    font-size: 0.82rem !important;
+  }
+
+  /* Continuity Engine single column */
+  .engine-monitor-section {
+    padding: 1.75rem 1rem !important;
+  }
+
+  .engine-studio-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 20px !important;
+  }
+
+  .engine-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.85rem !important;
+  }
+
+  .header-actions-group {
+    width: 100% !important;
+  }
+
+  .trigger-scan-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .engine-panes-layout {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .engine-connector-middle {
+    margin: 0.25rem auto !important;
+    transform: none !important;
+  }
+
+  .engine-pane {
+    padding: 1rem 0.85rem !important;
+    border-radius: 14px !important;
+  }
+
+  .pane-quote {
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* 3 Pillars Single Column Webapp Cards */
+  .features-pillars-section {
+    padding: 2rem 1rem 1.25rem !important;
+  }
+
+  .section-overhead-tag {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .section-heading {
+    font-size: 1.5rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .section-subtext {
+    font-size: 0.86rem !important;
+    margin-top: 0.35rem !important;
+  }
+
+  .stage-features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .feature-hero-card {
+    padding: 1.25rem 1.1rem !important;
+    border-radius: 18px !important;
+    min-height: auto !important;
+  }
+
+  .feature-card-title {
+    font-size: 1.15rem !important;
+  }
+
+  .feature-card-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Zigzag Showcases Single Column Webapp Stack */
+  .deep-showcase-section {
+    padding: 1rem 1rem 2.5rem !important;
+  }
+
+  .zigzag-row,
+  .zigzag-row.reverse-row {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .zigzag-visual-col {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .layered-card-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    perspective: none !important;
+  }
+
+  .layered-back-card,
+  .zigzag-row.reverse-row .layered-back-card {
+    inset: 0 !important;
+    transform: none !important;
+    border-radius: 18px !important;
+    filter: blur(6px) !important;
+    opacity: 0.5 !important;
+  }
+
+  .layered-card-wrapper:hover .layered-back-card,
+  .zigzag-row.reverse-row .layered-card-wrapper:hover .layered-back-card {
+    transform: none !important;
+  }
+
+  .layered-front-card {
+    padding: 1.1rem !important;
+    border-radius: 18px !important;
+  }
+
+  .mock-q-title {
+    font-size: 0.92rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .mock-opt-item {
+    font-size: 0.8rem !important;
+    padding: 0.55rem 0.75rem !important;
+  }
+
+  .mock-step-row {
+    padding: 0.55rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .mock-step-info strong {
+    font-size: 0.8rem !important;
+  }
+
+  .mock-step-info span {
+    font-size: 0.7rem !important;
+  }
+
+  .compact-text-col {
+    max-width: 100% !important;
+    gap: 0.6rem !important;
+    padding: 0.25rem 0 !important;
+  }
+
+  .zigzag-title.small-title {
+    font-size: 1.25rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .zigzag-desc.small-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .zigzag-points.small-points {
+    gap: 0.35rem !important;
+  }
+
+  .zigzag-points.small-points .point-item {
+    font-size: 0.78rem !important;
+    gap: 0.45rem !important;
+  }
+
+  .zigzag-cta-btn.compact-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.65rem 1.2rem !important;
+  }
+
+  .footer-top-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
   .zigzag-title {
-    font-size: 1.7rem;
+    font-size: 1.5rem !important;
   }
 }

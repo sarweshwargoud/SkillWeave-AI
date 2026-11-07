@@ -369,11 +369,28 @@
 }
 
 @media (max-width: 640px) {
+  .course-input-container {
+    padding: 1rem 0.75rem 2.5rem;
+    overflow-x: hidden;
+  }
   .input-studio-card {
-    padding: 2.5rem 1.5rem;
+    padding: 1.5rem 1.1rem;
+    border-radius: 20px;
+    margin: 0.5rem auto;
+  }
+  .input-title {
+    font-size: 1.45rem;
+  }
+  .input-subtitle {
+    font-size: 0.85rem;
   }
   .options-dual-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .mode-tab-btn {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.78rem;
   }
 }
 
