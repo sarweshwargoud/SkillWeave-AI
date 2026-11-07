@@ -1,10 +1,52 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, Clock, CheckCircle, Download, FolderHeart, Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Play, Clock, CheckCircle, Download, FolderHeart, Sparkles, ExternalLink, ShieldCheck, BookOpen } from 'lucide-react';
 import { getClient } from '../services/supabaseClient';
 import FloatingTiles from '../components/FloatingTiles';
 import './RoadmapPage.css';
+
+const DEFAULT_ROADMAP_DATA = {
+  title: "Docker & Container Engineering Mastery",
+  description: "Comprehensive step-by-step masterclass covering container engines, namespaces, layer caching, multi-stage Alpine builds, and production deployments.",
+  estimated_time: "4h 45m",
+  total_videos: 5,
+  modules: [
+    {
+      title: "Module 01: Container Engines & Linux Namespaces",
+      module_title: "Module 01: Container Engines & Linux Namespaces",
+      description: "Deep dive into Docker architecture, virtualization vs containerization, and basic CLI commands.",
+      video: {
+        id: "fqMOX6JJhGo",
+        title: "Docker Tutorial for Beginners [Full Course in 3 Hours]",
+        duration: "3h 11m",
+        completed: true
+      }
+    },
+    {
+      title: "Module 02: Layer Caching & Dockerfile Optimization",
+      module_title: "Module 02: Layer Caching & Dockerfile Optimization",
+      description: "Writing production-grade Dockerfiles, minimizing layer counts, and multi-stage builds.",
+      video: {
+        id: "3c-iBn73dDE",
+        title: "Dockerfile Best Practices & Layer Caching",
+        duration: "24m",
+        completed: false
+      }
+    },
+    {
+      title: "Module 03: Multi-Stage Alpine Builds & Cloud Production",
+      module_title: "Module 03: Multi-Stage Alpine Builds & Cloud Production",
+      description: "Deploying lightweight microservices, managing container secrets, and health checks.",
+      video: {
+        id: "bKFMS5C4CG0",
+        title: "Deploying Docker Containers to Production Environments",
+        duration: "28m",
+        completed: false
+      }
+    }
+  ]
+};
 
 const RoadmapPage = () => {
   const { state } = useLocation();
@@ -19,10 +61,13 @@ const RoadmapPage = () => {
     const cached = localStorage.getItem('skillweave_active_roadmap') || localStorage.getItem('skillweave_active_course');
     if (cached) {
       try {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.modules || parsed.roadmap_data)) {
+          return parsed.roadmap_data || parsed;
+        }
       } catch (e) {}
     }
-    return null;
+    return DEFAULT_ROADMAP_DATA;
   });
   const [user, setUser] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -166,13 +211,34 @@ const RoadmapPage = () => {
     <div className="roadmap-studio-page">
       {/* Top Navbar */}
       <nav className="roadmap-studio-nav">
-        <button className="nav-back-studio-btn" onClick={() => navigate('/create')}>
-          <ArrowLeft size={16} /> Back to Generator
+        <button
+          className="nav-back-studio-btn"
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate('/create');
+            }
+          }}
+        >
+          <ArrowLeft size={16} /> Back
         </button>
         <div className="nav-brand-title" onClick={() => navigate('/')}>
           SKILLWEAVE AI
         </div>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            className="btn-primary nav-action-pill"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            onClick={() => {
+              try {
+                localStorage.setItem('skillweave_active_course', JSON.stringify(course));
+              } catch (e) {}
+              navigate('/workspace', { state: { courseData: course } });
+            }}
+          >
+            <Play size={14} /> Open in Workspace
+          </button>
           {user ? (
             <button className="btn-secondary nav-action-pill" onClick={() => navigate('/profile')}>
               My Workspace
@@ -194,11 +260,23 @@ const RoadmapPage = () => {
           </div>
           <h1 className="roadmap-main-title">{course.title}</h1>
           <p className="roadmap-subtitle">
-            {course.modules.length} Sequenced Modules · Calibrated for Continuous Progression
+            {course.modules?.length || 0} Sequenced Modules · Calibrated for Continuous Progression
           </p>
         </div>
 
         <div className="roadmap-header-actions-group">
+          <button
+            className="btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', borderRadius: '12px', fontWeight: 600, background: '#111827', color: '#ffffff' }}
+            onClick={() => {
+              try {
+                localStorage.setItem('skillweave_active_course', JSON.stringify(course));
+              } catch (e) {}
+              navigate('/workspace', { state: { courseData: course } });
+            }}
+          >
+            <Play size={16} /> Open in Workspace
+          </button>
           {saved ? (
             <button className="btn-saved-success" disabled>
               <CheckCircle size={16} /> Saved to Workspace
@@ -232,22 +310,27 @@ const RoadmapPage = () => {
             <div className="timeline-card-surface">
               <div className="module-text-area">
                 <span className="module-overhead">Milestone {index + 1}</span>
-                <h3 className="module-title">{mod.module_title}</h3>
-                <p className="module-desc">{mod.description}</p>
+                <h3 className="module-title">{mod.module_title || mod.title || `Module ${index + 1}`}</h3>
+                <p className="module-desc">{mod.description || 'Core conceptual mastery and exercises.'}</p>
               </div>
 
               {mod.video && (
                 <div className="timeline-video-box">
                   <a
-                    href={`https://www.youtube.com/watch?v=${mod.video.id}`}
+                    href={`https://www.youtube.com/watch?v=${mod.video.id || mod.video.videoId || ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="video-thumb-link"
                   >
-                    <img src={mod.video.thumbnail} alt={mod.video.title} />
+                    <img 
+                      src={mod.video.thumbnail || `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80`} 
+                      alt={mod.video.title} 
+                    />
                     <div className="video-time-tag">
                       <Clock size={11} />
-                      {Math.floor(mod.video.duration / 60)}:{String(Math.floor(mod.video.duration % 60)).padStart(2, '0')}
+                      {typeof mod.video.duration === 'number'
+                        ? `${Math.floor(mod.video.duration / 60)}:${String(Math.floor(mod.video.duration % 60)).padStart(2, '0')}`
+                        : (mod.video.durationFormatted || mod.video.duration || '15m')}
                     </div>
                   </a>
 

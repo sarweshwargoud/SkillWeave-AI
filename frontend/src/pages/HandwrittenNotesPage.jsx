@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
   Sparkles, 
   Search, 
   ArrowRight, 
+  ArrowLeft,
   Loader2, 
   BookOpen, 
   BookmarkCheck,
@@ -24,7 +26,7 @@ import './HandwrittenNotesPage.css';
 
 const DEFAULT_NOTE_DATA = {
   title: "Python Memory Architecture & Scope",
-  video_id: "t_k_k_t",
+  video_id: "_uQrJ0TkZlc",
   summary: "Python uses a private heap for all its objects and data structures. Variable names are essentially references pointing to objects allocated in memory rather than storing the value directly inside the variable box.",
   sections: [
     {
@@ -48,8 +50,9 @@ const DEFAULT_NOTE_DATA = {
 };
 
 const HandwrittenNotesPage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=t_k_k_t');
+  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=_uQrJ0TkZlc');
   const [noteStyle, setNoteStyle] = useState('detailed');
   const [loading, setLoading] = useState(false);
   const [notesList, setNotesList] = useState([]);
@@ -62,9 +65,9 @@ const HandwrittenNotesPage = () => {
   const client = getClient();
 
   const sampleVideos = [
-    { label: "Python Memory Models", url: "https://www.youtube.com/watch?v=t_k_k_t" },
-    { label: "React Server Components", url: "https://www.youtube.com/watch?v=rsc_t" },
-    { label: "LLM Vector Embeddings", url: "https://www.youtube.com/watch?v=emb_t" }
+    { label: "Python Memory Models", url: "https://www.youtube.com/watch?v=_uQrJ0TkZlc" },
+    { label: "React Deep Dive", url: "https://www.youtube.com/watch?v=bMknfKXIFA8" },
+    { label: "Vector Databases & RAG", url: "https://www.youtube.com/watch?v=ySus5ZS0b94" }
   ];
 
   // 1. Initial Load of Saved Notes from Supabase
@@ -269,6 +272,17 @@ const HandwrittenNotesPage = () => {
           {/* Top Paste Link & Options Bar */}
           <div className="chatgpt-grounding-header">
             <div className="grounding-left">
+              <button 
+                className="btn-back-pill" 
+                onClick={() => {
+                  if (window.history.length > 1) navigate(-1);
+                  else navigate('/');
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.75rem', borderRadius: '999px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginRight: '0.5rem' }}
+                title="Go Back"
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
               <span className="grounding-pill" style={{ color: '#d97706', background: 'rgba(217, 119, 6, 0.1)' }}>
                 <Sparkles size={13} /> Notes Studio
               </span>
