@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { getClient, defaultGoogleLearner } from '../services/supabaseClient';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -364,6 +365,7 @@ const ProfilePage = () => {
       {/* Top Navigation & Breadcrumbs Bar */}
       <div className="profile-nav-breadcrumb-strip">
         <div className="profile-breadcrumb-container">
+          <BackButton fallback="/" label="Back" style={{ marginRight: "0.85rem" }} />
           <div className="profile-breadcrumb-links">
             <button 
               className="breadcrumb-nav-link" 

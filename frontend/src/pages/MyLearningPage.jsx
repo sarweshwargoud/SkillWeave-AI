@@ -13,6 +13,7 @@ import {
   Trash2
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import FloatingTiles from '../components/FloatingTiles';
 import { getClient } from '../services/supabaseClient';
 import './MyLearningPage.css';

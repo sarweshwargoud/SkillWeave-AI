@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Folder, 
   FolderOpen, 
@@ -255,7 +256,7 @@ const PrimarySidebar = ({
         {activeView === 'courses' && (
           <div className="browse-courses-view">
             <div className="sidebar-section-title">COURSE TEMPLATES</div>
-            <div className="template-card" onClick={() => window.location.href = '/create'}>
+            <div className="template-card" onClick={() => navigate('/create')}>
               <h4>+ Create New Roadmap</h4>
               <p>Turn any YouTube link or topic into a structured course.</p>
             </div>

@@ -350,6 +350,34 @@ export const mockSupabase = {
       const userStr = localStorage.getItem(MOCK_USER_KEY);
       return { data: { user: userStr ? JSON.parse(userStr) : defaultGoogleLearner }, error: null };
     },
+    getSession: async () => {
+      const userStr = localStorage.getItem(MOCK_USER_KEY);
+      const user = userStr ? JSON.parse(userStr) : defaultGoogleLearner;
+      return {
+        data: {
+          session: user ? {
+            access_token: 'mock-session-token',
+            token_type: 'bearer',
+            user
+          } : null
+        },
+        error: null
+      };
+    },
+    refreshSession: async () => {
+      const userStr = localStorage.getItem(MOCK_USER_KEY);
+      const user = userStr ? JSON.parse(userStr) : defaultGoogleLearner;
+      return {
+        data: {
+          session: user ? {
+            access_token: 'mock-session-token',
+            token_type: 'bearer',
+            user
+          } : null
+        },
+        error: null
+      };
+    },
     onAuthStateChange: (callback) => {
       const handleStorage = () => {
         const userStr = localStorage.getItem(MOCK_USER_KEY);

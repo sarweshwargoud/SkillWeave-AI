@@ -12,7 +12,7 @@ import {
   Compass,
   FileText,
   MessageSquare,
-  PlaySquare
+  Play
 } from 'lucide-react';
 import { getClient } from '../services/supabaseClient';
 import './AuthGateModal.css';
@@ -169,6 +169,26 @@ const AuthGateModal = ({
             <span>Sign In with Email / Password</span>
             <ArrowRight size={16} />
           </button>
+
+          {onClose && (
+            <button 
+              type="button"
+              className="auth-gate-guest-btn"
+              onClick={onClose}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: '0.5rem',
+                textDecoration: 'underline'
+              }}
+            >
+              Continue in Guest Demo Mode
+            </button>
+          )}
         </div>
 
         <div className="auth-gate-footer">

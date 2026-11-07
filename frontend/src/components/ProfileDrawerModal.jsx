@@ -87,9 +87,9 @@ const ProfileDrawerModal = ({ isOpen, onClose }) => {
   const handleSignOut = async () => {
     try {
       await client.auth.signOut();
+      setUser(null);
       onClose();
       navigate('/');
-      window.location.reload();
     } catch (e) {
       console.error('Logout error:', e);
     }

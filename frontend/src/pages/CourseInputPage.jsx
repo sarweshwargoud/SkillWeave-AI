@@ -22,6 +22,7 @@ import { generateCourse, generateRoadmapFromURL } from '../services/api';
 import { getClient } from '../services/supabaseClient';
 import FloatingTiles from '../components/FloatingTiles';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import AuthGateModal from '../components/AuthGateModal';
 import './CourseInputPage.css';
 
@@ -205,16 +206,7 @@ const CourseInputPage = () => {
       <main className="course-input-main-stage">
         <div className="input-studio-card">
           <div className="input-card-nav-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1.25rem' }}>
-            <button
-              className="btn-back-pill"
-              onClick={() => {
-                if (window.history.length > 1) navigate(-1);
-                else navigate('/');
-              }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '0.35rem 0.85rem', cursor: 'pointer' }}
-            >
-              <ArrowLeft size={14} /> Back
-            </button>
+            <BackButton fallback="/" label="Back" />
             <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>Studio Creator</span>
           </div>
 

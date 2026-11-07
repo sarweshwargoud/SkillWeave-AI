@@ -1,0 +1,74 @@
+/* Reusable BackButton Styling */
+.app-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-back-button:hover {
+  color: #0f172a;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateX(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.app-back-button:active {
+  transform: translateX(-1px) scale(0.98);
+}
+
+.back-arrow-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.app-back-button:hover .back-arrow-icon {
+  transform: translateX(-2px);
+}
+
+.back-button-label {
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* Dark mode / dark theme variant for Workspace IDE header */
+.app-back-button.workspace-theme {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  box-shadow: none;
+}
+
+.app-back-button.workspace-theme:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Compact icon-only variant */
+.app-back-button.icon-only {
+  padding: 0.4rem;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .app-back-button {
+    padding: 0.32rem 0.7rem;
+    font-size: 0.78rem;
+  }
+}
