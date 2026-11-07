@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import AuthGateModal from '../components/AuthGateModal';
 import AITutorChat from '../components/AITutorChat';
 import HandwrittenNotesViewer from '../components/HandwrittenNotesViewer';
@@ -148,6 +149,77 @@ export const getCleanYoutubeId = (raw) => {
   return trimmed;
 };
 
+
+// Helper to extract flattened videos synchronously from any course structure
+const extractCourseVideos = (courseObj) => {
+  if (!courseObj || !courseObj.modules) return [];
+  const allVideos = [];
+  courseObj.modules.forEach((mod, mIdx) => {
+    const vList = (mod.videos && mod.videos.length > 0)
+      ? mod.videos
+      : (mod.video ? [mod.video] : (mod.lessons && mod.lessons.length > 0 ? mod.lessons : []));
+    const modTitle = mod.module_title || mod.title || mod.name || mod.topic || `Module ${mIdx + 1}`;
+
+    vList.forEach((rawVid, vIdx) => {
+      const vidObj = typeof rawVid === 'string' ? { id: rawVid } : { ...rawVid };
+      const cleanId = getCleanYoutubeId(vidObj) || 'fqMOX6JJhGo';
+      const cleanTitle = (vidObj.title || vidObj.video_title || vidObj.name || '').toString().trim() || `Lesson ${vIdx + 1}: Video Lecture`;
+      const cleanDuration = (vidObj.duration || vidObj.durationFormatted || vidObj.time || '').toString().trim() || '15m';
+
+      allVideos.push({
+        ...vidObj,
+        id: cleanId,
+        title: cleanTitle,
+        duration: cleanDuration,
+        durationFormatted: cleanDuration,
+        moduleIdx: mIdx,
+        videoIdx: vIdx,
+        moduleTitle: modTitle,
+        completed: false
+      });
+    });
+  });
+  return allVideos;
+};
+
+// Helper to resolve initial course synchronously so workspace NEVER flashes empty screen
+const resolveInitialCourse = (state, urlCourseId) => {
+  if (state?.courseData && state.courseData.modules?.length > 0) {
+    return state.courseData;
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('skillweave_active_course');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.modules?.length > 0) {
+          if (!urlCourseId || parsed.id === urlCourseId || parsed._id === urlCourseId) {
+            return parsed;
+          }
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const cachedRoadmap = localStorage.getItem('skillweave_active_roadmap');
+      if (cachedRoadmap) {
+        const parsed = JSON.parse(cachedRoadmap);
+        if (parsed && parsed.modules?.length > 0) {
+          return {
+            id: parsed.id || `course_${Date.now()}`,
+            title: parsed.title || 'Personalized AI Course',
+            modules: parsed.modules,
+            description: parsed.description || 'Interactive Learning Course',
+            total_videos: parsed.modules.length,
+            total_duration: parsed.estimated_time || '45m'
+          };
+        }
+      }
+    } catch (e) {}
+  }
+  return DEFAULT_WORKSPACE_COURSE;
+};
+
 const LearningWorkspacePage = () => {
   const { state } = useLocation();
   const [searchParams] = useSearchParams();
@@ -163,9 +235,23 @@ const LearningWorkspacePage = () => {
   const [user, setUser] = useState(null);
   const [showAuthGate, setShowAuthGate] = useState(false);
 
-  // Active course data
-  const [course, setCourse] = useState(null);
-  const [activeVideo, setActiveVideo] = useState(null);
+  // Active course data (Initialized synchronously for zero-flicker immediate render)
+  const [course, setCourse] = useState(() => resolveInitialCourse(state, urlCourseId));
+  const [activeVideo, setActiveVideo] = useState(() => {
+    const initCourse = resolveInitialCourse(state, urlCourseId);
+    const vids = extractCourseVideos(initCourse);
+    if (vids.length === 0) return null;
+    const savedVidId = typeof window !== 'undefined' ? localStorage.getItem('skillweave_active_vid_id') : null;
+    if (state?.initialVideoId) {
+      const match = vids.find(v => v.id === state.initialVideoId);
+      if (match) return match;
+    }
+    if (savedVidId) {
+      const match = vids.find(v => v.id === savedVidId);
+      if (match) return match;
+    }
+    return vids[0];
+  });
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeVideoIdx, setActiveVideoIdx] = useState(0);
   const [openFolders, setOpenFolders] = useState({});
@@ -230,16 +316,9 @@ const LearningWorkspacePage = () => {
     initUser();
   }, []);
 
-  // Lock root document scroll on desktop so workspace acts like an IDE canvas
+  // Clean scroll reset on mount so workspace viewports start at top cleanly
   useEffect(() => {
-    if (window.innerWidth > 1024) {
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-      };
-    }
+    window.scrollTo(0, 0);
   }, []);
 
   // Save layout state to localStorage
@@ -966,19 +1045,11 @@ const LearningWorkspacePage = () => {
       {/* Top Sub-Navbar & Breadcrumbs Bar with Increased Prominent Typography */}
       <nav className="workspace-sticky-top-nav">
         <div className="workspace-nav-left-group">
-          <button 
-            className="workspace-nav-btn return-back"
-            onClick={() => {
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate('/create');
-              }
-            }}
-            title="Go Back"
-          >
-            <ArrowLeft size={16} /> <span>Back</span>
-          </button>
+          <BackButton 
+            fallback="/create" 
+            label="Back" 
+            className="workspace-theme" 
+          />
 
           <span className="nav-sep">/</span>
 

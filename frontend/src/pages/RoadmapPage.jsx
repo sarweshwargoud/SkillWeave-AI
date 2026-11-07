@@ -211,18 +211,7 @@ const RoadmapPage = () => {
     <div className="roadmap-studio-page">
       {/* Top Navbar */}
       <nav className="roadmap-studio-nav">
-        <button
-          className="nav-back-studio-btn"
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
-            } else {
-              navigate('/create');
-            }
-          }}
-        >
-          <ArrowLeft size={16} /> Back
-        </button>
+        <BackButton fallback="/create" label="Back" />
         <div className="nav-brand-title" onClick={() => navigate('/')}>
           SKILLWEAVE AI
         </div>

@@ -24,6 +24,7 @@ import {
   Video
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import AuthGateModal from '../components/AuthGateModal';
 import { parseYouTube, askAITutor } from '../services/api';
 import { getClient } from '../services/supabaseClient';
@@ -382,17 +383,7 @@ const AITutorPage = () => {
           {/* Top Video & Grounding Bar */}
           <div className="chatgpt-grounding-header">
             <div className="grounding-left">
-              <button 
-                className="btn-back-pill" 
-                onClick={() => {
-                  if (window.history.length > 1) navigate(-1);
-                  else navigate('/');
-                }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.75rem', borderRadius: '999px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginRight: '0.5rem' }}
-                title="Go Back"
-              >
-                <ArrowLeft size={14} /> Back
-              </button>
+              <BackButton fallback="/" label="Back" style={{ marginRight: '0.65rem' }} />
               <span className="grounding-pill">
                 <Sparkles size={13} className="sparkle-anim" /> Grounded Tutor
               </span>

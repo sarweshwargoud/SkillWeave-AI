@@ -88,9 +88,9 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await client.auth.signOut();
+      setUser(null);
       setDropdownOpen(false);
       navigate('/');
-      window.location.reload();
     } catch (e) {
       console.error('Logout error:', e);
     }
